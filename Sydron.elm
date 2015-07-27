@@ -8,6 +8,7 @@ import Json.Decode as Json exposing ((:=))
 import String
 import Task exposing (Task, andThen)
 import Window
+import Time
 
 
 -- VIEW
@@ -53,7 +54,7 @@ imgStyle height src =
 
 main : Signal Html
 main =
-    Signal.map3 view Window.height query.signal newEvents.signal
+    Signal.map3 view Window.height query.signal seenEvents
 
 --- Jess Makes Some Stuff
 pleaseFetchPage : Signal.Mailbox Int
@@ -68,6 +69,32 @@ port retrievePageOfEvents =
 
 newEvents : Signal.Mailbox (List Event)
 newEvents = Signal.mailbox []
+
+everyFewSeconds : Signal EventsOrTimer
+everyFewSeconds = Signal.map (\_ -> Heartbeat) (Time.every 3000)
+
+eventsAndTimer : Signal EventsOrTimer
+eventsAndTimer = Signal.merge everyFewSeconds (Signal.map (\e -> SomeNewEvents (List.reverse e)) newEvents.signal)
+moveOneOver : SomeEventModel -> SomeEventModel
+moveOneOver events = 
+    case events.unseen of 
+        [] -> events
+        head :: tail -> { seen = head :: events.seen, unseen = tail}
+
+type alias SomeEventModel = { seen: List Event, unseen: List Event}
+type EventsOrTimer = Heartbeat | SomeNewEvents (List Event)
+updateSomeEvents : EventsOrTimer -> SomeEventModel -> SomeEventModel
+updateSomeEvents action before =
+  case action of
+    Heartbeat -> moveOneOver before
+    SomeNewEvents events -> { seen = before.seen, unseen = before.unseen ++ events }
+
+
+someEvents : Signal SomeEventModel
+someEvents = Signal.foldp updateSomeEvents (SomeEventModel [] []) eventsAndTimer 
+
+seenEvents : Signal (List Event)
+seenEvents = Signal.map .seen someEvents 
 
 fetchPageOfEvents : Int -> Task Http.Error (List Event)
 fetchPageOfEvents pageNo =
