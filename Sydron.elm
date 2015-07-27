@@ -17,11 +17,7 @@ singleItemList item = [item]
 
 eventListItem : Event -> Html
 eventListItem event =
-    event
-     |> .eventType
-     |> Html.text
-     |> singleItemList
-     |> Html.li []
+    Html.li [] [Html.text (.eventType event)]
 
 view : Int -> String -> (List Event) -> Html
 view height string someStuff =
