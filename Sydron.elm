@@ -12,11 +12,22 @@ import Window
 
 -- VIEW
 
+singleItemList : a -> List a
+singleItemList item = [item]
+
+eventListItem : Event -> Html
+eventListItem event =
+    event
+     |> .eventType
+     |> Html.text
+     |> singleItemList
+     |> Html.li []
+
 view : Int -> String -> (List Event) -> Html
 view height string someStuff =
     Html.div
         [ ]
-        [Html.ul [] (List.map (.eventType >> Html.text >> (\a -> [a]) >> Html.li []) someStuff)]
+        [Html.ul [] (List.map eventListItem someStuff)]
 
 
 queryInputStyle : List (String, String)
