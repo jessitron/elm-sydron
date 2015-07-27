@@ -13,54 +13,27 @@ import Time
 
 -- VIEW
 
-singleItemList : a -> List a
-singleItemList item = [item]
-
 eventListItem : Event -> Html
 eventListItem event =
     Html.li [] [Html.text (event.eventType ++ " by " ++ event.actor.login)]
 
-view : Int -> String -> (List Event) -> Html
-view height string someStuff =
+view : Int -> (List Event) -> Html
+view height someStuff =
     Html.div
         [ ]
         [Html.ul [] (List.map eventListItem someStuff)]
-
-
-queryInputStyle : List (String, String)
-queryInputStyle =
-    [
-        ("width",      "100%"),
-        ("height",     "40px"),
-        ("padding",    "10px 0"),
-        ("font-size",  "2em"),
-        ("text-align", "center")
-    ]
-
-
-imgStyle : Int -> String -> List (String, String)
-imgStyle height src =
-    [
-        ("background-image",      "url('" ++ src ++ "')"),
-        ("background-repeat",     "no-repeat"),
-        ("background-attachment", "fixed"),
-        ("background-position",   "center"),
-        ("width",                 "100%"),
-        ("height",                (toString height) ++ "px")
-    ]
 
 
 -- WIRING
 
 main : Signal Html
 main =
-    Signal.map3 view Window.height query.signal seenEvents
+    Signal.map2 view Window.height seenEvents
 
 --- Jess Makes Some Stuff
 pleaseFetchPage : Signal.Mailbox Int
 pleaseFetchPage = Signal.mailbox 1
 
--- Question: will the port fire initially? what I want is for this to fire on "go"
 port retrievePageOfEvents : Signal (Task Http.Error ())
 port retrievePageOfEvents =
   pleaseFetchPage.signal
@@ -75,14 +48,22 @@ everyFewSeconds = Signal.map (\_ -> Heartbeat) (Time.every 3000)
 
 eventsAndTimer : Signal EventsOrTimer
 eventsAndTimer = Signal.merge everyFewSeconds (Signal.map (\e -> SomeNewEvents (List.reverse e)) newEvents.signal)
+
+type alias SomeEventModel = 
+    { 
+      seen: List Event, 
+      unseen: List Event
+    }
 moveOneOver : SomeEventModel -> SomeEventModel
 moveOneOver events = 
     case events.unseen of 
         [] -> events
         head :: tail -> { seen = head :: events.seen, unseen = tail}
 
-type alias SomeEventModel = { seen: List Event, unseen: List Event}
-type EventsOrTimer = Heartbeat | SomeNewEvents (List Event)
+
+type EventsOrTimer = 
+      Heartbeat 
+    | SomeNewEvents (List Event)
 updateSomeEvents : EventsOrTimer -> SomeEventModel -> SomeEventModel
 updateSomeEvents action before =
   case action of
@@ -96,6 +77,8 @@ someEvents = Signal.foldp updateSomeEvents (SomeEventModel [] []) eventsAndTimer
 seenEvents : Signal (List Event)
 seenEvents = Signal.map .seen someEvents 
 
+-- Fetchy Fetchy
+
 fetchPageOfEvents : Int -> Task Http.Error (List Event)
 fetchPageOfEvents pageNo =
     let
@@ -106,11 +89,6 @@ fetchPageOfEvents pageNo =
 github : String -> String -> Int -> String
 github owner repo pageNo = Http.url ("https://api.github.com/repos/" ++ owner ++ "/" ++ repo ++ "/events") <|
         [("pageNo", (toString pageNo))]
--- end Jess
-
-query : Signal.Mailbox String
-query =
-    Signal.mailbox ""
 
 -- JSON DECODERS
 
