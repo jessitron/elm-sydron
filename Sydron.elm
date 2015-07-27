@@ -18,7 +18,7 @@ singleItemList item = [item]
 
 eventListItem : Event -> Html
 eventListItem event =
-    Html.li [] [Html.text (.eventType event)]
+    Html.li [] [Html.text (event.eventType ++ " by " ++ event.actor.login)]
 
 view : Int -> String -> (List Event) -> Html
 view height string someStuff =
@@ -114,17 +114,32 @@ query =
 
 -- JSON DECODERS
 
+type alias EventActor = 
+    { 
+      login: String,
+      avatar_url: String
+    }
+
 type alias Event = 
   {
-    eventType : String
+    eventType : String,
+    actor : EventActor
   }
+
+githubEventActor : Json.Decoder EventActor
+githubEventActor = 
+    Json.object2
+      EventActor
+        ("login" := Json.string)
+        ("avatar_url" := Json.string)
 
 githubEvents : Json.Decoder (List Event)
 githubEvents =
     Json.list <| 
-        Json.object1
+        Json.object2
           Event
           ("type" := Json.string)
+          ("actor" := githubEventActor)
 
 
 
