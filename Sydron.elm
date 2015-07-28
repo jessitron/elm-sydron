@@ -4,10 +4,10 @@ import Html exposing (Html)
 import Html.Attributes as Attr
 import Html.Events as Event
 import Http
-import Json.Decode as Json exposing ((:=))
 import String
 import Task exposing (Task, andThen)
 import Time
+import GithubEvent exposing (Event)
 
 -- MODEL
 
@@ -57,7 +57,7 @@ start app =
         (\a m -> app.update a m)
         app.model
         eventsAndTimer
-  in
+  in    
     Signal.map app.view model
 
 main = start { model = Model [] [], view = view, update = update}
@@ -103,40 +103,12 @@ fetchPageOfEvents pageNo =
     let
       parameters = [("page", toString pageNo)]
     in 
-      Http.get githubEvents (github "satellite-of-love" "Hungover" pageNo)
+      Http.get GithubEvent.listDecoder (github "satellite-of-love" "Hungover" pageNo)
 
 github : String -> String -> Int -> String
 github owner repo pageNo = Http.url ("https://api.github.com/repos/" ++ owner ++ "/" ++ repo ++ "/events") <|
         [("pageNo", (toString pageNo))]
 
--- JSON DECODERS
-
-type alias EventActor = 
-    { 
-      login: String,
-      avatar_url: String
-    }
-
-type alias Event = 
-  {
-    eventType : String,
-    actor : EventActor
-  }
-
-githubEventActor : Json.Decoder EventActor
-githubEventActor = 
-    Json.object2
-      EventActor
-        ("login" := Json.string)
-        ("avatar_url" := Json.string)
-
-githubEvents : Json.Decoder (List Event)
-githubEvents =
-    Json.list <| 
-        Json.object2
-          Event
-          ("type" := Json.string)
-          ("actor" := githubEventActor)
 
 
 
