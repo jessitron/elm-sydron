@@ -7,8 +7,15 @@ import Http
 import Json.Decode as Json exposing ((:=))
 import String
 import Task exposing (Task, andThen)
-import Window
 import Time
+
+-- MODEL
+
+type alias Model = 
+    {
+      seenEvents   : List Event,
+      queuedEvents : List Event
+    }
 
 
 -- VIEW
@@ -17,18 +24,43 @@ eventListItem : Event -> Html
 eventListItem event =
     Html.li [] [Html.text (event.eventType ++ " by " ++ event.actor.login)]
 
-view : Int -> (List Event) -> Html
-view height someStuff =
+view : Model -> Html
+view someStuff =
     Html.div
         [ ]
-        [Html.ul [] (List.map eventListItem someStuff)]
+        [Html.h2 [] (List.map eventListItem someStuff.seenEvents)]
 
+-- UPDATE
+
+type Action = 
+      Heartbeat 
+    | SomeNewEvents (List Event)
+
+update: Action -> Model -> Model
+update action model =
+    case action of
+        Heartbeat -> moveOneOver model
+        SomeNewEvents events -> queueEvents model events
 
 -- WIRING
 
-main : Signal Html
-main =
-    Signal.map2 view Window.height seenEvents
+type alias App modelt action =
+    { model : modelt
+    , view : modelt -> Html
+    , update : action -> modelt -> modelt
+    }
+start : App Model Action -> Signal Html
+start app =
+  let
+    model =
+      Signal.foldp
+        (\a m -> app.update a m)
+        app.model
+        eventsAndTimer
+  in
+    Signal.map app.view model
+
+main = start { model = Model [] [], view = view, update = update}
 
 --- Jess Makes Some Stuff
 pleaseFetchPage : Signal.Mailbox Int
@@ -43,10 +75,10 @@ port retrievePageOfEvents =
 newEvents : Signal.Mailbox (List Event)
 newEvents = Signal.mailbox []
 
-everyFewSeconds : Signal EventsOrTimer
+everyFewSeconds : Signal Action
 everyFewSeconds = Signal.map (\_ -> Heartbeat) (Time.every 3000)
 
-eventsAndTimer : Signal EventsOrTimer
+eventsAndTimer : Signal Action
 eventsAndTimer = Signal.merge everyFewSeconds (Signal.map (\e -> SomeNewEvents (List.reverse e)) newEvents.signal)
 
 type alias SomeEventModel = 
@@ -54,28 +86,15 @@ type alias SomeEventModel =
       seen: List Event, 
       unseen: List Event
     }
-moveOneOver : SomeEventModel -> SomeEventModel
-moveOneOver events = 
-    case events.unseen of 
-        [] -> events
-        head :: tail -> { seen = head :: events.seen, unseen = tail}
-
-
-type EventsOrTimer = 
-      Heartbeat 
-    | SomeNewEvents (List Event)
-updateSomeEvents : EventsOrTimer -> SomeEventModel -> SomeEventModel
-updateSomeEvents action before =
-  case action of
-    Heartbeat -> moveOneOver before
-    SomeNewEvents events -> { seen = before.seen, unseen = before.unseen ++ events }
-
-
-someEvents : Signal SomeEventModel
-someEvents = Signal.foldp updateSomeEvents (SomeEventModel [] []) eventsAndTimer 
-
-seenEvents : Signal (List Event)
-seenEvents = Signal.map .seen someEvents 
+moveOneOver : Model -> Model
+moveOneOver model = 
+    case model.queuedEvents of 
+        [] -> model
+        head :: tail -> { seenEvents = head :: model.seenEvents, queuedEvents = tail }
+queueEvents : Model -> List Event -> Model
+queueEvents model moreEvents =
+    { seenEvents = model.seenEvents, queuedEvents = model.queuedEvents ++ moreEvents }
+-- todo: record "suchthat" syntax
 
 -- Fetchy Fetchy
 
