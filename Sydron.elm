@@ -81,6 +81,24 @@ everyFewSeconds = Signal.map (\_ -> Heartbeat) (Time.every 3000)
 eventsAndTimer : Signal Action
 eventsAndTimer = Signal.merge everyFewSeconds (Signal.map (\e -> SomeNewEvents (List.reverse e)) newEvents.signal)
 
+splitEvents: Action -> Model -> Model
+splitEvents action model =
+    case action of
+        Heartbeat -> moveOneOver model
+        SomeNewEvents events -> queueEvents model events
+
+singleEvent: Model -> SingleEvent
+singleEvent splitEvents =
+  case splitEvents.seenEvents of
+    [] -> Boring
+    head :: _ -> SoThisHappened head
+
+type SingleEvent = SoThisHappened Event | Boring
+spreadEvents : Signal SingleEvent
+spreadEvents = 
+  Signal.foldp splitEvents (Model [] []) eventsAndTimer
+  |> Signal.map singleEvent
+
 type alias SomeEventModel = 
     { 
       seen: List Event, 
