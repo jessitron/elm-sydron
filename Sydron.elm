@@ -11,11 +11,10 @@ import GithubEvent exposing (Event)
 
 -- MODEL
 
-type alias Model = 
-    {
-      seenEvents   : List Event,
-      queuedEvents : List Event
-    }
+type alias Model =
+  {
+     ticker: List Event
+  }
 
 
 -- VIEW
@@ -28,19 +27,17 @@ view : Model -> Html
 view someStuff =
     Html.div
         [ ]
-        [Html.h2 [] (List.map eventListItem someStuff.seenEvents)]
+        [Html.h2 [] (List.map eventListItem someStuff.ticker)]
 
 -- UPDATE
 
-type Action = 
-      Heartbeat 
-    | SomeNewEvents (List Event)
+type alias Action = SingleEvent
 
 update: Action -> Model -> Model
 update action model =
     case action of
-        Heartbeat -> moveOneOver model
-        SomeNewEvents events -> queueEvents model events
+        Boring -> model
+        SoThisHappened event -> Model (List.take 3 (event :: model.ticker))
 
 -- WIRING
 
@@ -56,11 +53,11 @@ start app =
       Signal.foldp
         (\a m -> app.update a m)
         app.model
-        eventsAndTimer
+        spreadEvents
   in    
     Signal.map app.view model
 
-main = start { model = Model [] [], view = view, update = update}
+main = start { model = Model [], view = view, update = update}
 
 --- Jess Makes Some Stuff
 pleaseFetchPage : Signal.Mailbox Int
@@ -75,19 +72,29 @@ port retrievePageOfEvents =
 newEvents : Signal.Mailbox (List Event)
 newEvents = Signal.mailbox []
 
-everyFewSeconds : Signal Action
+type InnerStuff = 
+  Heartbeat 
+  | SomeNewEvents (List Event)
+
+everyFewSeconds : Signal InnerStuff
 everyFewSeconds = Signal.map (\_ -> Heartbeat) (Time.every 3000)
 
-eventsAndTimer : Signal Action
+eventsAndTimer : Signal InnerStuff
 eventsAndTimer = Signal.merge everyFewSeconds (Signal.map (\e -> SomeNewEvents (List.reverse e)) newEvents.signal)
 
-splitEvents: Action -> Model -> Model
-splitEvents action model =
-    case action of
-        Heartbeat -> moveOneOver model
-        SomeNewEvents events -> queueEvents model events
 
-singleEvent: Model -> SingleEvent
+type alias SplitEvents = 
+    {
+      seenEvents   : List Event,
+      queuedEvents : List Event
+    }
+splitEvents: InnerStuff -> SplitEvents -> SplitEvents
+splitEvents action before =
+    case action of
+        Heartbeat -> moveOneOver before
+        SomeNewEvents events -> queueEvents before events
+
+singleEvent: SplitEvents -> SingleEvent
 singleEvent splitEvents =
   case splitEvents.seenEvents of
     [] -> Boring
@@ -96,7 +103,7 @@ singleEvent splitEvents =
 type SingleEvent = SoThisHappened Event | Boring
 spreadEvents : Signal SingleEvent
 spreadEvents = 
-  Signal.foldp splitEvents (Model [] []) eventsAndTimer
+  Signal.foldp splitEvents (SplitEvents [] []) eventsAndTimer
   |> Signal.map singleEvent
 
 type alias SomeEventModel = 
@@ -104,14 +111,14 @@ type alias SomeEventModel =
       seen: List Event, 
       unseen: List Event
     }
-moveOneOver : Model -> Model
-moveOneOver model = 
-    case model.queuedEvents of 
-        [] -> model
-        head :: tail -> { seenEvents = head :: model.seenEvents, queuedEvents = tail }
-queueEvents : Model -> List Event -> Model
-queueEvents model moreEvents =
-    { seenEvents = model.seenEvents, queuedEvents = model.queuedEvents ++ moreEvents }
+moveOneOver : SplitEvents -> SplitEvents
+moveOneOver before = 
+    case before.queuedEvents of 
+        [] -> before
+        head :: tail -> { seenEvents = head :: before.seenEvents, queuedEvents = tail }
+queueEvents : SplitEvents -> List Event -> SplitEvents
+queueEvents before moreEvents =
+    { seenEvents = before.seenEvents, queuedEvents = before.queuedEvents ++ moreEvents }
 -- todo: record "suchthat" syntax
 
 -- Fetchy Fetchy
