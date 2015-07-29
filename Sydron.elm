@@ -3,11 +3,11 @@ module Sydron where
 import Html exposing (Html)
 import Html.Attributes as Attr
 import Html.Events as Event
-import Http
 import String
-import Task exposing (Task, andThen)
-import Time
 import GithubEvent exposing (Event)
+import GithubEventSignal exposing (SingleEvent(..))
+import Task
+import Http
 
 -- MODEL
 
@@ -31,12 +31,12 @@ view someStuff =
 
 -- UPDATE
 
-type alias Action = SingleEvent
+type alias Action = GithubEventSignal.SingleEvent
 
 update: Action -> Model -> Model
 update action model =
     case action of
-        Boring -> model
+        NothingYet -> model
         SoThisHappened event -> Model (List.take 3 (event :: model.ticker))
 
 -- WIRING
@@ -53,87 +53,14 @@ start app =
       Signal.foldp
         (\a m -> app.update a m)
         app.model
-        spreadEvents
+        GithubEventSignal.eventsOneByOne
   in    
     Signal.map app.view model
 
 main = start { model = Model [], view = view, update = update}
 
---- Jess Makes Some Stuff
-pleaseFetchPage : Signal.Mailbox Int
-pleaseFetchPage = Signal.mailbox 1
+--- WORLD
 
-port retrievePageOfEvents : Signal (Task Http.Error ())
-port retrievePageOfEvents =
-  pleaseFetchPage.signal
-    |> Signal.map fetchPageOfEvents
-    |> Signal.map( \task -> task `andThen` Signal.send newEvents.address)
-
-newEvents : Signal.Mailbox (List Event)
-newEvents = Signal.mailbox []
-
-type InnerStuff = 
-  Heartbeat 
-  | SomeNewEvents (List Event)
-
-everyFewSeconds : Signal InnerStuff
-everyFewSeconds = Signal.map (\_ -> Heartbeat) (Time.every 3000)
-
-eventsAndTimer : Signal InnerStuff
-eventsAndTimer = Signal.merge everyFewSeconds (Signal.map (\e -> SomeNewEvents (List.reverse e)) newEvents.signal)
-
-
-type alias SplitEvents = 
-    {
-      seenEvents   : List Event,
-      queuedEvents : List Event
-    }
-splitEvents: InnerStuff -> SplitEvents -> SplitEvents
-splitEvents action before =
-    case action of
-        Heartbeat -> moveOneOver before
-        SomeNewEvents events -> queueEvents before events
-
-singleEvent: SplitEvents -> SingleEvent
-singleEvent splitEvents =
-  case splitEvents.seenEvents of
-    [] -> Boring
-    head :: _ -> SoThisHappened head
-
-type SingleEvent = SoThisHappened Event | Boring
-spreadEvents : Signal SingleEvent
-spreadEvents = 
-  Signal.foldp splitEvents (SplitEvents [] []) eventsAndTimer
-  |> Signal.map singleEvent
-
-type alias SomeEventModel = 
-    { 
-      seen: List Event, 
-      unseen: List Event
-    }
-moveOneOver : SplitEvents -> SplitEvents
-moveOneOver before = 
-    case before.queuedEvents of 
-        [] -> before
-        head :: tail -> { seenEvents = head :: before.seenEvents, queuedEvents = tail }
-queueEvents : SplitEvents -> List Event -> SplitEvents
-queueEvents before moreEvents =
-    { seenEvents = before.seenEvents, queuedEvents = before.queuedEvents ++ moreEvents }
--- todo: record "suchthat" syntax
-
--- Fetchy Fetchy
-
-fetchPageOfEvents : Int -> Task Http.Error (List Event)
-fetchPageOfEvents pageNo =
-    let
-      parameters = [("page", toString pageNo)]
-    in 
-      Http.get GithubEvent.listDecoder (github "satellite-of-love" "Hungover" pageNo)
-
-github : String -> String -> Int -> String
-github owner repo pageNo = Http.url ("https://api.github.com/repos/" ++ owner ++ "/" ++ repo ++ "/events") <|
-        [("pageNo", (toString pageNo))]
-
-
-
+port githubEventsPort : Signal (Task.Task Http.Error ())
+port githubEventsPort = GithubEventSignal.fetchOnce
 
