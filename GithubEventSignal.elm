@@ -8,18 +8,27 @@ import Task exposing (Task, andThen)
 
 type SingleEvent = NothingYet | SoThisHappened Event
 
---- Jess Makes Some Stuff
-pleaseFetchPage : Signal.Mailbox Int
-pleaseFetchPage = Signal.mailbox 1
-
+--- port
 fetchOnce: Signal (Task Http.Error ())
 fetchOnce = 
-  pleaseFetchPage.signal
-    |> Signal.map fetchPageOfEvents
-    |> Signal.map( \task -> task `andThen` Signal.send newEvents.address)
+  Signal.constant fetchPageOfEvents
+    |> Signal.map (\task -> task `andThen` Signal.send newEvents.address)
 
+-- wiring
 newEvents : Signal.Mailbox (List Event)
 newEvents = Signal.mailbox []
+
+-- signal
+eventsOneByOne : Signal SingleEvent
+eventsOneByOne =
+  newEvents.signal
+   |> Signal.map (\e -> SomeNewEvents (List.reverse e))
+   |> Signal.merge everyFewSeconds
+   |> Signal.foldp splitEvents (SplitEvents [] [])
+   |> Signal.map singleEvents
+   |> Signal.filterMap (\a -> Maybe.map SoThisHappened a) NothingYet
+
+-- private
 
 type InnerStuff = 
   Heartbeat 
@@ -27,10 +36,6 @@ type InnerStuff =
 
 everyFewSeconds : Signal InnerStuff
 everyFewSeconds = Signal.map (\_ -> Heartbeat) (Time.every 3000)
-
-eventsAndTimer : Signal InnerStuff
-eventsAndTimer = Signal.merge everyFewSeconds (Signal.map (\e -> SomeNewEvents (List.reverse e)) newEvents.signal)
-
 
 type alias SplitEvents = 
     {
@@ -49,12 +54,6 @@ singleEvents splitEvents =
     [] -> Nothing
     head :: _ -> Just head
 
-eventsOneByOne : Signal SingleEvent
-eventsOneByOne = 
-  Signal.foldp splitEvents (SplitEvents [] []) eventsAndTimer
-  |> Signal.map singleEvents
-  |> Signal.filterMap (\a -> Maybe.map SoThisHappened a) NothingYet
-
 type alias SomeEventModel = 
     { 
       seen: List Event, 
@@ -72,9 +71,10 @@ queueEvents before moreEvents =
 
 -- Fetchy Fetchy
 
-fetchPageOfEvents : Int -> Task Http.Error (List Event)
-fetchPageOfEvents pageNo =
+fetchPageOfEvents : Task Http.Error (List Event)
+fetchPageOfEvents  =
     let
+      pageNo = 1
       parameters = [("page", toString pageNo)]
     in 
       Http.get GithubEvent.listDecoder (github "satellite-of-love" "Hungover" pageNo)
