@@ -36,11 +36,24 @@ view m =
         ]
 
 pageTitle = 
-  Html.div [ Attr.style [ ("height", "100px"), ("font-family", "Helvetica"), ("margin-top", "20px"), ("margin-left", "20px")]]
-  [ Html.h1 [] [Html.text "Sydron"],
-    Html.text "A parade of Github Events for ",
-    Html.a [Attr.href "http://github.com/satellite-of-love/Hungover" ] [ Html.text "Rachel's baby game repo"]
+  Html.div 
+    [ Attr.style 
+      [ 
+        ("height", "100px"),
+        ("font-family", "Helvetica"),
+        ("margin-top", "20px"), 
+        ("margin-left", "20px")
+      ]
     ]
+  [ 
+    Html.h1 [] 
+      [Html.text "Sydron"],
+    Html.text "A parade of Github Events for ",
+    Html.a [Attr.href "http://github.com/satellite-of-love/Hungover" ] [ Html.text "Rachel's baby game repo"],
+    Html.text ". This is me playing with Elm; source code ",
+    Html.a [Attr.href "http://github.com/jessitron/elm-sydron"] [ Html.text "here" ],
+    Html.text "."
+  ]
 
 -- UPDATE
 
