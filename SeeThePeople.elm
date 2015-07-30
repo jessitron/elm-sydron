@@ -39,17 +39,23 @@ view: Model -> Html
 view model =
   Html.div [] (List.map draw model.all)
 
+borderPx = 20
+imgPx = 100
+
 pictureStyle : Float -> Html.Attribute
 pictureStyle relativeSize =
     Attr.style
      [
-       ("padding-left", "20px"),
-       ("padding-right", "20px"),
-       ("padding-top", "20px"),
-       ("padding-bottom", "20px"),
-       ("width", "100px"),
-       ("height", "100px")
+       ("padding-left", pixels borderPx),
+       ("padding-right", pixels borderPx),
+       ("padding-top", pixels borderPx),
+       ("padding-bottom", pixels borderPx),
+       ("width", pixels imgPx),
+       ("height", pixels imgPx)
      ]
+
+pixels: Int -> String
+pixels i = (toString i) ++ "px"
 
 ---- UPDATE
 
