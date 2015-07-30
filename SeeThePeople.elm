@@ -13,27 +13,31 @@ type Iteratee a =
     Constantly a 
     | Varying (Time -> (a, Iteratee a))
 
-type alias PresentAndFutureSizes = 
+type alias PresentAndFutureSize = 
     {
-      present: List Percentage,
-      future: Iteratee (List Percentage)
+      present: Percentage,
+      future: Iteratee Percentage
     }
+fullSize = PresentAndFutureSize 1.0 (Constantly 1.0) 
+
+type alias EachPerson = {
+  actor: EventActor,
+  size: PresentAndFutureSize
+}
 
 type alias Model = 
     { 
-      allActors: List EventActor,
-      sizes: PresentAndFutureSizes        
+      all: List EachPerson  
     }
-init = Model [] (PresentAndFutureSizes [] (Constantly []))
-
+init = Model []
 ---- VIEW
 
-draw: EventActor -> Html
-draw actor = Html.img [Attr.src actor.avatar_url , pictureStyle] []
+draw: EachPerson -> Html
+draw p = Html.img [Attr.src p.actor.avatar_url , pictureStyle] []
 
 view: Model -> Html
 view model =
-  Html.div [] (List.map draw model.allActors)
+  Html.div [] (List.map draw model.all)
 
 pictureStyle =
     Attr.style
@@ -53,6 +57,6 @@ update a m =
         TimeKeepsTickingAway t -> m
         SingleEvent NothingYet -> m
         SingleEvent (SoThisHappened e) -> 
-            if List.member e.actor m.allActors
+            if List.member e.actor (List.map .actor m.all)
                 then m
-                else { m | allActors <- e.actor :: m.allActors }
+                else { m | all <- (EachPerson e.actor fullSize) :: m.all }
