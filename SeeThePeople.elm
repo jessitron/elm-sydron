@@ -75,8 +75,25 @@ update a m =
         SingleEvent (SoThisHappened e) -> 
             if List.member e.actor (List.map .actor m.all)
                 then m
-                else { m | all <- (EachPerson e.actor fullSize) :: m.all }
+                else { m | all <- (EachPerson e.actor growing) :: m.all }
 
 -- animate
 
+slowness = Time.second
+
+growing: PresentAndFutureSize
+growing = 
+  {
+    present = 0.0,
+    future = Varying (growFromOver slowness 0.0)
+  }
+
+growFromOver : Time -> Float -> Time -> (Float, Iteratee Float)
+growFromOver totalTime presentValue dt = 
+  let
+    max = 1.0
+    nextPresent = (dt / totalTime) * max + presentValue
+    nextFunction = growFromOver totalTime nextPresent
+  in
+    (presentValue, Varying nextFunction)
 
