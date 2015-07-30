@@ -3,31 +3,29 @@ module Sydron where
 import Html exposing (Html)
 import Html.Attributes as Attr
 import Html.Events as Event
-import String
 import GithubEvent exposing (Event)
 import GithubEventSignal exposing (SingleEvent(..))
 import Task
 import Http
+-- for actual use
+import EventTicker
 
 -- MODEL
 
 type alias Model =
   {
-     ticker: List Event
+     ticker: EventTicker.Model
   }
+init = Model EventTicker.init
 
 
 -- VIEW
 
-eventListItem : Event -> Html
-eventListItem event =
-    Html.li [] [Html.text (event.eventType ++ " by " ++ event.actor.login)]
-
 view : Model -> Html
-view someStuff =
+view m =
     Html.div
         [ ]
-        [Html.h2 [] (List.map eventListItem someStuff.ticker)]
+        [ EventTicker.view m.ticker ]
 
 -- UPDATE
 
@@ -35,9 +33,7 @@ type alias Action = GithubEventSignal.SingleEvent
 
 update: Action -> Model -> Model
 update action model =
-    case action of
-        NothingYet -> model
-        SoThisHappened event -> Model (List.take 3 (event :: model.ticker))
+     { model | ticker <- EventTicker.update action model.ticker }
 
 -- WIRING
 
@@ -57,7 +53,7 @@ start app =
   in    
     Signal.map app.view model
 
-main = start { model = Model [], view = view, update = update}
+main = start { model = init, view = view, update = update}
 
 --- WORLD
 
