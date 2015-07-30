@@ -30,9 +30,17 @@ view : Model -> Html
 view m =
     Html.div
         [ ]
-        [ EventTicker.view m.ticker ,
+        [ pageTitle,
+          EventTicker.view m.ticker ,
           SeeThePeople.view m.people
         ]
+
+pageTitle = 
+  Html.div [ Attr.style [ ("height", "100px"), ("font-family", "Helvetica"), ("margin-top", "20px"), ("margin-left", "20px")]]
+  [ Html.h1 [] [Html.text "Sydron"],
+    Html.text "A parade of Github Events for ",
+    Html.a [Attr.href "http://github.com/satellite-of-love/Hungover" ] [ Html.text "Rachel's baby game repo"]
+    ]
 
 -- UPDATE
 
