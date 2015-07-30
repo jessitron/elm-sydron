@@ -18,7 +18,7 @@ init = Model []
 eventListItem : Event -> Html
 eventListItem event =
     Html.li [itemStyle]
-    [Html.text (event.eventType ++ " by " ++ event.actor.login)]
+    [Html.text (event.eventType ++ " by " ++ event.actor.login ++ " at " ++ event.created_at)]
 
 view : Model -> Html
 view m =

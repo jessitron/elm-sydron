@@ -1,6 +1,7 @@
 module GithubEvent (EventActor, Event, listDecoder) where
 
 import Json.Decode as Json exposing ((:=))
+import Date exposing (Date)
 
 
 -- JSON DECODERS
@@ -14,7 +15,8 @@ type alias EventActor =
 type alias Event = 
   {
     eventType : String,
-    actor : EventActor
+    actor : EventActor,
+    created_at: String
   }
 
 githubEventActor : Json.Decoder EventActor
@@ -27,7 +29,8 @@ githubEventActor =
 listDecoder : Json.Decoder (List Event)
 listDecoder =
     Json.list <| 
-        Json.object2
+        Json.object3
           Event
           ("type" := Json.string)
           ("actor" := githubEventActor)
+          ("created_at" := Json.string)
