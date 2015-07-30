@@ -14,11 +14,19 @@ init = Model []
 ---- VIEW
 
 draw: EventActor -> Html
-draw actor = Html.img [Attr.src actor.avatar_url] []
+draw actor = Html.img [Attr.src actor.avatar_url , pictureStyle] []
 
 view: Model -> Html
 view model =
   Html.div [] (List.map draw model.allActors)
+
+pictureStyle =
+    Attr.style
+     [
+       ("padding", "20px"),
+       ("width", "100px"),
+       ("height", "100px")
+     ]
 
 ---- UPDATE
 
