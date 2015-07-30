@@ -46,16 +46,22 @@ pictureStyle : Float -> Html.Attribute
 pictureStyle relativeSize =
     Attr.style
      [
-       ("padding-left", pixels borderPx),
-       ("padding-right", pixels borderPx),
+       ("padding-left", relativePixels borderPx relativeSize),
+       ("padding-right", relativePixels borderPx relativeSize),
        ("padding-top", pixels borderPx),
        ("padding-bottom", pixels borderPx),
-       ("width", pixels imgPx),
-       ("height", pixels imgPx)
+       ("width", relativePixels imgPx relativeSize),
+       ("height", relativePixels imgPx relativeSize)
      ]
 
 pixels: Int -> String
 pixels i = (toString i) ++ "px"
+
+relativePixels: Int -> Float -> String
+relativePixels maxPx relativeSize = 
+ (toFloat maxPx) * relativeSize
+   |> round 
+   |> pixels
 
 ---- UPDATE
 
