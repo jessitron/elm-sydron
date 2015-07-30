@@ -1,10 +1,11 @@
 module Sydron where
 
+import SydronAction exposing (SydronAction(..))
+import GithubEvent exposing (Event)
+import GithubEventSignal exposing (SingleEvent(..))
 import Html exposing (Html)
 import Html.Attributes as Attr
 import Html.Events as Event
-import GithubEvent exposing (Event)
-import GithubEventSignal exposing (SingleEvent(..))
 import Task
 import Http
 import Signal exposing (Signal)
@@ -37,6 +38,7 @@ view m =
           SeeThePeople.view m.people
         ]
 
+-- todo: move this to index.html
 pageTitle = 
   Html.div 
     [ Attr.style 
@@ -59,12 +61,10 @@ pageTitle =
 
 -- UPDATE
 
-type Action = Event GithubEventSignal.SingleEvent | TimeKeepsTickingAway Time 
-
-update: Action -> Model -> Model
+update: SydronAction -> Model -> Model
 update action model =
   case action of
-    Event e -> 
+    SingleEvent e -> 
      { model | ticker <- EventTicker.update e model.ticker,
                people <- SeeThePeople.update e model.people }
     TimeKeepsTickingAway t -> model
@@ -76,7 +76,7 @@ type alias App modelt action =
     , view : modelt -> Html
     , update : action -> modelt -> modelt
     }
-start : App Model Action -> Signal Html
+start : App Model SydronAction -> Signal Html
 start app =
   let
     model =
@@ -97,8 +97,8 @@ port githubEventsPort = GithubEventSignal.fetchOnce
 timePasses : Signal Time
 timePasses =  (Signal.map Time.inMilliseconds (Time.fps 30))
 
-both : Signal Action
+both : Signal SydronAction
 both = Signal.merge 
   (Signal.map TimeKeepsTickingAway timePasses)
-  (Signal.map Event GithubEventSignal.eventsOneByOne)
+  (Signal.map SingleEvent GithubEventSignal.eventsOneByOne)
 
