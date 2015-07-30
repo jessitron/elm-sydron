@@ -5,12 +5,26 @@ import GithubEvent exposing (EventActor)
 import GithubEventSignal exposing (SingleEvent(..))
 import Html exposing (Html)
 import Html.Attributes as Attr
+import Time exposing (Time)
+
+type alias Percentage = Float
+
+type Iteratee a = 
+    Constantly a 
+    | Varying (Time -> (a, Iteratee a))
+
+type alias PresentAndFutureSizes = 
+    {
+      present: List Percentage,
+      future: Iteratee (List Percentage)
+    }
 
 type alias Model = 
     { 
-      allActors: List EventActor
+      allActors: List EventActor,
+      sizes: PresentAndFutureSizes        
     }
-init = Model []
+init = Model [] (PresentAndFutureSizes [] (Constantly []))
 
 ---- VIEW
 
