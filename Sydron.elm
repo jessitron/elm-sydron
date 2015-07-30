@@ -9,14 +9,19 @@ import Task
 import Http
 -- for actual use
 import EventTicker
+import SeeThePeople
 
 -- MODEL
 
 type alias Model =
   {
-     ticker: EventTicker.Model
+     ticker: EventTicker.Model,
+     people: SeeThePeople.Model
   }
-init = Model EventTicker.init
+init = 
+  Model 
+    EventTicker.init 
+    SeeThePeople.init
 
 
 -- VIEW
@@ -25,7 +30,9 @@ view : Model -> Html
 view m =
     Html.div
         [ ]
-        [ EventTicker.view m.ticker ]
+        [ EventTicker.view m.ticker ,
+          SeeThePeople.view m.people
+        ]
 
 -- UPDATE
 
@@ -33,7 +40,8 @@ type alias Action = GithubEventSignal.SingleEvent
 
 update: Action -> Model -> Model
 update action model =
-     { model | ticker <- EventTicker.update action model.ticker }
+     { model | ticker <- EventTicker.update action model.ticker,
+               people <- SeeThePeople.update action model.people }
 
 -- WIRING
 
