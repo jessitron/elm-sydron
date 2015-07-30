@@ -62,11 +62,21 @@ pageTitle =
 -- UPDATE
 
 update: SydronAction -> Model -> Model
-update action model =
+update action m =
+  m 
+  |> updatePeople action
+  |> updateTicker action
+
+updatePeople : SydronAction -> Model -> Model
+updatePeople action model =
+  { model | people <- SeeThePeople.update action model.people }
+-- is there an "updateIn" for records?
+
+updateTicker : SydronAction -> Model -> Model
+updateTicker action model =
   case action of
     SingleEvent e -> 
-     { model | ticker <- EventTicker.update e model.ticker,
-               people <- SeeThePeople.update e model.people }
+     { model | ticker <- EventTicker.update e model.ticker }
     TimeKeepsTickingAway t -> model
 
 -- WIRING

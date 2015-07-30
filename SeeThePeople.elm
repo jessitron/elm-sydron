@@ -1,5 +1,6 @@
 module SeeThePeople(Model, init, view, update) where
 
+import SydronAction exposing (SydronAction(..))
 import GithubEvent exposing (EventActor)
 import GithubEventSignal exposing (SingleEvent(..))
 import Html exposing (Html)
@@ -30,13 +31,14 @@ pictureStyle =
 
 ---- UPDATE
 
-type alias Action = GithubEventSignal.SingleEvent
+type alias Action = SydronAction
 
 update: Action -> Model -> Model
 update a m = 
     case a of 
-        NothingYet -> m
-        SoThisHappened e -> 
+        TimeKeepsTickingAway t -> m
+        SingleEvent NothingYet -> m
+        SingleEvent (SoThisHappened e) -> 
             if List.member e.actor m.allActors
                 then m
                 else { m | allActors <- e.actor :: m.allActors }
