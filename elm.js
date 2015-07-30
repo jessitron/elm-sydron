@@ -13808,7 +13808,12 @@ Elm.Sydron.make = function (_elm) {
                 ,$Html.text("A parade of Github Events for ")
                 ,A2($Html.a,
                 _L.fromArray([$Html$Attributes.href("http://github.com/satellite-of-love/Hungover")]),
-                _L.fromArray([$Html.text("Rachel\'s baby game repo")]))]));
+                _L.fromArray([$Html.text("Rachel\'s baby game repo")]))
+                ,$Html.text(". This is me playing with Elm; source code ")
+                ,A2($Html.a,
+                _L.fromArray([$Html$Attributes.href("http://github.com/jessitron/elm-sydron")]),
+                _L.fromArray([$Html.text("here")]))
+                ,$Html.text(".")]));
    var view = function (m) {
       return A2($Html.div,
       _L.fromArray([]),
