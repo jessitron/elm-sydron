@@ -33,13 +33,14 @@ init = Model []
 ---- VIEW
 
 draw: EachPerson -> Html
-draw p = Html.img [Attr.src p.actor.avatar_url , pictureStyle] []
+draw p = Html.img [Attr.src p.actor.avatar_url , pictureStyle p.size.present] []
 
 view: Model -> Html
 view model =
   Html.div [] (List.map draw model.all)
 
-pictureStyle =
+pictureStyle : Float -> Html.Attribute
+pictureStyle relativeSize =
     Attr.style
      [
        ("padding", "20px"),
@@ -60,3 +61,7 @@ update a m =
             if List.member e.actor (List.map .actor m.all)
                 then m
                 else { m | all <- (EachPerson e.actor fullSize) :: m.all }
+
+-- animate
+
+
