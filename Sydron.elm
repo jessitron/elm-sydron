@@ -7,6 +7,8 @@ import GithubEvent exposing (Event)
 import GithubEventSignal exposing (SingleEvent(..))
 import Task
 import Http
+import Signal exposing (Signal)
+import Time exposing (Time)
 -- for actual use
 import EventTicker
 import SeeThePeople
@@ -57,12 +59,15 @@ pageTitle =
 
 -- UPDATE
 
-type alias Action = GithubEventSignal.SingleEvent
+type Action = Event GithubEventSignal.SingleEvent | TimeKeepsTickingAway Time 
 
 update: Action -> Model -> Model
 update action model =
-     { model | ticker <- EventTicker.update action model.ticker,
-               people <- SeeThePeople.update action model.people }
+  case action of
+    Event e -> 
+     { model | ticker <- EventTicker.update e model.ticker,
+               people <- SeeThePeople.update e model.people }
+    TimeKeepsTickingAway t -> model
 
 -- WIRING
 
@@ -78,7 +83,7 @@ start app =
       Signal.foldp
         (\a m -> app.update a m)
         app.model
-        GithubEventSignal.eventsOneByOne
+        both
   in    
     Signal.map app.view model
 
@@ -88,4 +93,12 @@ main = start { model = init, view = view, update = update}
 
 port githubEventsPort : Signal (Task.Task Http.Error ())
 port githubEventsPort = GithubEventSignal.fetchOnce
+
+timePasses : Signal Time
+timePasses =  (Signal.map Time.inMilliseconds (Time.fps 30))
+
+both : Signal Action
+both = Signal.merge 
+  (Signal.map TimeKeepsTickingAway timePasses)
+  (Signal.map Event GithubEventSignal.eventsOneByOne)
 
