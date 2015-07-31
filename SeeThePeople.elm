@@ -33,25 +33,27 @@ init = Model []
 ---- VIEW
 
 draw: EachPerson -> Html
-draw p = Html.img [Attr.src p.actor.avatar_url , pictureStyle p.size.present] []
+draw p = Html.img [Attr.src p.actor.avatar_url , pictureStyle p.size.present 1.0 ] []
 
 view: Model -> Html
 view model =
   Html.div [] (List.map draw model.all)
 
-borderPx = 20
+marginPx = 20
 imgPx = 100
+maxBorderPx = 10
 
-pictureStyle : Float -> Html.Attribute
-pictureStyle relativeSize =
+pictureStyle : Float -> Float -> Html.Attribute
+pictureStyle relativeSize borderSize =
     Attr.style
      [
-       ("margin-left", relativePixels borderPx relativeSize),
-       ("margin-right", relativePixels borderPx relativeSize),
-       ("margin-top", pixels borderPx),
-       ("margin-bottom", pixels borderPx),
+       ("margin-left", relativePixels marginPx relativeSize),
+       ("margin-right", relativePixels marginPx relativeSize),
+       ("margin-top", pixels marginPx),
+       ("margin-bottom", pixels marginPx),
        ("width", relativePixels imgPx relativeSize),
-       ("height", pixels imgPx)
+       ("height", pixels imgPx),
+       ("border", (relativePixels maxBorderPx borderSize) ++ " solid orange")
      ]
 
 pixels: Int -> String
@@ -89,13 +91,13 @@ incrementSize t m =
      in
        { m | size <- { present = nextPresent, future = nextFuture } }
 
-slowness = Time.second
+entrySlowness = Time.second
 
 growing: PresentAndFutureSize
 growing = 
   {
     present = 0.0,
-    future = Varying (growFromOver slowness 0.0)
+    future = Varying (growFromOver entrySlowness 0.0)
   }
 
 growFromOver : Time -> Float -> Time -> (Float, Iteratee Float)
