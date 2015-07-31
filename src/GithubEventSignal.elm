@@ -50,7 +50,7 @@ splitEvents action before =
 
 singleEvents: SplitEvents -> Maybe Event
 singleEvents splitEvents =
-  case splitEvents.seenEvents of
+  case splitEvents.queuedEvents of
     [] -> Nothing
     head :: _ -> Just head
 
