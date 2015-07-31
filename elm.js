@@ -1906,7 +1906,10 @@ Elm.EventTicker.make = function (_elm) {
                                                         ,_1: "Helvetica"}
                                                        ,{ctor: "_Tuple2"
                                                         ,_0: "font-size"
-                                                        ,_1: "14pt"}]));
+                                                        ,_1: "21px"}
+                                                       ,{ctor: "_Tuple2"
+                                                        ,_0: "height"
+                                                        ,_1: "24px"}]));
    var divStyle = $Html$Attributes.style(_L.fromArray([{ctor: "_Tuple2"
                                                        ,_0: "height"
                                                        ,_1: "100px"}
@@ -1921,9 +1924,12 @@ Elm.EventTicker.make = function (_elm) {
                                                        ,_1: "#666666"}
                                                       ,{ctor: "_Tuple2"
                                                        ,_0: "overflow"
-                                                       ,_1: "scroll"}]));
+                                                       ,_1: "scroll"}
+                                                      ,{ctor: "_Tuple2"
+                                                       ,_0: "padding"
+                                                       ,_1: "10px"}]));
    var eventListItem = function (event) {
-      return A2($Html.li,
+      return A2($Html.div,
       _L.fromArray([itemStyle]),
       _L.fromArray([$Html.text(A2($Basics._op["++"],
       event.eventType,
@@ -1938,11 +1944,9 @@ Elm.EventTicker.make = function (_elm) {
    var view = function (m) {
       return A2($Html.div,
       _L.fromArray([divStyle]),
-      _L.fromArray([A2($Html.ul,
-      _L.fromArray([]),
       A2($List.map,
       eventListItem,
-      m.recentEvents))]));
+      m.recentEvents));
    };
    var Model = function (a) {
       return {_: {}
@@ -1962,7 +1966,7 @@ Elm.EventTicker.make = function (_elm) {
               action._0,
               model.recentEvents)));}
          _U.badCase($moduleName,
-         "between lines 51 and 53");
+         "between lines 53 and 55");
       }();
    });
    _elm.EventTicker.values = {_op: _op
@@ -13438,49 +13442,159 @@ Elm.SeeThePeople.make = function (_elm) {
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
-   var update = F2(function (a,m) {
+   $Signal = Elm.Signal.make(_elm),
+   $SydronAction = Elm.SydronAction.make(_elm),
+   $Time = Elm.Time.make(_elm);
+   var slowness = $Time.second;
+   var incrementSize = F2(function (t,
+   m) {
       return function () {
-         switch (a.ctor)
-         {case "NothingYet": return m;
-            case "SoThisHappened":
-            return A2($List.member,
-              a._0.actor,
-              m.allActors) ? m : _U.replace([["allActors"
-                                             ,A2($List._op["::"],
-                                             a._0.actor,
-                                             m.allActors)]],
-              m);}
+         var _v0 = m.size.future;
+         switch (_v0.ctor)
+         {case "Constantly": return m;
+            case "Varying":
+            return function () {
+                 var $ = _v0._0(t),
+                 nextPresent = $._0,
+                 nextFuture = $._1;
+                 return _U.replace([["size"
+                                    ,{_: {}
+                                     ,future: nextFuture
+                                     ,present: nextPresent}]],
+                 m);
+              }();}
          _U.badCase($moduleName,
-         "between lines 37 and 42");
+         "between lines 84 and 90");
       }();
    });
-   var pictureStyle = $Html$Attributes.style(_L.fromArray([{ctor: "_Tuple2"
-                                                           ,_0: "padding"
-                                                           ,_1: "20px"}
-                                                          ,{ctor: "_Tuple2"
-                                                           ,_0: "width"
-                                                           ,_1: "100px"}
-                                                          ,{ctor: "_Tuple2"
-                                                           ,_0: "height"
-                                                           ,_1: "100px"}]));
-   var draw = function (actor) {
+   var pixels = function (i) {
+      return A2($Basics._op["++"],
+      $Basics.toString(i),
+      "px");
+   };
+   var relativePixels = F2(function (maxPx,
+   relativeSize) {
+      return pixels($Basics.round($Basics.toFloat(maxPx) * relativeSize));
+   });
+   var imgPx = 100;
+   var borderPx = 20;
+   var pictureStyle = function (relativeSize) {
+      return $Html$Attributes.style(_L.fromArray([{ctor: "_Tuple2"
+                                                  ,_0: "padding-left"
+                                                  ,_1: A2(relativePixels,
+                                                  borderPx,
+                                                  relativeSize)}
+                                                 ,{ctor: "_Tuple2"
+                                                  ,_0: "padding-right"
+                                                  ,_1: A2(relativePixels,
+                                                  borderPx,
+                                                  relativeSize)}
+                                                 ,{ctor: "_Tuple2"
+                                                  ,_0: "padding-top"
+                                                  ,_1: pixels(borderPx)}
+                                                 ,{ctor: "_Tuple2"
+                                                  ,_0: "padding-bottom"
+                                                  ,_1: pixels(borderPx)}
+                                                 ,{ctor: "_Tuple2"
+                                                  ,_0: "width"
+                                                  ,_1: A2(relativePixels,
+                                                  imgPx,
+                                                  relativeSize)}
+                                                 ,{ctor: "_Tuple2"
+                                                  ,_0: "height"
+                                                  ,_1: pixels(imgPx)}]));
+   };
+   var draw = function (p) {
       return A2($Html.img,
-      _L.fromArray([$Html$Attributes.src(actor.avatar_url)
-                   ,pictureStyle]),
+      _L.fromArray([$Html$Attributes.src(p.actor.avatar_url)
+                   ,pictureStyle(p.size.present)]),
       _L.fromArray([]));
    };
    var view = function (model) {
       return A2($Html.div,
       _L.fromArray([]),
-      A2($List.map,
-      draw,
-      model.allActors));
+      A2($List.map,draw,model.all));
    };
    var Model = function (a) {
-      return {_: {},allActors: a};
+      return {_: {},all: a};
    };
    var init = Model(_L.fromArray([]));
+   var EachPerson = F2(function (a,
+   b) {
+      return {_: {}
+             ,actor: a
+             ,size: b};
+   });
+   var PresentAndFutureSize = F2(function (a,
+   b) {
+      return {_: {}
+             ,future: b
+             ,present: a};
+   });
+   var Varying = function (a) {
+      return {ctor: "Varying"
+             ,_0: a};
+   };
+   var Constantly = function (a) {
+      return {ctor: "Constantly"
+             ,_0: a};
+   };
+   var fullSize = A2(PresentAndFutureSize,
+   1.0,
+   Constantly(1.0));
+   var growFromOver = F3(function (totalTime,
+   presentValue,
+   dt) {
+      return function () {
+         var max = 1.0;
+         var nextPresent = dt / totalTime * max + presentValue;
+         var nextFunction = A2(growFromOver,
+         totalTime,
+         nextPresent);
+         return _U.cmp(nextPresent,
+         max) > -1 ? {ctor: "_Tuple2"
+                     ,_0: max
+                     ,_1: Constantly(max)} : {ctor: "_Tuple2"
+                                             ,_0: presentValue
+                                             ,_1: Varying(nextFunction)};
+      }();
+   });
+   var growing = {_: {}
+                 ,future: Varying(A2(growFromOver,
+                 slowness,
+                 0.0))
+                 ,present: 0.0};
+   var update = F2(function (a,m) {
+      return function () {
+         switch (a.ctor)
+         {case "SingleEvent":
+            switch (a._0.ctor)
+              {case "NothingYet": return m;
+                 case "SoThisHappened":
+                 return A2($List.member,
+                   a._0._0.actor,
+                   A2($List.map,
+                   function (_) {
+                      return _.actor;
+                   },
+                   m.all)) ? m : _U.replace([["all"
+                                             ,A2($List._op["::"],
+                                             A2(EachPerson,
+                                             a._0._0.actor,
+                                             growing),
+                                             m.all)]],
+                   m);}
+              break;
+            case "TimeKeepsTickingAway":
+            return _U.replace([["all"
+                               ,A2($List.map,
+                               incrementSize(a._0),
+                               m.all)]],
+              m);}
+         _U.badCase($moduleName,
+         "between lines 72 and 78");
+      }();
+   });
    _elm.SeeThePeople.values = {_op: _op
                               ,init: init
                               ,view: view
@@ -13755,7 +13869,19 @@ Elm.Sydron.make = function (_elm) {
    $Result = Elm.Result.make(_elm),
    $SeeThePeople = Elm.SeeThePeople.make(_elm),
    $Signal = Elm.Signal.make(_elm),
-   $Task = Elm.Task.make(_elm);
+   $SydronAction = Elm.SydronAction.make(_elm),
+   $Task = Elm.Task.make(_elm),
+   $Time = Elm.Time.make(_elm);
+   var timePasses = A2($Signal.map,
+   $Time.inMilliseconds,
+   $Time.fps(30));
+   var both = A2($Signal.merge,
+   A2($Signal.map,
+   $SydronAction.TimeKeepsTickingAway,
+   timePasses),
+   A2($Signal.map,
+   $SydronAction.SingleEvent,
+   $GithubEventSignal.eventsOneByOne));
    var githubEventsPort = Elm.Native.Task.make(_elm).performSignal("githubEventsPort",
    $GithubEventSignal.fetchOnce);
    var start = function (app) {
@@ -13765,7 +13891,7 @@ Elm.Sydron.make = function (_elm) {
             return A2(app.update,a,m);
          }),
          app.model,
-         $GithubEventSignal.eventsOneByOne);
+         both);
          return A2($Signal.map,
          app.view,
          model);
@@ -13777,17 +13903,33 @@ Elm.Sydron.make = function (_elm) {
              ,update: c
              ,view: b};
    });
-   var update = F2(function (action,
+   var updateTicker = F2(function (action,
    model) {
-      return _U.replace([["ticker"
-                         ,A2($EventTicker.update,
-                         action,
-                         model.ticker)]
-                        ,["people"
+      return function () {
+         switch (action.ctor)
+         {case "SingleEvent":
+            return _U.replace([["ticker"
+                               ,A2($EventTicker.update,
+                               action._0,
+                               model.ticker)]],
+              model);
+            case "TimeKeepsTickingAway":
+            return model;}
+         _U.badCase($moduleName,
+         "between lines 77 and 80");
+      }();
+   });
+   var updatePeople = F2(function (action,
+   model) {
+      return _U.replace([["people"
                          ,A2($SeeThePeople.update,
                          action,
                          model.people)]],
       model);
+   });
+   var update = F2(function (action,
+   m) {
+      return updateTicker(action)(updatePeople(action)(m));
    });
    var pageTitle = A2($Html.div,
    _L.fromArray([$Html$Attributes.style(_L.fromArray([{ctor: "_Tuple2"
@@ -13839,10 +13981,45 @@ Elm.Sydron.make = function (_elm) {
                         ,view: view
                         ,pageTitle: pageTitle
                         ,update: update
+                        ,updatePeople: updatePeople
+                        ,updateTicker: updateTicker
                         ,App: App
                         ,start: start
-                        ,main: main};
+                        ,main: main
+                        ,timePasses: timePasses
+                        ,both: both};
    return _elm.Sydron.values;
+};
+Elm.SydronAction = Elm.SydronAction || {};
+Elm.SydronAction.make = function (_elm) {
+   "use strict";
+   _elm.SydronAction = _elm.SydronAction || {};
+   if (_elm.SydronAction.values)
+   return _elm.SydronAction.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   $moduleName = "SydronAction",
+   $Basics = Elm.Basics.make(_elm),
+   $GithubEventSignal = Elm.GithubEventSignal.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $Time = Elm.Time.make(_elm);
+   var TimeKeepsTickingAway = function (a) {
+      return {ctor: "TimeKeepsTickingAway"
+             ,_0: a};
+   };
+   var SingleEvent = function (a) {
+      return {ctor: "SingleEvent"
+             ,_0: a};
+   };
+   _elm.SydronAction.values = {_op: _op
+                              ,SingleEvent: SingleEvent
+                              ,TimeKeepsTickingAway: TimeKeepsTickingAway};
+   return _elm.SydronAction.values;
 };
 Elm.Task = Elm.Task || {};
 Elm.Task.make = function (_elm) {
