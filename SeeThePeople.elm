@@ -47,25 +47,28 @@ maxBorderPx = 10
 
 pictureStyle : Float -> Float -> Html.Attribute
 pictureStyle relativeSize borderSize =
+  let 
+    borderPx = relative maxBorderPx borderSize
+    horizontalMargin = pixels ((relative marginPx relativeSize) - borderPx)
+    verticalMargin = pixels (marginPx - borderPx)
+  in
     Attr.style
      [
-       ("margin-left", relativePixels marginPx relativeSize),
-       ("margin-right", relativePixels marginPx relativeSize),
-       ("margin-top", pixels marginPx),
-       ("margin-bottom", pixels marginPx),
-       ("width", relativePixels imgPx relativeSize),
+       ("margin-left", horizontalMargin),
+       ("margin-right", horizontalMargin),
+       ("margin-top", verticalMargin),
+       ("margin-bottom", verticalMargin),
+       ("width", pixels (relative imgPx relativeSize)),
        ("height", pixels imgPx),
-       ("border", (relativePixels maxBorderPx borderSize) ++ " solid orange")
+       ("border", (pixels borderPx) ++ " solid orange")
      ]
 
 pixels: Int -> String
 pixels i = (toString i) ++ "px"
 
-relativePixels: Int -> Float -> String
-relativePixels maxPx relativeSize = 
- (toFloat maxPx) * relativeSize
-   |> round 
-   |> pixels
+relative: Int -> Float -> Int
+relative maxPx relativeSize = 
+ round ((toFloat maxPx) * relativeSize) 
 
 ---- UPDATE
 
@@ -85,21 +88,19 @@ update a m =
 
 incrementSize : Time -> EachPerson -> EachPerson
 incrementSize t m =
-  case m.size.future of 
-   Constantly _ -> m
-   Varying f    ->
-     let
-       (nextPresent, nextFuture) = f t
-     in
-       { m | size <- { present = nextPresent, future = nextFuture } }
+  { m | size <- iterateeate t m.size }
 incrementBorder t m =
-  case m.border.future of 
-   Constantly _ -> m
-   Varying f    ->
-     let
-       (nextPresent, nextFuture) = f t
-     in
-       { m | border <- { present = nextPresent, future = nextFuture } }
+  { m | border <- iterateeate t m.border }
+
+iterateeate : Time -> PresentAndFutureSize -> PresentAndFutureSize
+iterateeate t paf =
+  case paf.future of
+    Constantly _ -> paf
+    Varying f    ->
+      let
+        (nextPresent, nextFuture) = f t
+      in
+        PresentAndFutureSize nextPresent nextFuture
 
 entrySlowness = Time.second
 
