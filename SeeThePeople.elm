@@ -22,18 +22,20 @@ fullSize = PresentAndFutureSize 1.0 (Constantly 1.0)
 
 type alias EachPerson = {
   actor: EventActor,
-  size: PresentAndFutureSize
+  size: PresentAndFutureSize,
+  border: PresentAndFutureSize
 }
+newPerson actor = EachPerson actor growing shrinking
 
 type alias Model = 
     { 
-      all: List EachPerson  
+      all: List EachPerson 
     }
 init = Model []
 ---- VIEW
 
 draw: EachPerson -> Html
-draw p = Html.img [Attr.src p.actor.avatar_url , pictureStyle p.size.present 1.0 ] []
+draw p = Html.img [Attr.src p.actor.avatar_url , pictureStyle p.size.present p.border.present ] []
 
 view: Model -> Html
 view model =
@@ -72,12 +74,12 @@ type alias Action = SydronAction
 update: Action -> Model -> Model
 update a m = 
     case a of 
-        TimeKeepsTickingAway t -> { m | all <- List.map (incrementSize t) m.all }
+        TimeKeepsTickingAway t -> { m | all <- List.map (\m -> incrementSize t (incrementBorder t m)) m.all }
         SingleEvent NothingYet -> m
         SingleEvent (SoThisHappened e) -> 
             if List.member e.actor (List.map .actor m.all)
                 then m
-                else { m | all <- (EachPerson e.actor growing) :: m.all }
+                else { m | all <- (newPerson e.actor) :: m.all }
 
 -- animate
 
@@ -90,6 +92,14 @@ incrementSize t m =
        (nextPresent, nextFuture) = f t
      in
        { m | size <- { present = nextPresent, future = nextFuture } }
+incrementBorder t m =
+  case m.border.future of 
+   Constantly _ -> m
+   Varying f    ->
+     let
+       (nextPresent, nextFuture) = f t
+     in
+       { m | border <- { present = nextPresent, future = nextFuture } }
 
 entrySlowness = Time.second
 
@@ -110,4 +120,26 @@ growFromOver totalTime presentValue dt =
     if (nextPresent >= max)
     then (max, Constantly max)
     else (presentValue, Varying nextFunction)
+
+borderErodes = 3 * Time.second
+
+shrinking: PresentAndFutureSize
+shrinking = 
+  {
+    present = 1.0,
+    future = Varying (shrinkOver borderErodes 1.0)
+  }
+
+shrinkOver : Time -> Float -> Time -> (Float, Iteratee Float)
+shrinkOver totalTime presentValue dt = 
+  let
+    min = 0.0
+    nextPresent = presentValue - (dt / totalTime) * 1.0
+    nextFunction = shrinkOver totalTime nextPresent
+  in
+    if (nextPresent <= min)
+    then (min, Constantly min)
+    else (presentValue, Varying nextFunction)
+
+
 
