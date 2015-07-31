@@ -46,10 +46,10 @@ pictureStyle : Float -> Html.Attribute
 pictureStyle relativeSize =
     Attr.style
      [
-       ("padding-left", relativePixels borderPx relativeSize),
-       ("padding-right", relativePixels borderPx relativeSize),
-       ("padding-top", pixels borderPx),
-       ("padding-bottom", pixels borderPx),
+       ("margin-left", relativePixels borderPx relativeSize),
+       ("margin-right", relativePixels borderPx relativeSize),
+       ("margin-top", pixels borderPx),
+       ("margin-bottom", pixels borderPx),
        ("width", relativePixels imgPx relativeSize),
        ("height", pixels imgPx)
      ]
