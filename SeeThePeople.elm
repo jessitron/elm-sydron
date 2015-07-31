@@ -51,7 +51,7 @@ pictureStyle relativeSize =
        ("padding-top", pixels borderPx),
        ("padding-bottom", pixels borderPx),
        ("width", relativePixels imgPx relativeSize),
-       ("height", relativePixels imgPx relativeSize)
+       ("height", pixels imgPx)
      ]
 
 pixels: Int -> String
