@@ -81,10 +81,15 @@ update a m =
         SingleEvent NothingYet -> m
         SingleEvent (SoThisHappened e) -> 
             if List.member e.actor (List.map .actor m.all)
-                then m
+                then { m | all <- startAnimation e.actor m.all }
                 else { m | all <- (newPerson e.actor) :: m.all }
 
 -- animate
+
+startAnimation : EventActor -> List EachPerson -> List EachPerson
+startAnimation ea = 
+  List.map (\n -> if (n.actor /= ea) then n else { n | border <- shrinking })
+
 
 incrementSize : Time -> EachPerson -> EachPerson
 incrementSize t m =
