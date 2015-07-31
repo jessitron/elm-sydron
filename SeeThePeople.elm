@@ -70,7 +70,7 @@ type alias Action = SydronAction
 update: Action -> Model -> Model
 update a m = 
     case a of 
-        TimeKeepsTickingAway t -> m
+        TimeKeepsTickingAway t -> { m | all <- List.map (incrementSize t) m.all }
         SingleEvent NothingYet -> m
         SingleEvent (SoThisHappened e) -> 
             if List.member e.actor (List.map .actor m.all)
@@ -78,6 +78,16 @@ update a m =
                 else { m | all <- (EachPerson e.actor growing) :: m.all }
 
 -- animate
+
+incrementSize : Time -> EachPerson -> EachPerson
+incrementSize t m =
+  case m.size.future of 
+   Constantly _ -> m
+   Varying f    ->
+     let
+       (nextPresent, nextFuture) = f t
+     in
+       { m | size <- { present = nextPresent, future = nextFuture } }
 
 slowness = Time.second
 
