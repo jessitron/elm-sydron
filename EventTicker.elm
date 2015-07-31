@@ -17,14 +17,14 @@ init = Model []
 -- View
 eventListItem : Event -> Html
 eventListItem event =
-    Html.li [itemStyle]
+    Html.div [itemStyle]
     [Html.text (event.eventType ++ " by " ++ event.actor.login ++ " at " ++ event.created_at)]
 
 view : Model -> Html
 view m =
     Html.div
         [ divStyle ]
-        [ Html.ul [] (List.map eventListItem m.recentEvents) ]
+        (List.map eventListItem m.recentEvents)
 
 divStyle = 
   style 
@@ -33,14 +33,16 @@ divStyle =
       ("box-sizing", "border-box"),
       ("border", "1px solid"),
       ("color", "#666666"),
-      ("overflow", "scroll")
+      ("overflow", "scroll"),
+      ("padding", "10px")
     ]
 itemStyle = 
   style 
     [ 
       ("color", "#515151"),
       ("font-family", "Helvetica"),
-      ("font-size", "14pt")
+      ("font-size", "21px"),
+      ("height", "24px")
     ]
 
 -- Update
