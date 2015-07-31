@@ -1,4 +1,4 @@
-module GithubEventSignal(SingleEvent(..), eventsOneByOne, fetchOnce) where
+module GithubEventSignal(SingleEvent(..), eventsOneByOne, fetchOnce, GithubRepository, setRepo) where
 
 import Http
 import GithubEvent exposing (Event)
@@ -8,13 +8,27 @@ import Task exposing (Task, andThen)
 
 type SingleEvent = NothingYet | SoThisHappened Event
 
+setRepo: GithubRepository -> Task a ()
+setRepo r = Signal.send repository.address r
+
+type alias GithubRepository = 
+  {
+    owner: String,
+    repo : String
+  }
+
 --- port
 fetchOnce: Signal (Task Http.Error ())
 fetchOnce = 
-  Signal.constant fetchPageOfEvents
+  repository.signal
+    |> Signal.map fetchPageOfEvents
     |> Signal.map (\task -> task `andThen` Signal.send newEvents.address)
 
 -- wiring
+
+repository: Signal.Mailbox GithubRepository
+repository = Signal.mailbox (GithubRepository "satellite-of-love" "Hungover")
+
 newEvents : Signal.Mailbox (List Event)
 newEvents = Signal.mailbox []
 
@@ -71,16 +85,17 @@ queueEvents before moreEvents =
 
 -- Fetchy Fetchy
 
-fetchPageOfEvents : Task Http.Error (List Event)
-fetchPageOfEvents  =
+
+fetchPageOfEvents : GithubRepository -> Task Http.Error (List Event)
+fetchPageOfEvents repo =
     let
       pageNo = 1
       parameters = [("page", toString pageNo)]
     in 
-      Http.get GithubEvent.listDecoder (github "satellite-of-love" "Hungover" pageNo)
+      Http.get GithubEvent.listDecoder (github repo pageNo)
 
-github : String -> String -> Int -> String
-github owner repo pageNo = Http.url ("https://api.github.com/repos/" ++ owner ++ "/" ++ repo ++ "/events") <|
+github : GithubRepository -> Int -> String
+github repo pageNo = Http.url ("https://api.github.com/repos/" ++ repo.owner ++ "/" ++ repo.repo ++ "/events") <|
         [("pageNo", (toString pageNo))]
 
 
