@@ -1,6 +1,5 @@
-*.elm
-elm-package.json
+elm.js
 elm-stuff
-README.md
-some_events.json
-README.md
+Gemfile
+Gemfile.lock
+_site

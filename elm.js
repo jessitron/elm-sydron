@@ -2109,7 +2109,7 @@ Elm.GithubEventSignal.make = function (_elm) {
    });
    var singleEvents = function (splitEvents) {
       return function () {
-         var _v3 = splitEvents.seenEvents;
+         var _v3 = splitEvents.queuedEvents;
          switch (_v3.ctor)
          {case "::":
             return $Maybe.Just(_v3._0);
@@ -13445,69 +13445,63 @@ Elm.SeeThePeople.make = function (_elm) {
    $Signal = Elm.Signal.make(_elm),
    $SydronAction = Elm.SydronAction.make(_elm),
    $Time = Elm.Time.make(_elm);
-   var slowness = $Time.second;
-   var incrementSize = F2(function (t,
-   m) {
-      return function () {
-         var _v0 = m.size.future;
-         switch (_v0.ctor)
-         {case "Constantly": return m;
-            case "Varying":
-            return function () {
-                 var $ = _v0._0(t),
-                 nextPresent = $._0,
-                 nextFuture = $._1;
-                 return _U.replace([["size"
-                                    ,{_: {}
-                                     ,future: nextFuture
-                                     ,present: nextPresent}]],
-                 m);
-              }();}
-         _U.badCase($moduleName,
-         "between lines 84 and 90");
-      }();
+   var borderErodes = 3 * $Time.second;
+   var entrySlowness = $Time.second;
+   var relative = F2(function (maxPx,
+   relativeSize) {
+      return $Basics.round($Basics.toFloat(maxPx) * relativeSize);
    });
    var pixels = function (i) {
       return A2($Basics._op["++"],
       $Basics.toString(i),
       "px");
    };
-   var relativePixels = F2(function (maxPx,
-   relativeSize) {
-      return pixels($Basics.round($Basics.toFloat(maxPx) * relativeSize));
-   });
+   var maxBorderPx = 10;
    var imgPx = 100;
-   var borderPx = 20;
-   var pictureStyle = function (relativeSize) {
-      return $Html$Attributes.style(_L.fromArray([{ctor: "_Tuple2"
-                                                  ,_0: "padding-left"
-                                                  ,_1: A2(relativePixels,
-                                                  borderPx,
-                                                  relativeSize)}
-                                                 ,{ctor: "_Tuple2"
-                                                  ,_0: "padding-right"
-                                                  ,_1: A2(relativePixels,
-                                                  borderPx,
-                                                  relativeSize)}
-                                                 ,{ctor: "_Tuple2"
-                                                  ,_0: "padding-top"
-                                                  ,_1: pixels(borderPx)}
-                                                 ,{ctor: "_Tuple2"
-                                                  ,_0: "padding-bottom"
-                                                  ,_1: pixels(borderPx)}
-                                                 ,{ctor: "_Tuple2"
-                                                  ,_0: "width"
-                                                  ,_1: A2(relativePixels,
-                                                  imgPx,
-                                                  relativeSize)}
-                                                 ,{ctor: "_Tuple2"
-                                                  ,_0: "height"
-                                                  ,_1: pixels(imgPx)}]));
-   };
+   var marginPx = 20;
+   var pictureStyle = F2(function (relativeSize,
+   borderSize) {
+      return function () {
+         var borderPx = A2(relative,
+         maxBorderPx,
+         borderSize);
+         var horizontalMargin = pixels(A2(relative,
+         marginPx,
+         relativeSize) - borderPx);
+         var verticalMargin = pixels(marginPx - borderPx);
+         return $Html$Attributes.style(_L.fromArray([{ctor: "_Tuple2"
+                                                     ,_0: "margin-left"
+                                                     ,_1: horizontalMargin}
+                                                    ,{ctor: "_Tuple2"
+                                                     ,_0: "margin-right"
+                                                     ,_1: horizontalMargin}
+                                                    ,{ctor: "_Tuple2"
+                                                     ,_0: "margin-top"
+                                                     ,_1: verticalMargin}
+                                                    ,{ctor: "_Tuple2"
+                                                     ,_0: "margin-bottom"
+                                                     ,_1: verticalMargin}
+                                                    ,{ctor: "_Tuple2"
+                                                     ,_0: "width"
+                                                     ,_1: pixels(A2(relative,
+                                                     imgPx,
+                                                     relativeSize))}
+                                                    ,{ctor: "_Tuple2"
+                                                     ,_0: "height"
+                                                     ,_1: pixels(imgPx)}
+                                                    ,{ctor: "_Tuple2"
+                                                     ,_0: "border"
+                                                     ,_1: A2($Basics._op["++"],
+                                                     pixels(borderPx),
+                                                     " solid orange")}]));
+      }();
+   });
    var draw = function (p) {
       return A2($Html.img,
       _L.fromArray([$Html$Attributes.src(p.actor.avatar_url)
-                   ,pictureStyle(p.size.present)]),
+                   ,A2(pictureStyle,
+                   p.size.present,
+                   p.border.present)]),
       _L.fromArray([]));
    };
    var view = function (model) {
@@ -13519,10 +13513,12 @@ Elm.SeeThePeople.make = function (_elm) {
       return {_: {},all: a};
    };
    var init = Model(_L.fromArray([]));
-   var EachPerson = F2(function (a,
-   b) {
+   var EachPerson = F3(function (a,
+   b,
+   c) {
       return {_: {}
              ,actor: a
+             ,border: c
              ,size: b};
    });
    var PresentAndFutureSize = F2(function (a,
@@ -13530,6 +13526,37 @@ Elm.SeeThePeople.make = function (_elm) {
       return {_: {}
              ,future: b
              ,present: a};
+   });
+   var iterateeate = F2(function (t,
+   paf) {
+      return function () {
+         var _v0 = paf.future;
+         switch (_v0.ctor)
+         {case "Constantly": return paf;
+            case "Varying":
+            return function () {
+                 var $ = _v0._0(t),
+                 nextPresent = $._0,
+                 nextFuture = $._1;
+                 return A2(PresentAndFutureSize,
+                 nextPresent,
+                 nextFuture);
+              }();}
+         _U.badCase($moduleName,
+         "between lines 102 and 108");
+      }();
+   });
+   var incrementSize = F2(function (t,
+   m) {
+      return _U.replace([["size"
+                         ,A2(iterateeate,t,m.size)]],
+      m);
+   });
+   var incrementBorder = F2(function (t,
+   m) {
+      return _U.replace([["border"
+                         ,A2(iterateeate,t,m.border)]],
+      m);
    });
    var Varying = function (a) {
       return {ctor: "Varying"
@@ -13561,9 +13588,45 @@ Elm.SeeThePeople.make = function (_elm) {
    });
    var growing = {_: {}
                  ,future: Varying(A2(growFromOver,
-                 slowness,
+                 entrySlowness,
                  0.0))
                  ,present: 0.0};
+   var shrinkOver = F3(function (totalTime,
+   presentValue,
+   dt) {
+      return function () {
+         var nextPresent = presentValue - dt / totalTime * 1.0;
+         var nextFunction = A2(shrinkOver,
+         totalTime,
+         nextPresent);
+         var min = 0.0;
+         return _U.cmp(nextPresent,
+         min) < 1 ? {ctor: "_Tuple2"
+                    ,_0: min
+                    ,_1: Constantly(min)} : {ctor: "_Tuple2"
+                                            ,_0: presentValue
+                                            ,_1: Varying(nextFunction)};
+      }();
+   });
+   var shrinking = {_: {}
+                   ,future: Varying(A2(shrinkOver,
+                   borderErodes,
+                   1.0))
+                   ,present: 1.0};
+   var newPerson = function (actor) {
+      return A3(EachPerson,
+      actor,
+      growing,
+      shrinking);
+   };
+   var startAnimation = function (ea) {
+      return $List.map(function (n) {
+         return !_U.eq(n.actor,
+         ea) ? n : _U.replace([["border"
+                               ,shrinking]],
+         n);
+      });
+   };
    var update = F2(function (a,m) {
       return function () {
          switch (a.ctor)
@@ -13577,22 +13640,28 @@ Elm.SeeThePeople.make = function (_elm) {
                    function (_) {
                       return _.actor;
                    },
-                   m.all)) ? m : _U.replace([["all"
-                                             ,A2($List._op["::"],
-                                             A2(EachPerson,
-                                             a._0._0.actor,
-                                             growing),
-                                             m.all)]],
+                   m.all)) ? _U.replace([["all"
+                                         ,A2(startAnimation,
+                                         a._0._0.actor,
+                                         m.all)]],
+                   m) : _U.replace([["all"
+                                    ,A2($List._op["::"],
+                                    newPerson(a._0._0.actor),
+                                    m.all)]],
                    m);}
               break;
             case "TimeKeepsTickingAway":
             return _U.replace([["all"
                                ,A2($List.map,
-                               incrementSize(a._0),
+                               function (m) {
+                                  return A2(incrementSize,
+                                  a._0,
+                                  A2(incrementBorder,a._0,m));
+                               },
                                m.all)]],
               m);}
          _U.badCase($moduleName,
-         "between lines 72 and 78");
+         "between lines 79 and 85");
       }();
    });
    _elm.SeeThePeople.values = {_op: _op
