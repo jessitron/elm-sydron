@@ -1,3 +1,6 @@
-elm-stuff
 *.elm
 elm-package.json
+elm-stuff
+README.md
+some_events.json
+README.md
