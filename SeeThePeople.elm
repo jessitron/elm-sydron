@@ -105,5 +105,7 @@ growFromOver totalTime presentValue dt =
     nextPresent = (dt / totalTime) * max + presentValue
     nextFunction = growFromOver totalTime nextPresent
   in
-    (presentValue, Varying nextFunction)
+    if (nextPresent >= max)
+    then (max, Constantly max)
+    else (presentValue, Varying nextFunction)
 
