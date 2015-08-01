@@ -34,9 +34,19 @@ view m =
     Html.div
         [ ]
         [ pageTitle,
+          inputThinger,
           EventTicker.view m.ticker ,
           SeeThePeople.view m.people
         ]
+
+inputThinger : Html
+inputThinger = 
+  Html.div []
+    [
+       Html.input [ Attr.placeholder "owner", Attr.id "repo-owner"] []
+       Html.input [ Attr.placeholder "repository", Attr.id "repo-name"] []
+       Html.button [ Attr.style [("background", "url(img/elm-button.jpg")]] []
+    ]
 
 -- todo: move this to index.html
 pageTitle = 
