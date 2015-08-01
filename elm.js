@@ -2052,33 +2052,31 @@ Elm.GithubEventSignal.make = function (_elm) {
    $Signal = Elm.Signal.make(_elm),
    $Task = Elm.Task.make(_elm),
    $Time = Elm.Time.make(_elm);
-   var github = F3(function (owner,
-   repo,
+   var github = F2(function (repo,
    pageNo) {
       return $Http.url(A2($Basics._op["++"],
       "https://api.github.com/repos/",
       A2($Basics._op["++"],
-      owner,
+      repo.owner,
       A2($Basics._op["++"],
       "/",
       A2($Basics._op["++"],
-      repo,
+      repo.repo,
       "/events")))))(_L.fromArray([{ctor: "_Tuple2"
                                    ,_0: "pageNo"
                                    ,_1: $Basics.toString(pageNo)}]));
    });
-   var fetchPageOfEvents = function () {
-      var pageNo = 1;
-      var parameters = _L.fromArray([{ctor: "_Tuple2"
-                                     ,_0: "page"
-                                     ,_1: $Basics.toString(pageNo)}]);
-      return A2($Http.get,
-      $GithubEvent.listDecoder,
-      A3(github,
-      "satellite-of-love",
-      "Hungover",
-      pageNo));
-   }();
+   var fetchPageOfEvents = function (repo) {
+      return function () {
+         var pageNo = 1;
+         var parameters = _L.fromArray([{ctor: "_Tuple2"
+                                        ,_0: "page"
+                                        ,_1: $Basics.toString(pageNo)}]);
+         return A2($Http.get,
+         $GithubEvent.listDecoder,
+         A2(github,repo,pageNo));
+      }();
+   };
    var queueEvents = F2(function (before,
    moreEvents) {
       return {_: {}
@@ -2098,7 +2096,7 @@ Elm.GithubEventSignal.make = function (_elm) {
                             before.seenEvents)};
             case "[]": return before;}
          _U.badCase($moduleName,
-         "between lines 64 and 66");
+         "between lines 78 and 80");
       }();
    };
    var SomeEventModel = F2(function (a,
@@ -2116,7 +2114,7 @@ Elm.GithubEventSignal.make = function (_elm) {
             case "[]":
             return $Maybe.Nothing;}
          _U.badCase($moduleName,
-         "between lines 53 and 55");
+         "between lines 67 and 69");
       }();
    };
    var splitEvents = F2(function (action,
@@ -2130,7 +2128,7 @@ Elm.GithubEventSignal.make = function (_elm) {
               before,
               action._0);}
          _U.badCase($moduleName,
-         "between lines 47 and 49");
+         "between lines 61 and 63");
       }();
    });
    var SplitEvents = F2(function (a,
@@ -2152,11 +2150,27 @@ Elm.GithubEventSignal.make = function (_elm) {
    },
    $Time.every(3000));
    var newEvents = $Signal.mailbox(_L.fromArray([]));
-   var fetchOnce = $Signal.map(function (task) {
-      return A2($Task.andThen,
-      task,
-      $Signal.send(newEvents.address));
-   })($Signal.constant(fetchPageOfEvents));
+   var fetchOnce = function (ofWhat) {
+      return $Signal.map(function (task) {
+         return A2($Task.andThen,
+         task,
+         $Signal.send(newEvents.address));
+      })($Signal.map(fetchPageOfEvents)($Signal.constant(ofWhat)));
+   };
+   var GithubRepository = F2(function (a,
+   b) {
+      return {_: {}
+             ,owner: a
+             ,repo: b};
+   });
+   var repository = $Signal.mailbox(A2(GithubRepository,
+   "satellite-of-love",
+   "Hungover"));
+   var setRepo = function (r) {
+      return A2($Signal.send,
+      repository.address,
+      r);
+   };
    var SoThisHappened = function (a) {
       return {ctor: "SoThisHappened"
              ,_0: a};
@@ -2178,6 +2192,8 @@ Elm.GithubEventSignal.make = function (_elm) {
    _elm.GithubEventSignal.values = {_op: _op
                                    ,eventsOneByOne: eventsOneByOne
                                    ,fetchOnce: fetchOnce
+                                   ,setRepo: setRepo
+                                   ,GithubRepository: GithubRepository
                                    ,NothingYet: NothingYet
                                    ,SoThisHappened: SoThisHappened};
    return _elm.GithubEventSignal.values;
@@ -13447,6 +13463,30 @@ Elm.SeeThePeople.make = function (_elm) {
    $Time = Elm.Time.make(_elm);
    var borderErodes = 3 * $Time.second;
    var entrySlowness = $Time.second;
+   var iterateeate = F2(function (t,
+   paf) {
+      return function () {
+         var _v0 = paf.future;
+         switch (_v0.ctor)
+         {case "Constant": return paf;
+            case "Varying":
+            return _v0._0(t);}
+         _U.badCase($moduleName,
+         "between lines 105 and 107");
+      }();
+   });
+   var incrementBorder = F2(function (t,
+   m) {
+      return _U.replace([["border"
+                         ,A2(iterateeate,t,m.border)]],
+      m);
+   });
+   var incrementSize = F2(function (t,
+   m) {
+      return _U.replace([["size"
+                         ,A2(iterateeate,t,m.size)]],
+      m);
+   });
    var relative = F2(function (maxPx,
    relativeSize) {
       return $Basics.round($Basics.toFloat(maxPx) * relativeSize);
@@ -13521,54 +13561,20 @@ Elm.SeeThePeople.make = function (_elm) {
              ,border: c
              ,size: b};
    });
-   var PresentAndFutureSize = F2(function (a,
+   var Varying = function (a) {
+      return {ctor: "Varying"
+             ,_0: a};
+   };
+   var Constant = {ctor: "Constant"};
+   var PresentAndFuture = F2(function (a,
    b) {
       return {_: {}
              ,future: b
              ,present: a};
    });
-   var iterateeate = F2(function (t,
-   paf) {
-      return function () {
-         var _v0 = paf.future;
-         switch (_v0.ctor)
-         {case "Constantly": return paf;
-            case "Varying":
-            return function () {
-                 var $ = _v0._0(t),
-                 nextPresent = $._0,
-                 nextFuture = $._1;
-                 return A2(PresentAndFutureSize,
-                 nextPresent,
-                 nextFuture);
-              }();}
-         _U.badCase($moduleName,
-         "between lines 102 and 108");
-      }();
-   });
-   var incrementSize = F2(function (t,
-   m) {
-      return _U.replace([["size"
-                         ,A2(iterateeate,t,m.size)]],
-      m);
-   });
-   var incrementBorder = F2(function (t,
-   m) {
-      return _U.replace([["border"
-                         ,A2(iterateeate,t,m.border)]],
-      m);
-   });
-   var Varying = function (a) {
-      return {ctor: "Varying"
-             ,_0: a};
-   };
-   var Constantly = function (a) {
-      return {ctor: "Constantly"
-             ,_0: a};
-   };
-   var fullSize = A2(PresentAndFutureSize,
+   var fullSize = A2(PresentAndFuture,
    1.0,
-   Constantly(1.0));
+   Constant);
    var growFromOver = F3(function (totalTime,
    presentValue,
    dt) {
@@ -13579,11 +13585,11 @@ Elm.SeeThePeople.make = function (_elm) {
          totalTime,
          nextPresent);
          return _U.cmp(nextPresent,
-         max) > -1 ? {ctor: "_Tuple2"
-                     ,_0: max
-                     ,_1: Constantly(max)} : {ctor: "_Tuple2"
-                                             ,_0: presentValue
-                                             ,_1: Varying(nextFunction)};
+         max) > -1 ? A2(PresentAndFuture,
+         max,
+         Constant) : A2(PresentAndFuture,
+         presentValue,
+         Varying(nextFunction));
       }();
    });
    var growing = {_: {}
@@ -13601,11 +13607,11 @@ Elm.SeeThePeople.make = function (_elm) {
          nextPresent);
          var min = 0.0;
          return _U.cmp(nextPresent,
-         min) < 1 ? {ctor: "_Tuple2"
-                    ,_0: min
-                    ,_1: Constantly(min)} : {ctor: "_Tuple2"
-                                            ,_0: presentValue
-                                            ,_1: Varying(nextFunction)};
+         min) < 1 ? A2(PresentAndFuture,
+         min,
+         Constant) : A2(PresentAndFuture,
+         presentValue,
+         Varying(nextFunction));
       }();
    });
    var shrinking = {_: {}
@@ -13627,12 +13633,14 @@ Elm.SeeThePeople.make = function (_elm) {
          n);
       });
    };
-   var update = F2(function (a,m) {
+   var update = F2(function (a,
+   model) {
       return function () {
          switch (a.ctor)
          {case "SingleEvent":
             switch (a._0.ctor)
-              {case "NothingYet": return m;
+              {case "NothingYet":
+                 return model;
                  case "SoThisHappened":
                  return A2($List.member,
                    a._0._0.actor,
@@ -13640,15 +13648,15 @@ Elm.SeeThePeople.make = function (_elm) {
                    function (_) {
                       return _.actor;
                    },
-                   m.all)) ? _U.replace([["all"
-                                         ,A2(startAnimation,
-                                         a._0._0.actor,
-                                         m.all)]],
-                   m) : _U.replace([["all"
-                                    ,A2($List._op["::"],
-                                    newPerson(a._0._0.actor),
-                                    m.all)]],
-                   m);}
+                   model.all)) ? _U.replace([["all"
+                                             ,A2(startAnimation,
+                                             a._0._0.actor,
+                                             model.all)]],
+                   model) : _U.replace([["all"
+                                        ,A2($List._op["::"],
+                                        newPerson(a._0._0.actor),
+                                        model.all)]],
+                   model);}
               break;
             case "TimeKeepsTickingAway":
             return _U.replace([["all"
@@ -13658,10 +13666,10 @@ Elm.SeeThePeople.make = function (_elm) {
                                   a._0,
                                   A2(incrementBorder,a._0,m));
                                },
-                               m.all)]],
-              m);}
+                               model.all)]],
+              model);}
          _U.badCase($moduleName,
-         "between lines 79 and 85");
+         "between lines 82 and 88");
       }();
    });
    _elm.SeeThePeople.values = {_op: _op
@@ -13928,6 +13936,7 @@ Elm.Sydron.make = function (_elm) {
    _L = _N.List.make(_elm),
    $moduleName = "Sydron",
    $Basics = Elm.Basics.make(_elm),
+   $Dict = Elm.Dict.make(_elm),
    $EventTicker = Elm.EventTicker.make(_elm),
    $GithubEventSignal = Elm.GithubEventSignal.make(_elm),
    $Html = Elm.Html.make(_elm),
@@ -13938,6 +13947,7 @@ Elm.Sydron.make = function (_elm) {
    $Result = Elm.Result.make(_elm),
    $SeeThePeople = Elm.SeeThePeople.make(_elm),
    $Signal = Elm.Signal.make(_elm),
+   $String = Elm.String.make(_elm),
    $SydronAction = Elm.SydronAction.make(_elm),
    $Task = Elm.Task.make(_elm),
    $Time = Elm.Time.make(_elm);
@@ -13951,8 +13961,59 @@ Elm.Sydron.make = function (_elm) {
    A2($Signal.map,
    $SydronAction.SingleEvent,
    $GithubEventSignal.eventsOneByOne));
+   var makeTheseTwoThingsIntoATuple = function (inp) {
+      return function () {
+         switch (inp.ctor)
+         {case "::": switch (inp._1.ctor)
+              {case "::":
+                 switch (inp._1._1.ctor)
+                   {case "[]":
+                      return {ctor: "_Tuple2"
+                             ,_0: inp._0
+                             ,_1: inp._1._0};}
+                   break;}
+              break;}
+         _U.badCase($moduleName,
+         "between lines 147 and 148");
+      }();
+   };
+   var parseTheFucker = function (mappydoober) {
+      return A2($GithubEventSignal.GithubRepository,
+      A2($Maybe.withDefault,
+      "satellite-of-love",
+      A2($Dict.get,
+      "owner",
+      mappydoober)),
+      A2($Maybe.withDefault,
+      "Hungover",
+      A2($Dict.get,
+      "repo-name",
+      mappydoober)));
+   };
+   var initialLocation = Elm.Native.Port.make(_elm).inbound("initialLocation",
+   "String",
+   function (v) {
+      return typeof v === "string" || typeof v === "object" && v instanceof String ? v : _U.badPort("a string",
+      v);
+   });
+   var fuckingInputParameters = $String.isEmpty(initialLocation) ? $Dict.empty : function () {
+      var loseTheQuestionMark = A2($String.dropLeft,
+      1,
+      initialLocation);
+      var args = A2($String.split,
+      "&",
+      loseTheQuestionMark);
+      var listsOfTwo = A2($List.map,
+      $String.split("="),
+      args);
+      var pairs = A2($List.map,
+      makeTheseTwoThingsIntoATuple,
+      listsOfTwo);
+      var mappydoober = $Dict.fromList(pairs);
+      return mappydoober;
+   }();
    var githubEventsPort = Elm.Native.Task.make(_elm).performSignal("githubEventsPort",
-   $GithubEventSignal.fetchOnce);
+   $GithubEventSignal.fetchOnce(parseTheFucker(fuckingInputParameters)));
    var start = function (app) {
       return function () {
          var model = A3($Signal.foldp,
@@ -13985,7 +14046,7 @@ Elm.Sydron.make = function (_elm) {
             case "TimeKeepsTickingAway":
             return model;}
          _U.badCase($moduleName,
-         "between lines 77 and 80");
+         "between lines 92 and 95");
       }();
    });
    var updatePeople = F2(function (action,
@@ -14025,10 +14086,43 @@ Elm.Sydron.make = function (_elm) {
                 _L.fromArray([$Html$Attributes.href("http://github.com/jessitron/elm-sydron")]),
                 _L.fromArray([$Html.text("here")]))
                 ,$Html.text(".")]));
+   var inputParameter = function (key) {
+      return A2($Maybe.withDefault,
+      "",
+      A2($Dict.get,
+      key,
+      fuckingInputParameters));
+   };
+   var inputThinger = A2($Html.div,
+   _L.fromArray([]),
+   _L.fromArray([A2($Html.form,
+   _L.fromArray([]),
+   _L.fromArray([A2($Html.input,
+                _L.fromArray([$Html$Attributes.placeholder("owner")
+                             ,$Html$Attributes.name("owner")
+                             ,$Html$Attributes.value(inputParameter("owner"))]),
+                _L.fromArray([]))
+                ,A2($Html.input,
+                _L.fromArray([$Html$Attributes.placeholder("repository")
+                             ,$Html$Attributes.name("repo-name")
+                             ,$Html$Attributes.value(inputParameter("repo-name"))]),
+                _L.fromArray([]))
+                ,A2($Html.button,
+                _L.fromArray([$Html$Attributes.style(_L.fromArray([{ctor: "_Tuple2"
+                                                                   ,_0: "background"
+                                                                   ,_1: "url(\'img/elm-button.jpg\')"}
+                                                                  ,{ctor: "_Tuple2"
+                                                                   ,_0: "width"
+                                                                   ,_1: "137px"}
+                                                                  ,{ctor: "_Tuple2"
+                                                                   ,_0: "height"
+                                                                   ,_1: "100px"}]))]),
+                _L.fromArray([$Html.text("Go")]))]))]));
    var view = function (m) {
       return A2($Html.div,
       _L.fromArray([]),
       _L.fromArray([pageTitle
+                   ,inputThinger
                    ,$EventTicker.view(m.ticker)
                    ,$SeeThePeople.view(m.people)]));
    };
@@ -14040,14 +14134,21 @@ Elm.Sydron.make = function (_elm) {
    var init = A2(Model,
    $EventTicker.init,
    $SeeThePeople.init);
-   var main = start({_: {}
-                    ,model: init
-                    ,update: update
-                    ,view: view});
+   var main = function () {
+      var nothing = $GithubEventSignal.setRepo(A2($GithubEventSignal.GithubRepository,
+      initialLocation,
+      ""));
+      return start({_: {}
+                   ,model: init
+                   ,update: update
+                   ,view: view});
+   }();
    _elm.Sydron.values = {_op: _op
                         ,Model: Model
                         ,init: init
                         ,view: view
+                        ,inputThinger: inputThinger
+                        ,inputParameter: inputParameter
                         ,pageTitle: pageTitle
                         ,update: update
                         ,updatePeople: updatePeople
@@ -14055,6 +14156,9 @@ Elm.Sydron.make = function (_elm) {
                         ,App: App
                         ,start: start
                         ,main: main
+                        ,fuckingInputParameters: fuckingInputParameters
+                        ,parseTheFucker: parseTheFucker
+                        ,makeTheseTwoThingsIntoATuple: makeTheseTwoThingsIntoATuple
                         ,timePasses: timePasses
                         ,both: both};
    return _elm.Sydron.values;
