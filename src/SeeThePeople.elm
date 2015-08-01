@@ -10,17 +10,23 @@ import Time exposing (Time)
 type alias Percentage = Float
 
 
-type alias PresentAndFutureSize = 
+type alias PresentAndFuture a = 
     {
-      present: Percentage,
-      future: Iteratee Percentage
+      present: a,
+      future: Iteratee a
     }
-fullSize = PresentAndFutureSize 1.0 (Constantly 1.0) 
+
+type Iteratee a = 
+    Constant
+    | Varying (Time -> PresentAndFuture a)
+
+
+fullSize = PresentAndFuture 1.0 Constant 
 
 type alias EachPerson = {
   actor: EventActor,
-  size: PresentAndFutureSize,
-  border: PresentAndFutureSize
+  size: PresentAndFuture Percentage,
+  border: PresentAndFuture Percentage
 }
 newPerson actor = EachPerson actor growing shrinking
 
@@ -94,26 +100,22 @@ incrementSize t m =
 incrementBorder t m =
   { m | border <- iterateeate t m.border }
 
-iterateeate : Time -> PresentAndFutureSize -> PresentAndFutureSize
+iterateeate : Time -> PresentAndFuture a -> PresentAndFuture a
 iterateeate t paf =
   case paf.future of
-    Constantly _ -> paf
-    Varying f    ->
-      let
-        (nextPresent, nextFuture) = f t
-      in
-        PresentAndFutureSize nextPresent nextFuture
+    Constant  -> paf
+    Varying f -> f t
 
 entrySlowness = Time.second
 
-growing: PresentAndFutureSize
+growing: PresentAndFuture Percentage
 growing = 
   {
     present = 0.0,
     future = Varying (growFromOver entrySlowness 0.0)
   }
 
-growFromOver : Time -> Float -> Time -> (Float, Iteratee Float)
+growFromOver : Time -> Percentage -> Time -> PresentAndFuture Percentage
 growFromOver totalTime presentValue dt = 
   let
     max = 1.0
@@ -121,19 +123,19 @@ growFromOver totalTime presentValue dt =
     nextFunction = growFromOver totalTime nextPresent
   in
     if (nextPresent >= max)
-    then (max, Constantly max)
-    else (presentValue, Varying nextFunction)
+    then PresentAndFuture max Constant
+    else PresentAndFuture presentValue (Varying nextFunction)
 
 borderErodes = 3 * Time.second
 
-shrinking: PresentAndFutureSize
+shrinking: PresentAndFuture Percentage
 shrinking = 
   {
     present = 1.0,
     future = Varying (shrinkOver borderErodes 1.0)
   }
 
-shrinkOver : Time -> Float -> Time -> (Float, Iteratee Float)
+shrinkOver : Time -> Percentage -> Time -> PresentAndFuture Percentage
 shrinkOver totalTime presentValue dt = 
   let
     min = 0.0
@@ -141,13 +143,9 @@ shrinkOver totalTime presentValue dt =
     nextFunction = shrinkOver totalTime nextPresent
   in
     if (nextPresent <= min)
-    then (min, Constantly min)
-    else (presentValue, Varying nextFunction)
+    then PresentAndFuture min Constant
+    else PresentAndFuture presentValue (Varying nextFunction)
 
-
-type Iteratee a = 
-    Constantly a 
-    | Varying (Time -> (a, Iteratee a))
 
 
 
