@@ -1,4 +1,4 @@
-elm.js
+*.elm
 elm-stuff
 Gemfile
 Gemfile.lock
