@@ -9,9 +9,6 @@ import Time exposing (Time)
 
 type alias Percentage = Float
 
-type Iteratee a = 
-    Constantly a 
-    | Varying (Time -> (a, Iteratee a))
 
 type alias PresentAndFutureSize = 
     {
@@ -75,14 +72,14 @@ relative maxPx relativeSize =
 type alias Action = SydronAction
 
 update: Action -> Model -> Model
-update a m = 
+update a model = 
     case a of 
-        TimeKeepsTickingAway t -> { m | all <- List.map (\m -> incrementSize t (incrementBorder t m)) m.all }
-        SingleEvent NothingYet -> m
+        TimeKeepsTickingAway t -> { model | all <- List.map (\m -> incrementSize t (incrementBorder t m)) model.all }
+        SingleEvent NothingYet -> model
         SingleEvent (SoThisHappened e) -> 
-            if List.member e.actor (List.map .actor m.all)
-                then { m | all <- startAnimation e.actor m.all }
-                else { m | all <- (newPerson e.actor) :: m.all }
+            if List.member e.actor (List.map .actor model.all)
+                then { model | all <- startAnimation e.actor model.all }
+                else { model | all <- (newPerson e.actor) :: model.all }
 
 -- animate
 
@@ -146,6 +143,11 @@ shrinkOver totalTime presentValue dt =
     if (nextPresent <= min)
     then (min, Constantly min)
     else (presentValue, Varying nextFunction)
+
+
+type Iteratee a = 
+    Constantly a 
+    | Varying (Time -> (a, Iteratee a))
 
 
 
