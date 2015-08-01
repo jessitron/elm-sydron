@@ -18,9 +18,9 @@ type alias GithubRepository =
   }
 
 --- port
-fetchOnce: Signal (Task Http.Error ())
-fetchOnce = 
-  repository.signal
+fetchOnce: GithubRepository -> Signal (Task Http.Error ())
+fetchOnce ofWhat = 
+  Signal.constant ofWhat
     |> Signal.map fetchPageOfEvents
     |> Signal.map (\task -> task `andThen` Signal.send newEvents.address)
 

@@ -2,12 +2,15 @@ module Sydron where
 
 import SydronAction exposing (SydronAction(..))
 import GithubEvent exposing (Event)
-import GithubEventSignal exposing (SingleEvent(..))
+import GithubEventSignal exposing (SingleEvent(..), GithubRepository)
 import Html exposing (Html)
 import Html.Attributes as Attr
 import Html.Events as Event
 import Task
 import Http
+import String
+import Dict
+import Maybe
 import Signal exposing (Signal)
 import Time exposing (Time)
 -- for actual use
@@ -42,11 +45,13 @@ view m =
 inputThinger : Html
 inputThinger = 
   Html.div []
-    [
-       Html.input [ Attr.placeholder "owner", Attr.id "repo-owner"] []
-       Html.input [ Attr.placeholder "repository", Attr.id "repo-name"] []
-       Html.button [ Attr.style [("background", "url(img/elm-button.jpg")]] []
-    ]
+    [ Html.form [] [
+       Html.input [ Attr.placeholder "owner", Attr.name "owner", Attr.value (inputParameter "owner")] [],
+       Html.input [ Attr.placeholder "repository", Attr.name "repo-name", Attr.value (inputParameter "repo-name")] [],
+       Html.button [ Attr.style [("background", "url('img/elm-button.jpg')"), ("width", "137px"), ("height", "100px")]] [Html.text "Go"]
+    ]]
+
+inputParameter key = (Maybe.withDefault "" (Dict.get key fuckingInputParameters))
 
 -- todo: move this to index.html
 pageTitle = 
@@ -107,12 +112,45 @@ start app =
   in    
     Signal.map app.view model
 
-main = start { model = init, view = view, update = update}
+main =
+  let 
+    nothing = GithubEventSignal.setRepo (GithubEventSignal.GithubRepository initialLocation "")
+  in
+    start { model = init, view = view, update = update}
 
 --- WORLD
 
+port initialLocation: String
+
+fuckingInputParameters : Dict.Dict String String
+fuckingInputParameters = 
+  if (String.isEmpty initialLocation) then
+     Dict.empty
+  else
+    let 
+      loseTheQuestionMark = String.dropLeft 1 initialLocation
+      args = String.split "&" loseTheQuestionMark
+      listsOfTwo = List.map (String.split "=") args
+      pairs = List.map makeTheseTwoThingsIntoATuple listsOfTwo
+      mappydoober = Dict.fromList pairs
+    in 
+      mappydoober
+
+parseTheFucker: Dict.Dict String String -> GithubRepository
+parseTheFucker mappydoober =
+  GithubEventSignal.GithubRepository 
+        (Maybe.withDefault "satellite-of-love" (Dict.get "owner" mappydoober))
+        (Maybe.withDefault "Hungover" (Dict.get "repo-name" mappydoober))
+
+makeTheseTwoThingsIntoATuple: List String -> (String,String)
+makeTheseTwoThingsIntoATuple inp = 
+  case inp of
+    head :: (head2 :: []) -> (head, head2)
+
+
+
 port githubEventsPort : Signal (Task.Task Http.Error ())
-port githubEventsPort = GithubEventSignal.fetchOnce
+port githubEventsPort = GithubEventSignal.fetchOnce (parseTheFucker fuckingInputParameters)
 
 timePasses : Signal Time
 timePasses =  (Signal.map Time.inMilliseconds (Time.fps 30))
