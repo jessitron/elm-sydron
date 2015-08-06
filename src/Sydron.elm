@@ -3,12 +3,8 @@ module Sydron where
 import SydronAction exposing (SydronAction(..))
 import GithubEventSignal exposing (SingleEvent(..))
 import GithubRepository exposing (GithubRepository)
-import Html exposing (Html)
 import Task
 import Http
-import String
-import Dict
-import Maybe
 import Signal exposing (Signal)
 import Time exposing (Time)
 import ParseUrlParams

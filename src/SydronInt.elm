@@ -23,7 +23,6 @@ init repositoryFromUrlParams =
     EventTicker.init 
     SeeThePeople.init
 
-
 -- VIEW
 
 formclass = "pure-form" -- this is dependent on index.html including purecss
@@ -33,7 +32,7 @@ view m =
     Html.div
         [ ]
         [ Header.view m.repositoryOfInterest,
-          RepoInput.view formclass m.repositoryOfInterest,
+          RepoInput.view formclass,
           EventTicker.view m.ticker,
           SeeThePeople.view m.people
         ]
