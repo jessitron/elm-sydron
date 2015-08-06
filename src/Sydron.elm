@@ -13,66 +13,8 @@ import Dict
 import Maybe
 import Signal exposing (Signal)
 import Time exposing (Time)
--- for actual use
-import EventTicker
-import SeeThePeople
-import Header
+import SydronInt exposing (Model, view, update, init)
 
--- MODEL
-
-type alias Model =
-  {
-     ticker: EventTicker.Model,
-     people: SeeThePeople.Model
-  }
-init = 
-  Model 
-    EventTicker.init 
-    SeeThePeople.init
-
-
--- VIEW
-
-view : Model -> Html
-view m =
-    Html.div
-        [ ]
-        [ Header.view repositoryOfInterest,
-          inputThinger,
-          EventTicker.view m.ticker ,
-          SeeThePeople.view m.people
-        ]
-
-inputThinger : Html
-inputThinger = 
-  Html.div []
-    [ Html.form [ Attr.style [("class", "pure-form")]] [
-       Html.input [ Attr.placeholder "owner", Attr.name "owner", Attr.value (inputParameter "owner")] [],
-       Html.input [ Attr.placeholder "repository", Attr.name "repo-name", Attr.value (inputParameter "repo-name")] [],
-       Html.button [ Attr.style [("background", "url('img/elm-button.jpg')"), ("width", "137px"), ("height", "100px")]] [Html.text "Go"]
-    ]]
-
-inputParameter key = (Maybe.withDefault "" (Dict.get key inputParameters))
-
--- UPDATE
-
-update: SydronAction -> Model -> Model
-update action m =
-  m 
-  |> updatePeople action
-  |> updateTicker action
-
-updatePeople : SydronAction -> Model -> Model
-updatePeople action model =
-  { model | people <- SeeThePeople.update action model.people }
--- is there an "updateIn" for records?
-
-updateTicker : SydronAction -> Model -> Model
-updateTicker action model =
-  case action of
-    SingleEvent e -> 
-     { model | ticker <- EventTicker.update e model.ticker }
-    TimeKeepsTickingAway t -> model
 
 -- WIRING
 
@@ -93,7 +35,7 @@ start app =
     Signal.map app.view model
 
 main =
-  start { model = init, view = view, update = update}
+  start { model = (init repositoryOfInterest), view = view, update = update}
 
 --- WORLD
 
