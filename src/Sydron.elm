@@ -113,10 +113,7 @@ start app =
     Signal.map app.view model
 
 main =
-  let 
-    nothing = GithubEventSignal.setRepo (GithubEventSignal.GithubRepository initialLocation "" Nothing)
-  in
-    start { model = init, view = view, update = update}
+  start { model = init, view = view, update = update}
 
 --- WORLD
 
