@@ -1,4 +1,4 @@
-module SydronInt(Model, view, init, update) where
+module SydronInt(Model, view, init, update, start) where
 
 import GithubEventSignal exposing (GithubRepository)
 import SydronAction exposing (SydronAction(..))
@@ -58,3 +58,22 @@ updateTicker action model =
     SingleEvent e -> 
      { model | ticker <- EventTicker.update e model.ticker }
     TimeKeepsTickingAway t -> model
+
+
+--- WIRING
+
+type alias App modelt action =
+    { model : modelt
+    , view : modelt -> Html
+    , update : action -> modelt -> modelt
+    }
+start : Signal SydronAction -> App Model SydronAction -> Signal Html
+start signals app =
+  let
+    model =
+      Signal.foldp
+        (\a m -> app.update a m)
+        app.model
+        signals
+  in    
+    Signal.map app.view model

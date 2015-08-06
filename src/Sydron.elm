@@ -1,11 +1,8 @@
 module Sydron where
 
 import SydronAction exposing (SydronAction(..))
-import GithubEvent exposing (Event)
 import GithubEventSignal exposing (SingleEvent(..), GithubRepository)
 import Html exposing (Html)
-import Html.Attributes as Attr
-import Html.Events as Event
 import Task
 import Http
 import String
@@ -13,29 +10,14 @@ import Dict
 import Maybe
 import Signal exposing (Signal)
 import Time exposing (Time)
-import SydronInt exposing (Model, view, update, init)
+import SydronInt exposing (Model, view, update, init, start)
 
 
 -- WIRING
 
-type alias App modelt action =
-    { model : modelt
-    , view : modelt -> Html
-    , update : action -> modelt -> modelt
-    }
-start : App Model SydronAction -> Signal Html
-start app =
-  let
-    model =
-      Signal.foldp
-        (\a m -> app.update a m)
-        app.model
-        both
-  in    
-    Signal.map app.view model
 
 main =
-  start { model = (init repositoryOfInterest), view = view, update = update}
+  start both { model = (init repositoryOfInterest), view = view, update = update}
 
 --- WORLD
 
