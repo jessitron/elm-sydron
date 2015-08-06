@@ -14,7 +14,8 @@ setRepo r = Signal.send repository.address r
 type alias GithubRepository = 
   {
     owner: String,
-    repo : String
+    repo : String,
+    githubUrl : Maybe String
   }
 
 --- port
@@ -27,7 +28,7 @@ fetchOnce ofWhat =
 -- wiring
 
 repository: Signal.Mailbox GithubRepository
-repository = Signal.mailbox (GithubRepository "satellite-of-love" "Hungover")
+repository = Signal.mailbox (GithubRepository "satellite-of-love" "Hungover" Nothing)
 
 newEvents : Signal.Mailbox (List Event)
 newEvents = Signal.mailbox []
@@ -94,8 +95,10 @@ fetchPageOfEvents repo =
     in 
       Http.get GithubEvent.listDecoder (github repo pageNo)
 
+realGithubUrl = "https://api.github.com/repos"
+
 github : GithubRepository -> Int -> String
-github repo pageNo = Http.url ("https://api.github.com/repos/" ++ repo.owner ++ "/" ++ repo.repo ++ "/events") <|
+github repo pageNo = Http.url ( (Maybe.withDefault realGithubUrl repo.githubUrl) ++ "/" ++ repo.owner ++ "/" ++ repo.repo ++ "/events") <|
         [("pageNo", (toString pageNo))]
 
 

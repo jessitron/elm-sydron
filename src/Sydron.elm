@@ -45,13 +45,13 @@ view m =
 inputThinger : Html
 inputThinger = 
   Html.div []
-    [ Html.form [] [
+    [ Html.form [ Attr.style [("class", "pure-form")]] [
        Html.input [ Attr.placeholder "owner", Attr.name "owner", Attr.value (inputParameter "owner")] [],
        Html.input [ Attr.placeholder "repository", Attr.name "repo-name", Attr.value (inputParameter "repo-name")] [],
        Html.button [ Attr.style [("background", "url('img/elm-button.jpg')"), ("width", "137px"), ("height", "100px")]] [Html.text "Go"]
     ]]
 
-inputParameter key = (Maybe.withDefault "" (Dict.get key fuckingInputParameters))
+inputParameter key = (Maybe.withDefault "" (Dict.get key inputParameters))
 
 -- todo: move this to index.html
 pageTitle = 
@@ -114,7 +114,7 @@ start app =
 
 main =
   let 
-    nothing = GithubEventSignal.setRepo (GithubEventSignal.GithubRepository initialLocation "")
+    nothing = GithubEventSignal.setRepo (GithubEventSignal.GithubRepository initialLocation "" Nothing)
   in
     start { model = init, view = view, update = update}
 
@@ -122,8 +122,8 @@ main =
 
 port initialLocation: String
 
-fuckingInputParameters : Dict.Dict String String
-fuckingInputParameters = 
+inputParameters : Dict.Dict String String
+inputParameters = 
   if (String.isEmpty initialLocation) then
      Dict.empty
   else
@@ -136,11 +136,12 @@ fuckingInputParameters =
     in 
       mappydoober
 
-parseTheFucker: Dict.Dict String String -> GithubRepository
-parseTheFucker mappydoober =
+parse: Dict.Dict String String -> GithubRepository
+parse mappydoober =
   GithubEventSignal.GithubRepository 
         (Maybe.withDefault "satellite-of-love" (Dict.get "owner" mappydoober))
         (Maybe.withDefault "Hungover" (Dict.get "repo-name" mappydoober))
+        (Dict.get "github" mappydoober)
 
 makeTheseTwoThingsIntoATuple: List String -> (String,String)
 makeTheseTwoThingsIntoATuple inp = 
@@ -150,7 +151,7 @@ makeTheseTwoThingsIntoATuple inp =
 
 
 port githubEventsPort : Signal (Task.Task Http.Error ())
-port githubEventsPort = GithubEventSignal.fetchOnce (parseTheFucker fuckingInputParameters)
+port githubEventsPort = GithubEventSignal.fetchOnce (parse inputParameters)
 
 timePasses : Signal Time
 timePasses =  (Signal.map Time.inMilliseconds (Time.fps 30))
