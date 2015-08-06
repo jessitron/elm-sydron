@@ -1,6 +1,6 @@
 module SydronInt(start) where
 
-import GithubEventSignal exposing (GithubRepository)
+import GithubRepository exposing (GithubRepository)
 import SydronAction exposing (SydronAction(..))
 import Html exposing (Html)
 -- for actual use
