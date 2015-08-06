@@ -1,4 +1,4 @@
-module SydronInt(Model, view, init, update, start) where
+module SydronInt(start) where
 
 import GithubEventSignal exposing (GithubRepository)
 import SydronAction exposing (SydronAction(..))
@@ -62,18 +62,13 @@ updateTicker action model =
 
 --- WIRING
 
-type alias App modelt action =
-    { model : modelt
-    , view : modelt -> Html
-    , update : action -> modelt -> modelt
-    }
-start : Signal SydronAction -> App Model SydronAction -> Signal Html
-start signals app =
+start : Signal SydronAction -> GithubRepository -> Signal Html
+start signals repositoryOfInterest =
   let
     model =
       Signal.foldp
-        (\a m -> app.update a m)
-        app.model
+        (\a m -> update a m)
+        (init repositoryOfInterest)
         signals
   in    
-    Signal.map app.view model
+    Signal.map view model

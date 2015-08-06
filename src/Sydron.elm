@@ -10,15 +10,15 @@ import Dict
 import Maybe
 import Signal exposing (Signal)
 import Time exposing (Time)
-import SydronInt exposing (Model, view, update, init, start)
+import SydronInt exposing (start)
 
 
 -- WIRING
 
 
 main =
-  start both { model = (init repositoryOfInterest), view = view, update = update}
-
+  start both repositoryOfInterest
+  
 --- WORLD
 
 port initialLocation: String
