@@ -16,6 +16,7 @@ import Time exposing (Time)
 -- for actual use
 import EventTicker
 import SeeThePeople
+import Header
 
 -- MODEL
 
@@ -36,7 +37,7 @@ view : Model -> Html
 view m =
     Html.div
         [ ]
-        [ pageTitle,
+        [ Header.view repositoryOfInterest,
           inputThinger,
           EventTicker.view m.ticker ,
           SeeThePeople.view m.people
@@ -52,27 +53,6 @@ inputThinger =
     ]]
 
 inputParameter key = (Maybe.withDefault "" (Dict.get key inputParameters))
-
--- todo: move this to index.html
-pageTitle = 
-  Html.div 
-    [ Attr.style 
-      [ 
-        ("height", "100px"),
-        ("font-family", "Helvetica"),
-        ("margin-top", "20px"), 
-        ("margin-left", "20px")
-      ]
-    ]
-  [ 
-    Html.h1 [] 
-      [Html.text "Sydron"],
-    Html.text "A parade of Github Events for ",
-    Html.a [Attr.href "http://github.com/satellite-of-love/Hungover" ] [ Html.text "Rachel's baby game repo"],
-    Html.text ". This is me playing with Elm; source code ",
-    Html.a [Attr.href "http://github.com/jessitron/elm-sydron"] [ Html.text "here" ],
-    Html.text "."
-  ]
 
 -- UPDATE
 
@@ -145,10 +125,10 @@ makeTheseTwoThingsIntoATuple inp =
   case inp of
     head :: (head2 :: []) -> (head, head2)
 
-
+repositoryOfInterest = parse inputParameters
 
 port githubEventsPort : Signal (Task.Task Http.Error ())
-port githubEventsPort = GithubEventSignal.fetchOnce (parse inputParameters)
+port githubEventsPort = GithubEventSignal.fetchOnce repositoryOfInterest
 
 timePasses : Signal Time
 timePasses =  (Signal.map Time.inMilliseconds (Time.fps 30))
