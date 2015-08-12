@@ -7,9 +7,12 @@ view : String -> Html
 view formclass = 
   Html.div [ styles ]
     [ Html.form [ Attr.class formclass] [
-       Html.input [ Attr.placeholder "owner", Attr.name "owner"] [],
-       Html.input [ Attr.placeholder "repository", Attr.name "repo-name"] [],
-       Html.button [ Attr.style [("background", "url('img/elm-button.jpg')"), ("width", "137px"), ("height", "100px")]] [Html.text "Go"]
+      Html.fieldset [] [
+         Html.legend [] [Html.text "See events for a different repository:"],
+         Html.input [ Attr.placeholder "owner", Attr.name "owner"] [],
+         Html.input [ Attr.placeholder "repository", Attr.name "repo-name"] [],
+         Html.button [ Attr.class "pure-button pure-button-primary"] [Html.text "Go"]
+       ]
     ]]
 
 styles : Html.Attribute
