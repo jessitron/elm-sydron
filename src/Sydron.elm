@@ -2,7 +2,7 @@ module Sydron where
 
 import SydronAction exposing (SydronAction(..))
 import GithubEventSignal exposing (SingleEvent(..))
-import GithubRepository exposing (GithubRepository)
+import GithubRepository exposing (GithubRepository) 
 import Task
 import Http
 import Signal exposing (Signal)
