@@ -12,7 +12,7 @@ view formclass =
        Html.button [ Attr.style [("background", "url('img/elm-button.jpg')"), ("width", "137px"), ("height", "100px")]] [Html.text "Go"]
     ]]
 
-styles : Attr.Attribute
+styles : Html.Attribute
 styles = Attr.style [
           ("margin", "10px")
           ]
