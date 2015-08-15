@@ -75,9 +75,7 @@ relative maxPx relativeSize =
 
 ---- UPDATE
 
-type alias Action = SydronAction
-
-update: Action -> Model -> Model
+update: SydronAction -> Model -> Model
 update a model = 
     case a of 
         TimeKeepsTickingAway t -> { model | all <- List.map (\m -> incrementSize t (incrementBorder t m)) model.all }

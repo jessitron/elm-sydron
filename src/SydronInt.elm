@@ -18,12 +18,12 @@ type alias Model =
      ticker: EventTicker.Model,
      people: SeeThePeople.Model
   }
-init: GithubRepository -> (Model, Effects SydronAction)
+init: GithubRepository -> Model
 init repositoryFromUrlParams = 
-  (Model 
+  Model 
     repositoryFromUrlParams
     EventTicker.init 
-    SeeThePeople.init, Effects.none)
+    SeeThePeople.init
 
 -- VIEW
 
@@ -42,13 +42,11 @@ view _ m =
 
 -- UPDATE
 
-update: SydronAction -> Model -> (Model, Effects SydronAction)
+update: SydronAction -> Model -> Model
 update action m =
-  (
     m 
       |> updatePeople action
-      |> updateTicker action, 
-    Effects.none)
+      |> updateTicker action
 
 updatePeople : SydronAction -> Model -> Model
 updatePeople action model =
