@@ -1,8 +1,9 @@
-module SydronInt(start) where
+module SydronInt(update, init, view) where
 
 import GithubRepository exposing (GithubRepository)
 import SydronAction exposing (SydronAction(..))
 import Html exposing (Html)
+import Effects exposing (Effects)
 -- for actual use
 import EventTicker
 import SeeThePeople
@@ -17,18 +18,19 @@ type alias Model =
      ticker: EventTicker.Model,
      people: SeeThePeople.Model
   }
+init: GithubRepository -> (Model, Effects SydronAction)
 init repositoryFromUrlParams = 
-  Model 
+  (Model 
     repositoryFromUrlParams
     EventTicker.init 
-    SeeThePeople.init
+    SeeThePeople.init, Effects.none)
 
 -- VIEW
 
 formclass = "pure-form" -- this is dependent on index.html including purecss
 
-view : Model -> Html
-view m =
+view : Signal.Address SydronAction -> Model -> Html
+view _ m =
     Html.div
         [ ]
         [ Header.view m.repositoryOfInterest,
@@ -40,11 +42,13 @@ view m =
 
 -- UPDATE
 
-update: SydronAction -> Model -> Model
+update: SydronAction -> Model -> (Model, Effects SydronAction)
 update action m =
-  m 
-  |> updatePeople action
-  |> updateTicker action
+  (
+    m 
+      |> updatePeople action
+      |> updateTicker action, 
+    Effects.none)
 
 updatePeople : SydronAction -> Model -> Model
 updatePeople action model =
@@ -59,15 +63,7 @@ updateTicker action model =
     TimeKeepsTickingAway t -> model
 
 
---- WIRING
 
-start : Signal SydronAction -> GithubRepository -> Signal Html
-start signals repositoryOfInterest =
-  let
-    model =
-      Signal.foldp
-        (\a m -> update a m)
-        (init repositoryOfInterest)
-        signals
-  in    
-    Signal.map view model
+
+
+

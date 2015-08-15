@@ -8,14 +8,19 @@ import Http
 import Signal exposing (Signal)
 import Time exposing (Time)
 import ParseUrlParams
-import SydronInt exposing (start)
+import SydronInt exposing (init, view, update)
+import StartApp
+import Effects exposing (Never)
 
 
--- WIRING
+--- WIRING
+ 
+app = StartApp.start (StartApp.Config (init repositoryOfInterest) update view [both])
+main = app.html
 
-
-main =
-  start both repositoryOfInterest
+port tasks : Signal (Task.Task Never ())
+port tasks =
+    app.tasks
 
 --- WORLD
 
