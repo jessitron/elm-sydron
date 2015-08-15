@@ -1,4 +1,4 @@
-module GithubEventLayer(init, update, view, Action) where
+module GithubEventLayer(init, update, view, Action, wrapAction) where
 
 import SydronInt as Inner
 import SydronAction as InnerActions
@@ -8,25 +8,29 @@ import GithubRepository exposing (GithubRepository)
 import Effects exposing (Effects)
 import Task exposing (Task)
 import Http
+import Html exposing (Html)
 
 --- ACTIONS
 
-type InnerAction = InnerActions.SydronAction -- this isn't working anymore
-passSingleEvent: Event -> InnerActions.SydronAction
+type alias InnerAction = InnerActions.SydronAction
+passSingleEvent: Event -> InnerAction
 passSingleEvent e = InnerActions.ThisHappened e
 
-type Action = Passthrough InnerActions.SydronAction
+type Action = Passthrough InnerAction
              | Heartbeat
              | SomeNewEvents (List Event)
              | ErrorAlert Http.Error
 
+wrapAction: InnerAction -> Action
+wrapAction ia = Passthrough ia
+
 --- MODEL
 
-type InnerModel = Inner.Model -- wish I could do this
-type LastSeenHeader = String
+type alias InnerModel = Inner.Model 
+type alias LastSeenHeader = String
 type alias Model =    
     { 
-      inner: Inner.Model,
+      inner: InnerModel,
       repository: GithubRepository,
       seen: List Event, 
       unseen: List Event,
@@ -102,7 +106,8 @@ wrapErrors t =
   |> (\t -> Task.onError t errorToAction)
   |> Effects.task
 
-view = "hi"
+view: Signal.Address Action -> Model -> Html
+view addr m = Inner.view (Signal.forwardTo addr Passthrough ) m.inner
 
 
 

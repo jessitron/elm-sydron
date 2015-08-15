@@ -1,4 +1,4 @@
-module SydronInt(update, init, view) where
+module SydronInt(update, init, view, Model) where
 
 import GithubRepository exposing (GithubRepository)
 import SydronAction exposing (SydronAction(..))

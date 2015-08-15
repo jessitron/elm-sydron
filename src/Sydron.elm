@@ -1,6 +1,7 @@
 module Sydron where
 
 import SydronAction exposing (SydronAction(..))
+import GithubEventLayer
 import GithubEventSignal exposing (SingleEvent(..))
 import GithubRepository exposing (GithubRepository) 
 import Task
@@ -15,7 +16,11 @@ import Effects exposing (Never)
 
 --- WIRING
  
-app = StartApp.start (StartApp.Config (init repositoryOfInterest) update view [both])
+app = StartApp.start (StartApp.Config 
+                       (GithubEventLayer.init repositoryOfInterest)
+                       GithubEventLayer.update
+                       GithubEventLayer.view
+                       [both])
 main = app.html
 
 port tasks : Signal (Task.Task Never ())
@@ -37,8 +42,9 @@ port githubEventsPort = GithubEventSignal.fetchOnce repositoryOfInterest
 timePasses : Signal Time
 timePasses =  (Signal.map Time.inMilliseconds (Time.fps 30))
 
-both : Signal SydronAction
+both : Signal GithubEventLayer.Action
 both = Signal.merge 
-  (Signal.map TimeKeepsTickingAway timePasses)
-  (Signal.map SingleEvent GithubEventSignal.eventsOneByOne)
+         (Signal.map TimeKeepsTickingAway timePasses)
+         (Signal.map SingleEvent GithubEventSignal.eventsOneByOne)
+       |> Signal.map GithubEventLayer.wrapAction 
 
