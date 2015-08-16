@@ -2420,7 +2420,26 @@ Elm.GithubEventLayer.make = function (_elm) {
                    break;}
               return $Task.fail(_v0._1);}
          _U.badCase($moduleName,
-         "between lines 100 and 102");
+         "between lines 109 and 111");
+      }();
+   });
+   var filterKnown = F2(function (m,
+   incomingEvents) {
+      return function () {
+         var knownEvents = A2($Basics._op["++"],
+         m.seen,
+         m.unseen);
+         var isKnown = function (event) {
+            return A2($List.member,
+            event,
+            knownEvents);
+         };
+         var unknown = function (event) {
+            return $Basics.not(isKnown(event));
+         };
+         return A2($List.filter,
+         unknown,
+         incomingEvents);
       }();
    });
    var andDo = F2(function (m,
@@ -2476,7 +2495,7 @@ Elm.GithubEventLayer.make = function (_elm) {
               _v8._0,
               _v8._1);}
          _U.badCase($moduleName,
-         "on line 112, column 26 to 45");
+         "on line 121, column 26 to 45");
       }();
    };
    var wrapErrors = F2(function (mbh,
@@ -2585,7 +2604,9 @@ Elm.GithubEventLayer.make = function (_elm) {
                       _U.replace([["unseen"
                                   ,A2($Basics._op["++"],
                                   m.unseen,
-                                  $List.reverse(a._0))]
+                                  $List.reverse(A2(filterKnown,
+                                  m,
+                                  a._0)))]
                                  ,["lastHeader"
                                   ,$Maybe.Just(a._1)]],
                       m),
