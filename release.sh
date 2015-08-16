@@ -10,6 +10,7 @@ fi
 commit=$1
 
 git fetch
+git rm src/*
 git checkout $commit .
 elm-make src/*
 git add elm.js
