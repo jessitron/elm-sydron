@@ -5,7 +5,8 @@ import Date exposing (Date)
 import GithubRepository exposing (GithubRepository)
 import Http
 import Task exposing (Task)
-
+import GetWithHeaders
+import Dict
 
 -- JSON DECODERS
 
@@ -40,22 +41,27 @@ listDecoder =
 
 --- HOW TO FETCH
 
-type alias BookmarkHeader = 
-  {
-    eTag: String
-  }
+type alias BookmarkHeader = String
 
 fetchPageOfEvents : GithubRepository -> Maybe BookmarkHeader -> Task Http.Error ((List Event), BookmarkHeader)
-fetchPageOfEvents repo _ =
+fetchPageOfEvents repo bh =
     let
-      pageNo = 1
-      parameters = [("page", toString pageNo)]
+      headers = Maybe.map (\s -> [("ETag", s)]) bh |> Maybe.withDefault [] 
     in 
-      Http.get listDecoder (github repo pageNo)
-      |> Task.map (\e -> (e, { eTag = "" }))
+      GetWithHeaders.get listDecoder (github repo 1) headers
+      |> Task.map extractHeader
 
 realGithubUrl = "https://api.github.com/repos"
+
+extractHeader: (value, GetWithHeaders.Headers) -> (value, BookmarkHeader)
+extractHeader (v, hh) = 
+  let 
+    dict = (Dict.fromList hh)
+    getOrEmpty key = (Dict.get key) >> Maybe.withDefault ""
+  in
+    (v, getOrEmpty "ETag" dict)
 
 github : GithubRepository -> Int -> String
 github repo pageNo = Http.url ( (Maybe.withDefault realGithubUrl repo.githubUrl) ++ "/" ++ repo.owner ++ "/" ++ repo.repo ++ "/events") <|
         [("pageNo", (toString pageNo))]
+
