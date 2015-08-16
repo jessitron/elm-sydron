@@ -3627,7 +3627,13 @@ Elm.Header.make = function (_elm) {
                    ,A2($Html.a,
                    _L.fromArray([$Html$Attributes.href("http://github.com/jessitron/elm-sydron")]),
                    _L.fromArray([$Html.text("here")]))
-                   ,$Html.text(".")]));
+                   ,$Html.text(".")
+                   ,A2($Html.br,
+                   _L.fromArray([]),
+                   _L.fromArray([]))
+                   ,$Html.text("This retrieves one page of past events (within the past 90 days; github doesn\'t keep them forever)")
+                   ,$Html.text(" and displays them one at a time. Then it polls github for new events for the repository, displaying them as they come in.")
+                   ,$Html.text(" Events are displayed at most one per three seconds.")]));
    };
    _elm.Header.values = {_op: _op
                         ,view: view};
@@ -13547,7 +13553,7 @@ Elm.ParseUrlParams.make = function (_elm) {
             case "[]":
             return $Maybe.Nothing;}
          _U.badCase($moduleName,
-         "between lines 41 and 43");
+         "between lines 55 and 57");
       }();
    });
    var splitAtFirst = F2(function (c,
@@ -13568,7 +13574,42 @@ Elm.ParseUrlParams.make = function (_elm) {
                    ,_0: s
                    ,_1: ""};}
          _U.badCase($moduleName,
-         "between lines 35 and 37");
+         "between lines 49 and 51");
+      }();
+   });
+   var toMaybeInt = function (s) {
+      return function () {
+         var _v5 = $String.toInt(s);
+         switch (_v5.ctor)
+         {case "Err":
+            return $Maybe.Nothing;
+            case "Ok":
+            return $Maybe.Just(_v5._0);}
+         _U.badCase($moduleName,
+         "between lines 29 and 31");
+      }();
+   };
+   var integerParam = F3(function (key,
+   $default,
+   dict) {
+      return function () {
+         var _v8 = A2($Dict.get,
+         key,
+         dict);
+         switch (_v8.ctor)
+         {case "Just":
+            return function () {
+                 var _v10 = $String.toInt(_v8._0);
+                 switch (_v10.ctor)
+                 {case "Err": return $default;
+                    case "Ok": return _v10._0;}
+                 _U.badCase($moduleName,
+                 "between lines 23 and 25");
+              }();
+            case "Nothing":
+            return $default;}
+         _U.badCase($moduleName,
+         "between lines 20 and 25");
       }();
    });
    var UrlParams = function (a) {
@@ -13591,33 +13632,34 @@ Elm.ParseUrlParams.make = function (_elm) {
    };
    var parseSearchString = function (startsWithQuestionMarkThenParams) {
       return function () {
-         var _v5 = $String.uncons(startsWithQuestionMarkThenParams);
-         switch (_v5.ctor)
+         var _v13 = $String.uncons(startsWithQuestionMarkThenParams);
+         switch (_v13.ctor)
          {case "Just":
-            switch (_v5._0.ctor)
+            switch (_v13._0.ctor)
               {case "_Tuple2":
-                 switch (_v5._0._0 + "")
+                 switch (_v13._0._0 + "")
                    {case "?":
-                      return parseParams(_v5._0._1);}
+                      return parseParams(_v13._0._1);}
                    break;}
               break;
             case "Nothing":
             return Error("No URL params");}
          _U.badCase($moduleName,
-         "between lines 21 and 23");
+         "between lines 35 and 37");
       }();
    };
    var parse = function (s) {
       return function () {
-         var _v9 = parseSearchString(s);
-         switch (_v9.ctor)
+         var _v17 = parseSearchString(s);
+         switch (_v17.ctor)
          {case "UrlParams":
-            return _v9._0;}
+            return _v17._0;}
          return $Dict.empty;
       }();
    };
    _elm.ParseUrlParams.values = {_op: _op
-                                ,parse: parse};
+                                ,parse: parse
+                                ,integerParam: integerParam};
    return _elm.ParseUrlParams.values;
 };
 Elm.ReformattedFlickr = Elm.ReformattedFlickr || {};
@@ -14746,6 +14788,7 @@ Elm.Sydron.make = function (_elm) {
    _L = _N.List.make(_elm),
    $moduleName = "Sydron",
    $Basics = Elm.Basics.make(_elm),
+   $Dict = Elm.Dict.make(_elm),
    $Effects = Elm.Effects.make(_elm),
    $GithubEventLayer = Elm.GithubEventLayer.make(_elm),
    $GithubRepository = Elm.GithubRepository.make(_elm),
@@ -14758,12 +14801,6 @@ Elm.Sydron.make = function (_elm) {
    $SydronAction = Elm.SydronAction.make(_elm),
    $Task = Elm.Task.make(_elm),
    $Time = Elm.Time.make(_elm);
-   var perEventMS = 3000;
-   var showNewEvent = A2($Signal.map,
-   function (t) {
-      return $GithubEventLayer.Heartbeat;
-   },
-   $Time.every(perEventMS));
    var timePasses = A2($Signal.map,
    $Time.inMilliseconds,
    $Time.fps(30));
@@ -14776,10 +14813,20 @@ Elm.Sydron.make = function (_elm) {
       return typeof v === "string" || typeof v === "object" && v instanceof String ? v : _U.badPort("a string",
       v);
    });
+   var urlParameters = $ParseUrlParams.parse(initialLocation);
    var repositoryOfInterest = A3($GithubRepository.fromDict,
-   $ParseUrlParams.parse(initialLocation),
+   urlParameters,
    "satellite-of-love",
    "Hungover");
+   var perEventMS = $Time.second * $Basics.toFloat(A3($ParseUrlParams.integerParam,
+   "frequency",
+   3,
+   urlParameters));
+   var showNewEvent = A2($Signal.map,
+   function (t) {
+      return $GithubEventLayer.Heartbeat;
+   },
+   $Time.every(perEventMS));
    var app = $StartApp.start(A4($StartApp.Config,
    $GithubEventLayer.init(repositoryOfInterest),
    $GithubEventLayer.update,
@@ -14792,6 +14839,7 @@ Elm.Sydron.make = function (_elm) {
    _elm.Sydron.values = {_op: _op
                         ,app: app
                         ,main: main
+                        ,urlParameters: urlParameters
                         ,repositoryOfInterest: repositoryOfInterest
                         ,timePasses: timePasses
                         ,animationFrames: animationFrames
