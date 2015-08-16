@@ -1,4 +1,4 @@
-module GithubEventLayer(init, update, view, Action, wrapAction) where
+module GithubEventLayer(init, update, view, Action(..), wrapAction) where
 
 import SydronInt as Inner
 import SydronAction as InnerActions
@@ -15,7 +15,7 @@ import Html exposing (Html)
 
 type alias InnerAction = InnerActions.SydronAction
 passSingleEvent: Event -> InnerAction
-passSingleEvent e = InnerActions.ThisHappened e
+passSingleEvent e = InnerActions.SingleEvent e
 
 type Action = Passthrough InnerAction
              | Heartbeat
@@ -57,7 +57,8 @@ init repo =
 
 --- UPDATE
 
---innerUpdate: InnerAction -> Inner.Model -> Inner.Model
+type alias InnerUpdate = InnerAction -> Inner.Model -> Inner.Model
+innerUpdate: InnerUpdate
 innerUpdate = Inner.update 
 
 update: Action -> Model -> (Model, Effects Action)
@@ -68,17 +69,17 @@ updateModel a m =
   case a of 
     Passthrough ia -> { m | inner <- innerUpdate ia m.inner }
     SomeNewEvents moreEvents -> { m | unseen <- m.unseen ++ moreEvents }
-    Heartbeat -> moveOneOver m
+    Heartbeat -> 
+      case m.unseen of
+        [] -> m
+        head :: tail -> { m | inner <- innerUpdate (passSingleEvent head) m.inner,
+                              seen <- head :: m.seen, 
+                              unseen <- tail }
     ErrorAlert e -> { m | lastError <- Just e}
 
 andDoNothing: Model -> (Model, Effects Action)
 andDoNothing m = (m, Effects.none)
- 
-moveOneOver : Model -> Model
-moveOneOver before = 
-    case before.unseen of 
-        [] -> before
-        head :: tail -> { before | seen <- head :: before.seen, unseen <- tail }
+
 
 --- EFFECTS 
 

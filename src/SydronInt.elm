@@ -55,10 +55,8 @@ updatePeople action model =
 
 updateTicker : SydronAction -> Model -> Model
 updateTicker action model =
-  case action of
-    SingleEvent e -> 
-     { model | ticker <- EventTicker.update e model.ticker }
-    TimeKeepsTickingAway t -> model
+  { model | ticker <- EventTicker.update action model.ticker }
+
 
 
 

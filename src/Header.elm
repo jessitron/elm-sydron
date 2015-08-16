@@ -1,6 +1,6 @@
 module Header(view) where
 
-import GithubEventSignal exposing (GithubRepository)
+import GithubRepository exposing (GithubRepository)
 import Html
 import Html.Attributes as Attr
 

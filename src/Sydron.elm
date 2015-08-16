@@ -19,7 +19,7 @@ app = StartApp.start (StartApp.Config
                        (GithubEventLayer.init repositoryOfInterest)
                        GithubEventLayer.update
                        GithubEventLayer.view
-                       [animationFrames])
+                       [animationFrames, showNewEvent])
 main = app.html
 
 port tasks : Signal (Task.Task Never ())
@@ -41,4 +41,9 @@ timePasses =  (Signal.map Time.inMilliseconds (Time.fps 30))
 animationFrames : Signal GithubEventLayer.Action
 animationFrames = Signal.map TimeKeepsTickingAway timePasses
                   |> Signal.map GithubEventLayer.wrapAction 
+
+perEventMS = 3000
+
+showNewEvent: Signal GithubEventLayer.Action
+showNewEvent = Signal.map (\t -> GithubEventLayer.Heartbeat) (Time.every perEventMS) 
 
