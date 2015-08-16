@@ -88,16 +88,23 @@ andDo m maybe =
 --- EFFECTS 
 
 fetchEvents: GithubRepository -> Maybe BookmarkHeader -> Effects Action
-fetchEvents repo bh = wrapErrors (fetchPageOfEvents repo bh)
+fetchEvents repo bh = wrapErrors bh (fetchPageOfEvents repo bh)
 
 --- guts
 
 errorToAction: Http.Error -> Task Effects.Never Action
 errorToAction e = Task.succeed (ErrorAlert e)
 
-wrapErrors: Task Http.Error ((List Event), BookmarkHeader) -> Effects Action
-wrapErrors t =
+notModifiedIsOk: Maybe BookmarkHeader -> Http.Error -> Task Http.Error ((List Event), BookmarkHeader)
+notModifiedIsOk mbh e =
+  case (mbh, e) of
+    (Just bh, Http.BadResponse 304 _) -> Task.succeed ([], bh)
+    (_, e) -> Task.fail e
+
+wrapErrors: Maybe BookmarkHeader -> Task Http.Error ((List Event), BookmarkHeader) -> Effects Action
+wrapErrors mbh t =
   t 
+  |> (\t -> Task.onError t (notModifiedIsOk mbh))
   |> Task.map someNewEvents
   |> (\t -> Task.onError t errorToAction)
   |> Effects.task
