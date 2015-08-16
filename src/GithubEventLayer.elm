@@ -62,24 +62,24 @@ innerUpdate: InnerUpdate
 innerUpdate = Inner.update 
 
 update: Action -> Model -> (Model, Effects Action)
-update a = updateModel a >> andDoNothing
-
-updateModel: Action -> Model -> Model
-updateModel a m =
+update a m =
   case a of 
-    Passthrough ia -> { m | inner <- innerUpdate ia m.inner }
+    Passthrough ia -> { m | inner <- innerUpdate ia m.inner } `andDo` Nothing
     SomeNewEvents moreEvents bh -> { m | unseen <- m.unseen ++ (List.reverse moreEvents),
-                                         lastHeader <- Just bh }
+                                         lastHeader <- Just bh } `andDo` Nothing
     Heartbeat -> 
       case m.unseen of
-        [] -> m
+        [] -> m `andDo` Nothing
         head :: tail -> { m | inner <- innerUpdate (passSingleEvent head) m.inner,
                               seen <- head :: m.seen, 
-                              unseen <- tail }
-    ErrorAlert e -> { m | lastError <- Just e}
+                              unseen <- tail } `andDo` Nothing
+    ErrorAlert e -> { m | lastError <- Just e} `andDo` Nothing
 
-andDoNothing: Model -> (Model, Effects Action)
-andDoNothing m = (m, Effects.none)
+andDo: Model -> Maybe (Effects Action) -> (Model, Effects Action)
+andDo m maybe =
+  case maybe of
+    Nothing -> (m, Effects.none)
+    Just something -> (m, something)
 
 
 --- EFFECTS 
