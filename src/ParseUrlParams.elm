@@ -1,4 +1,4 @@
-module ParseUrlParams(parse) where
+module ParseUrlParams(parse, integerParam) where
 
 import String
 import Dict exposing (Dict)
@@ -15,6 +15,20 @@ parse s =
     UrlParams d -> d
     _ -> Dict.empty 
 
+integerParam: String -> Int -> Dict String String -> Int
+integerParam key default dict =
+  case (Dict.get key dict) of
+    Nothing -> default
+    Just str -> 
+      case (String.toInt str) of
+        Err _ -> default
+        Ok i -> i
+
+toMaybeInt: String -> Maybe Int 
+toMaybeInt s = 
+  case (String.toInt s) of 
+    Ok i -> Just i 
+    Err _ -> Nothing
 
 parseSearchString : String -> Model
 parseSearchString startsWithQuestionMarkThenParams =
