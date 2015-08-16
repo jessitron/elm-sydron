@@ -1,8 +1,7 @@
 module SeeThePeople(Model, init, view, update) where
 
 import SydronAction exposing (SydronAction(..))
-import GithubEvent exposing (EventActor)
-import GithubEventSignal exposing (SingleEvent(..))
+import GithubEvent exposing (EventActor, Event)
 import Html exposing (Html)
 import Html.Attributes as Attr
 import Time exposing (Time)
@@ -75,14 +74,11 @@ relative maxPx relativeSize =
 
 ---- UPDATE
 
-type alias Action = SydronAction
-
-update: Action -> Model -> Model
+update: SydronAction -> Model -> Model
 update a model = 
     case a of 
         TimeKeepsTickingAway t -> { model | all <- List.map (\m -> incrementSize t (incrementBorder t m)) model.all }
-        SingleEvent NothingYet -> model
-        SingleEvent (SoThisHappened e) -> 
+        SingleEvent e -> 
             if List.member e.actor (List.map .actor model.all)
                 then { model | all <- startAnimation e.actor model.all }
                 else { model | all <- (newPerson e.actor) :: model.all }

@@ -1878,6 +1878,189 @@ Elm.Dict.make = function (_elm) {
                       ,fromList: fromList};
    return _elm.Dict.values;
 };
+Elm.Effects = Elm.Effects || {};
+Elm.Effects.make = function (_elm) {
+   "use strict";
+   _elm.Effects = _elm.Effects || {};
+   if (_elm.Effects.values)
+   return _elm.Effects.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   $moduleName = "Effects",
+   $Basics = Elm.Basics.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Native$Effects = Elm.Native.Effects.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $Task = Elm.Task.make(_elm);
+   var ignore = function (task) {
+      return A2($Task.andThen,
+      task,
+      $Basics.always($Task.succeed({ctor: "_Tuple0"})));
+   };
+   var sequence_ = function (tasks) {
+      return ignore($Task.sequence(tasks));
+   };
+   var requestAnimationFrame = $Native$Effects.requestAnimationFrame;
+   var toTaskHelp = F3(function (address,
+   _v0,
+   effect) {
+      return function () {
+         switch (_v0.ctor)
+         {case "_Tuple2":
+            return function () {
+                 switch (effect.ctor)
+                 {case "Batch":
+                    return function () {
+                         var $ = $List.unzip(A2($List.map,
+                         A2(toTaskHelp,address,_v0),
+                         effect._0)),
+                         tasks = $._0,
+                         toMsgLists = $._1;
+                         return {ctor: "_Tuple2"
+                                ,_0: sequence_(tasks)
+                                ,_1: $List.concat(toMsgLists)};
+                      }();
+                    case "None": return _v0;
+                    case "Task":
+                    return function () {
+                         var reporter = A2($Task.andThen,
+                         effect._0,
+                         $Signal.send(address));
+                         return {ctor: "_Tuple2"
+                                ,_0: A2($Task.andThen,
+                                _v0._0,
+                                $Basics.always(ignore($Task.spawn(reporter))))
+                                ,_1: _v0._1};
+                      }();
+                    case "Tick":
+                    return {ctor: "_Tuple2"
+                           ,_0: _v0._0
+                           ,_1: A2($List._op["::"],
+                           effect._0,
+                           _v0._1)};}
+                 _U.badCase($moduleName,
+                 "between lines 184 and 209");
+              }();}
+         _U.badCase($moduleName,
+         "between lines 184 and 209");
+      }();
+   });
+   var toTask = F2(function (address,
+   effect) {
+      return function () {
+         var $ = A3(toTaskHelp,
+         address,
+         {ctor: "_Tuple2"
+         ,_0: $Task.succeed({ctor: "_Tuple0"})
+         ,_1: _L.fromArray([])},
+         effect),
+         combinedTask = $._0,
+         tickMessages = $._1;
+         var animationReport = function (time) {
+            return sequence_($List.map(function (f) {
+               return A2($Signal.send,
+               address,
+               f(time));
+            })(tickMessages));
+         };
+         var animationRequests = requestAnimationFrame(animationReport);
+         return A2($Task.andThen,
+         combinedTask,
+         $Basics.always(animationRequests));
+      }();
+   });
+   var Never = function (a) {
+      return {ctor: "Never",_0: a};
+   };
+   var Batch = function (a) {
+      return {ctor: "Batch",_0: a};
+   };
+   var batch = Batch;
+   var None = {ctor: "None"};
+   var none = None;
+   var Tick = function (a) {
+      return {ctor: "Tick",_0: a};
+   };
+   var tick = Tick;
+   var Task = function (a) {
+      return {ctor: "Task",_0: a};
+   };
+   var task = Task;
+   var map = F2(function (func,
+   effect) {
+      return function () {
+         switch (effect.ctor)
+         {case "Batch":
+            return Batch(A2($List.map,
+              map(func),
+              effect._0));
+            case "None": return None;
+            case "Task":
+            return Task(A2($Task.map,
+              func,
+              effect._0));
+            case "Tick":
+            return Tick(function ($) {
+                 return func(effect._0($));
+              });}
+         _U.badCase($moduleName,
+         "between lines 136 and 147");
+      }();
+   });
+   _elm.Effects.values = {_op: _op
+                         ,none: none
+                         ,task: task
+                         ,tick: tick
+                         ,map: map
+                         ,batch: batch
+                         ,toTask: toTask};
+   return _elm.Effects.values;
+};
+Elm.ErrorDisplay = Elm.ErrorDisplay || {};
+Elm.ErrorDisplay.make = function (_elm) {
+   "use strict";
+   _elm.ErrorDisplay = _elm.ErrorDisplay || {};
+   if (_elm.ErrorDisplay.values)
+   return _elm.ErrorDisplay.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   $moduleName = "ErrorDisplay",
+   $Basics = Elm.Basics.make(_elm),
+   $Html = Elm.Html.make(_elm),
+   $Html$Attributes = Elm.Html.Attributes.make(_elm),
+   $Http = Elm.Http.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var errorStyle = $Html$Attributes.style(_L.fromArray([{ctor: "_Tuple2"
+                                                         ,_0: "color"
+                                                         ,_1: "red"}]));
+   var view = function (me) {
+      return function () {
+         switch (me.ctor)
+         {case "Just":
+            return A2($Html.h2,
+              _L.fromArray([errorStyle]),
+              _L.fromArray([$Html.text($Basics.toString(me._0))]));
+            case "Nothing":
+            return A2($Html.div,
+              _L.fromArray([]),
+              _L.fromArray([]));}
+         _U.badCase($moduleName,
+         "between lines 9 and 11");
+      }();
+   };
+   _elm.ErrorDisplay.values = {_op: _op
+                              ,view: view};
+   return _elm.ErrorDisplay.values;
+};
 Elm.EventTicker = Elm.EventTicker || {};
 Elm.EventTicker.make = function (_elm) {
    "use strict";
@@ -1891,13 +2074,13 @@ Elm.EventTicker.make = function (_elm) {
    $moduleName = "EventTicker",
    $Basics = Elm.Basics.make(_elm),
    $GithubEvent = Elm.GithubEvent.make(_elm),
-   $GithubEventSignal = Elm.GithubEventSignal.make(_elm),
    $Html = Elm.Html.make(_elm),
    $Html$Attributes = Elm.Html.Attributes.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
+   $Signal = Elm.Signal.make(_elm),
+   $SydronAction = Elm.SydronAction.make(_elm);
    var itemStyle = $Html$Attributes.style(_L.fromArray([{ctor: "_Tuple2"
                                                         ,_0: "color"
                                                         ,_1: "#515151"}
@@ -1957,16 +2140,13 @@ Elm.EventTicker.make = function (_elm) {
    model) {
       return function () {
          switch (action.ctor)
-         {case "NothingYet":
-            return model;
-            case "SoThisHappened":
+         {case "SingleEvent":
             return Model(A2($List.take,
               10,
               A2($List._op["::"],
               action._0,
               model.recentEvents)));}
-         _U.badCase($moduleName,
-         "between lines 53 and 55");
+         return model;
       }();
    });
    _elm.EventTicker.values = {_op: _op
@@ -1975,6 +2155,107 @@ Elm.EventTicker.make = function (_elm) {
                              ,update: update
                              ,Model: Model};
    return _elm.EventTicker.values;
+};
+Elm.GetWithHeaders = Elm.GetWithHeaders || {};
+Elm.GetWithHeaders.make = function (_elm) {
+   "use strict";
+   _elm.GetWithHeaders = _elm.GetWithHeaders || {};
+   if (_elm.GetWithHeaders.values)
+   return _elm.GetWithHeaders.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   $moduleName = "GetWithHeaders",
+   $Basics = Elm.Basics.make(_elm),
+   $Dict = Elm.Dict.make(_elm),
+   $Http = Elm.Http.make(_elm),
+   $Json$Decode = Elm.Json.Decode.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $Task = Elm.Task.make(_elm);
+   var handleResponseWithHeaders = F2(function (handle,
+   response) {
+      return function () {
+         var _v0 = _U.cmp(200,
+         response.status) < 1 && _U.cmp(response.status,
+         300) < 0;
+         switch (_v0)
+         {case false:
+            return $Task.fail(A2($Http.BadResponse,
+              response.status,
+              response.statusText));
+            case true: return function () {
+                 var _v1 = response.value;
+                 switch (_v1.ctor)
+                 {case "Text":
+                    return $Task.map(function (v) {
+                         return {ctor: "_Tuple2"
+                                ,_0: v
+                                ,_1: $Dict.toList(response.headers)};
+                      })(handle(_v1._0));}
+                 return $Task.fail($Http.UnexpectedPayload("Response body is a blob, expecting a string."));
+              }();}
+         _U.badCase($moduleName,
+         "between lines 43 and 50");
+      }();
+   });
+   var promoteError = function (rawError) {
+      return function () {
+         switch (rawError.ctor)
+         {case "RawNetworkError":
+            return $Http.NetworkError;
+            case "RawTimeout":
+            return $Http.Timeout;}
+         _U.badCase($moduleName,
+         "between lines 37 and 39");
+      }();
+   };
+   var fromJsonWithHeaders = F2(function (decoder,
+   response) {
+      return function () {
+         var decode = function (str) {
+            return function () {
+               var _v4 = A2($Json$Decode.decodeString,
+               decoder,
+               str);
+               switch (_v4.ctor)
+               {case "Err":
+                  return $Task.fail($Http.UnexpectedPayload(_v4._0));
+                  case "Ok":
+                  return $Task.succeed(_v4._0);}
+               _U.badCase($moduleName,
+               "between lines 28 and 31");
+            }();
+         };
+         return A2($Task.andThen,
+         A2($Task.mapError,
+         promoteError,
+         response),
+         handleResponseWithHeaders(decode));
+      }();
+   });
+   var get = F3(function (decoder,
+   url,
+   headers) {
+      return function () {
+         var request = {_: {}
+                       ,body: $Http.empty
+                       ,headers: headers
+                       ,url: url
+                       ,verb: "GET"};
+         return A2(fromJsonWithHeaders,
+         decoder,
+         A2($Http.send,
+         $Http.defaultSettings,
+         request));
+      }();
+   });
+   _elm.GetWithHeaders.values = {_op: _op
+                                ,get: get};
+   return _elm.GetWithHeaders.values;
 };
 Elm.GithubEvent = Elm.GithubEvent || {};
 Elm.GithubEvent.make = function (_elm) {
@@ -1988,11 +2269,56 @@ Elm.GithubEvent.make = function (_elm) {
    _L = _N.List.make(_elm),
    $moduleName = "GithubEvent",
    $Basics = Elm.Basics.make(_elm),
+   $Dict = Elm.Dict.make(_elm),
+   $GetWithHeaders = Elm.GetWithHeaders.make(_elm),
+   $GithubRepository = Elm.GithubRepository.make(_elm),
+   $Http = Elm.Http.make(_elm),
    $Json$Decode = Elm.Json.Decode.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
+   $Signal = Elm.Signal.make(_elm),
+   $Task = Elm.Task.make(_elm);
+   var extractHeader = function (_v0) {
+      return function () {
+         switch (_v0.ctor)
+         {case "_Tuple2":
+            return function () {
+                 var getOrEmpty = function (key) {
+                    return function ($) {
+                       return $Maybe.withDefault("")($Dict.get(key)($));
+                    };
+                 };
+                 var dict = $Dict.fromList(_v0._1);
+                 return {ctor: "_Tuple2"
+                        ,_0: _v0._0
+                        ,_1: A2(getOrEmpty,
+                        "ETag",
+                        dict)};
+              }();}
+         _U.badCase($moduleName,
+         "between lines 58 and 62");
+      }();
+   };
+   var realGithubUrl = "https://api.github.com/repos";
+   var github = F2(function (repo,
+   pageNo) {
+      return $Http.url(A2($Basics._op["++"],
+      A2($Maybe.withDefault,
+      realGithubUrl,
+      repo.githubUrl),
+      A2($Basics._op["++"],
+      "/",
+      A2($Basics._op["++"],
+      repo.owner,
+      A2($Basics._op["++"],
+      "/",
+      A2($Basics._op["++"],
+      repo.repo,
+      "/events"))))))(_L.fromArray([{ctor: "_Tuple2"
+                                    ,_0: "pageNo"
+                                    ,_1: $Basics.toString(pageNo)}]));
+   });
    var Event = F3(function (a,
    b,
    c) {
@@ -2026,177 +2352,309 @@ Elm.GithubEvent.make = function (_elm) {
    A2($Json$Decode._op[":="],
    "created_at",
    $Json$Decode.string)));
+   var fetchPageOfEvents = F2(function (repo,
+   bh) {
+      return function () {
+         var headers = $Maybe.withDefault(_L.fromArray([]))(A2($Maybe.map,
+         function (s) {
+            return _L.fromArray([{ctor: "_Tuple2"
+                                 ,_0: "If-None-Match"
+                                 ,_1: s}]);
+         },
+         bh));
+         return $Task.map(extractHeader)(A3($GetWithHeaders.get,
+         listDecoder,
+         A2(github,repo,1),
+         headers));
+      }();
+   });
    _elm.GithubEvent.values = {_op: _op
-                             ,listDecoder: listDecoder
+                             ,fetchPageOfEvents: fetchPageOfEvents
                              ,EventActor: EventActor
                              ,Event: Event};
    return _elm.GithubEvent.values;
 };
-Elm.GithubEventSignal = Elm.GithubEventSignal || {};
-Elm.GithubEventSignal.make = function (_elm) {
+Elm.GithubEventLayer = Elm.GithubEventLayer || {};
+Elm.GithubEventLayer.make = function (_elm) {
    "use strict";
-   _elm.GithubEventSignal = _elm.GithubEventSignal || {};
-   if (_elm.GithubEventSignal.values)
-   return _elm.GithubEventSignal.values;
+   _elm.GithubEventLayer = _elm.GithubEventLayer || {};
+   if (_elm.GithubEventLayer.values)
+   return _elm.GithubEventLayer.values;
    var _op = {},
    _N = Elm.Native,
    _U = _N.Utils.make(_elm),
    _L = _N.List.make(_elm),
-   $moduleName = "GithubEventSignal",
+   $moduleName = "GithubEventLayer",
    $Basics = Elm.Basics.make(_elm),
+   $Effects = Elm.Effects.make(_elm),
+   $ErrorDisplay = Elm.ErrorDisplay.make(_elm),
    $GithubEvent = Elm.GithubEvent.make(_elm),
+   $GithubRepository = Elm.GithubRepository.make(_elm),
+   $Html = Elm.Html.make(_elm),
    $Http = Elm.Http.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm),
-   $Task = Elm.Task.make(_elm),
-   $Time = Elm.Time.make(_elm);
-   var github = F2(function (repo,
-   pageNo) {
-      return $Http.url(A2($Basics._op["++"],
-      "https://api.github.com/repos/",
-      A2($Basics._op["++"],
-      repo.owner,
-      A2($Basics._op["++"],
-      "/",
-      A2($Basics._op["++"],
-      repo.repo,
-      "/events")))))(_L.fromArray([{ctor: "_Tuple2"
-                                   ,_0: "pageNo"
-                                   ,_1: $Basics.toString(pageNo)}]));
-   });
-   var fetchPageOfEvents = function (repo) {
+   $SydronAction = Elm.SydronAction.make(_elm),
+   $SydronInt = Elm.SydronInt.make(_elm),
+   $Task = Elm.Task.make(_elm);
+   var notModifiedIsOk = F2(function (mbh,
+   e) {
       return function () {
-         var pageNo = 1;
-         var parameters = _L.fromArray([{ctor: "_Tuple2"
-                                        ,_0: "page"
-                                        ,_1: $Basics.toString(pageNo)}]);
-         return A2($Http.get,
-         $GithubEvent.listDecoder,
-         A2(github,repo,pageNo));
-      }();
-   };
-   var queueEvents = F2(function (before,
-   moreEvents) {
-      return {_: {}
-             ,queuedEvents: A2($Basics._op["++"],
-             before.queuedEvents,
-             moreEvents)
-             ,seenEvents: before.seenEvents};
-   });
-   var moveOneOver = function (before) {
-      return function () {
-         var _v0 = before.queuedEvents;
+         var _v0 = {ctor: "_Tuple2"
+                   ,_0: mbh
+                   ,_1: e};
          switch (_v0.ctor)
-         {case "::": return {_: {}
-                            ,queuedEvents: _v0._1
-                            ,seenEvents: A2($List._op["::"],
-                            _v0._0,
-                            before.seenEvents)};
-            case "[]": return before;}
+         {case "_Tuple2":
+            switch (_v0._0.ctor)
+              {case "Just":
+                 switch (_v0._1.ctor)
+                   {case "BadResponse":
+                      switch (_v0._1._0)
+                        {case 304:
+                           return $Task.succeed({ctor: "_Tuple2"
+                                                ,_0: _L.fromArray([])
+                                                ,_1: _v0._0._0});}
+                        break;}
+                   break;}
+              return $Task.fail(_v0._1);}
          _U.badCase($moduleName,
-         "between lines 78 and 80");
+         "between lines 100 and 102");
       }();
-   };
-   var SomeEventModel = F2(function (a,
-   b) {
-      return {_: {}
-             ,seen: a
-             ,unseen: b};
    });
-   var singleEvents = function (splitEvents) {
+   var andDo = F2(function (m,
+   maybe) {
       return function () {
-         var _v3 = splitEvents.queuedEvents;
-         switch (_v3.ctor)
-         {case "::":
-            return $Maybe.Just(_v3._0);
-            case "[]":
-            return $Maybe.Nothing;}
+         switch (maybe.ctor)
+         {case "Just":
+            return {ctor: "_Tuple2"
+                   ,_0: m
+                   ,_1: maybe._0};
+            case "Nothing":
+            return {ctor: "_Tuple2"
+                   ,_0: m
+                   ,_1: $Effects.none};}
          _U.badCase($moduleName,
-         "between lines 67 and 69");
-      }();
-   };
-   var splitEvents = F2(function (action,
-   before) {
-      return function () {
-         switch (action.ctor)
-         {case "Heartbeat":
-            return moveOneOver(before);
-            case "SomeNewEvents":
-            return A2(queueEvents,
-              before,
-              action._0);}
-         _U.badCase($moduleName,
-         "between lines 61 and 63");
+         "between lines 83 and 85");
       }();
    });
-   var SplitEvents = F2(function (a,
-   b) {
+   var innerUpdate = $SydronInt.update;
+   var innerInit = $SydronInt.init;
+   var Model = F6(function (a,
+   b,
+   c,
+   d,
+   e,
+   f) {
       return {_: {}
-             ,queuedEvents: b
-             ,seenEvents: a};
+             ,error: e
+             ,inner: a
+             ,lastHeader: f
+             ,repository: b
+             ,seen: c
+             ,unseen: d};
    });
-   var SomeNewEvents = function (a) {
-      return {ctor: "SomeNewEvents"
+   var ErrorAlert = function (a) {
+      return {ctor: "ErrorAlert"
              ,_0: a};
    };
-   var Heartbeat = {ctor: "Heartbeat"};
-   var everyFewSeconds = A2($Signal.map,
-   function (_v8) {
-      return function () {
-         return Heartbeat;
-      }();
-   },
-   $Time.every(3000));
-   var newEvents = $Signal.mailbox(_L.fromArray([]));
-   var fetchOnce = function (ofWhat) {
-      return $Signal.map(function (task) {
-         return A2($Task.andThen,
-         task,
-         $Signal.send(newEvents.address));
-      })($Signal.map(fetchPageOfEvents)($Signal.constant(ofWhat)));
+   var errorToAction = function (e) {
+      return $Task.succeed(ErrorAlert(e));
    };
-   var GithubRepository = F2(function (a,
+   var SomeNewEvents = F2(function (a,
    b) {
+      return {ctor: "SomeNewEvents"
+             ,_0: a
+             ,_1: b};
+   });
+   var someNewEvents = function (_v8) {
+      return function () {
+         switch (_v8.ctor)
+         {case "_Tuple2":
+            return A2(SomeNewEvents,
+              _v8._0,
+              _v8._1);}
+         _U.badCase($moduleName,
+         "on line 112, column 26 to 45");
+      }();
+   };
+   var wrapErrors = F2(function (mbh,
+   t) {
+      return $Effects.task(function (t) {
+         return A2($Task.onError,
+         t,
+         errorToAction);
+      }($Task.map(someNewEvents)(function (t) {
+         return A2($Task.onError,
+         t,
+         notModifiedIsOk(mbh));
+      }(t))));
+   });
+   var fetchEvents = F2(function (repo,
+   bh) {
+      return A2(wrapErrors,
+      bh,
+      A2($GithubEvent.fetchPageOfEvents,
+      repo,
+      bh));
+   });
+   var init = function (repo) {
+      return {ctor: "_Tuple2"
+             ,_0: {_: {}
+                  ,error: $Maybe.Nothing
+                  ,inner: innerInit(repo)
+                  ,lastHeader: $Maybe.Nothing
+                  ,repository: repo
+                  ,seen: _L.fromArray([])
+                  ,unseen: _L.fromArray([])}
+             ,_1: A2(fetchEvents,
+             repo,
+             $Maybe.Nothing)};
+   };
+   var Heartbeat = {ctor: "Heartbeat"};
+   var Passthrough = function (a) {
+      return {ctor: "Passthrough"
+             ,_0: a};
+   };
+   var wrapAction = function (ia) {
+      return Passthrough(ia);
+   };
+   var view = F2(function (addr,
+   m) {
+      return A2($Html.div,
+      _L.fromArray([]),
+      _L.fromArray([A2($SydronInt.view,
+                   A2($Signal.forwardTo,
+                   addr,
+                   Passthrough),
+                   m.inner)
+                   ,$ErrorDisplay.view(m.error)]));
+   });
+   var passSingleEvent = function (e) {
+      return $SydronAction.SingleEvent(e);
+   };
+   var update = F2(function (a,m) {
+      return function () {
+         var _v12 = m.error;
+         switch (_v12.ctor)
+         {case "Just": return A2(andDo,
+              m,
+              $Maybe.Nothing);
+            case "Nothing":
+            return function () {
+                 switch (a.ctor)
+                 {case "ErrorAlert":
+                    return A2(andDo,
+                      _U.replace([["error"
+                                  ,$Maybe.Just(a._0)]],
+                      m),
+                      $Maybe.Nothing);
+                    case "Heartbeat":
+                    return function () {
+                         var _v19 = m.unseen;
+                         switch (_v19.ctor)
+                         {case "::": return A2(andDo,
+                              _U.replace([["inner"
+                                          ,A2(innerUpdate,
+                                          passSingleEvent(_v19._0),
+                                          m.inner)]
+                                         ,["seen"
+                                          ,A2($List._op["::"],
+                                          _v19._0,
+                                          m.seen)]
+                                         ,["unseen",_v19._1]],
+                              m),
+                              $Maybe.Nothing);
+                            case "[]": return A2(andDo,
+                              m,
+                              $Maybe.Just(A2(fetchEvents,
+                              m.repository,
+                              m.lastHeader)));}
+                         _U.badCase($moduleName,
+                         "between lines 74 and 79");
+                      }();
+                    case "Passthrough":
+                    return A2(andDo,
+                      _U.replace([["inner"
+                                  ,A2(innerUpdate,a._0,m.inner)]],
+                      m),
+                      $Maybe.Nothing);
+                    case "SomeNewEvents":
+                    return A2(andDo,
+                      _U.replace([["unseen"
+                                  ,A2($Basics._op["++"],
+                                  m.unseen,
+                                  $List.reverse(a._0))]
+                                 ,["lastHeader"
+                                  ,$Maybe.Just(a._1)]],
+                      m),
+                      $Maybe.Nothing);}
+                 _U.badCase($moduleName,
+                 "between lines 69 and 79");
+              }();}
+         _U.badCase($moduleName,
+         "between lines 66 and 79");
+      }();
+   });
+   _elm.GithubEventLayer.values = {_op: _op
+                                  ,init: init
+                                  ,update: update
+                                  ,view: view
+                                  ,wrapAction: wrapAction
+                                  ,Passthrough: Passthrough
+                                  ,Heartbeat: Heartbeat
+                                  ,SomeNewEvents: SomeNewEvents
+                                  ,ErrorAlert: ErrorAlert};
+   return _elm.GithubEventLayer.values;
+};
+Elm.GithubRepository = Elm.GithubRepository || {};
+Elm.GithubRepository.make = function (_elm) {
+   "use strict";
+   _elm.GithubRepository = _elm.GithubRepository || {};
+   if (_elm.GithubRepository.values)
+   return _elm.GithubRepository.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   $moduleName = "GithubRepository",
+   $Basics = Elm.Basics.make(_elm),
+   $Dict = Elm.Dict.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var GithubRepository = F3(function (a,
+   b,
+   c) {
       return {_: {}
+             ,githubUrl: c
              ,owner: a
              ,repo: b};
    });
-   var repository = $Signal.mailbox(A2(GithubRepository,
-   "satellite-of-love",
-   "Hungover"));
-   var setRepo = function (r) {
-      return A2($Signal.send,
-      repository.address,
-      r);
-   };
-   var SoThisHappened = function (a) {
-      return {ctor: "SoThisHappened"
-             ,_0: a};
-   };
-   var NothingYet = {ctor: "NothingYet"};
-   var eventsOneByOne = A2($Signal.filterMap,
-   function (a) {
-      return A2($Maybe.map,
-      SoThisHappened,
-      a);
-   },
-   NothingYet)($Signal.map(singleEvents)(A2($Signal.foldp,
-   splitEvents,
-   A2(SplitEvents,
-   _L.fromArray([]),
-   _L.fromArray([])))($Signal.merge(everyFewSeconds)($Signal.map(function (e) {
-      return SomeNewEvents($List.reverse(e));
-   })(newEvents.signal)))));
-   _elm.GithubEventSignal.values = {_op: _op
-                                   ,eventsOneByOne: eventsOneByOne
-                                   ,fetchOnce: fetchOnce
-                                   ,setRepo: setRepo
-                                   ,GithubRepository: GithubRepository
-                                   ,NothingYet: NothingYet
-                                   ,SoThisHappened: SoThisHappened};
-   return _elm.GithubEventSignal.values;
+   var fromDict = F3(function (mappydoober,
+   defaultOwner,
+   defaultRepo) {
+      return A3(GithubRepository,
+      A2($Maybe.withDefault,
+      defaultOwner,
+      A2($Dict.get,
+      "owner",
+      mappydoober)),
+      A2($Maybe.withDefault,
+      defaultRepo,
+      A2($Dict.get,
+      "repo-name",
+      mappydoober)),
+      A2($Dict.get,
+      "github",
+      mappydoober));
+   });
+   _elm.GithubRepository.values = {_op: _op
+                                  ,GithubRepository: GithubRepository
+                                  ,fromDict: fromDict};
+   return _elm.GithubRepository.values;
 };
 Elm.Graphics = Elm.Graphics || {};
 Elm.Graphics.Collage = Elm.Graphics.Collage || {};
@@ -3085,6 +3543,74 @@ Elm.Graphics.Element.make = function (_elm) {
                                   ,Element: Element
                                   ,Position: Position};
    return _elm.Graphics.Element.values;
+};
+Elm.Header = Elm.Header || {};
+Elm.Header.make = function (_elm) {
+   "use strict";
+   _elm.Header = _elm.Header || {};
+   if (_elm.Header.values)
+   return _elm.Header.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   $moduleName = "Header",
+   $Basics = Elm.Basics.make(_elm),
+   $GithubRepository = Elm.GithubRepository.make(_elm),
+   $Html = Elm.Html.make(_elm),
+   $Html$Attributes = Elm.Html.Attributes.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var repositoryDescription = function (repo) {
+      return A2($Basics._op["++"],
+      repo.owner,
+      A2($Basics._op["++"],
+      "\'s ",
+      A2($Basics._op["++"],
+      repo.repo,
+      " repository")));
+   };
+   var repositoryLink = function (repo) {
+      return A2($Basics._op["++"],
+      "http://github.com/",
+      A2($Basics._op["++"],
+      repo.owner,
+      A2($Basics._op["++"],
+      "/",
+      repo.repo)));
+   };
+   var view = function (model) {
+      return A2($Html.div,
+      _L.fromArray([$Html$Attributes.style(_L.fromArray([{ctor: "_Tuple2"
+                                                         ,_0: "height"
+                                                         ,_1: "100px"}
+                                                        ,{ctor: "_Tuple2"
+                                                         ,_0: "font-family"
+                                                         ,_1: "Helvetica"}
+                                                        ,{ctor: "_Tuple2"
+                                                         ,_0: "margin-top"
+                                                         ,_1: "20px"}
+                                                        ,{ctor: "_Tuple2"
+                                                         ,_0: "margin-left"
+                                                         ,_1: "20px"}]))]),
+      _L.fromArray([A2($Html.h1,
+                   _L.fromArray([]),
+                   _L.fromArray([$Html.text("Sydron")]))
+                   ,$Html.text("A parade of Github Events for ")
+                   ,A2($Html.a,
+                   _L.fromArray([$Html$Attributes.href(repositoryLink(model))]),
+                   _L.fromArray([$Html.text(repositoryDescription(model))]))
+                   ,$Html.text(". This is me playing with Elm; source code ")
+                   ,A2($Html.a,
+                   _L.fromArray([$Html$Attributes.href("http://github.com/jessitron/elm-sydron")]),
+                   _L.fromArray([$Html.text("here")]))
+                   ,$Html.text(".")]));
+   };
+   _elm.Header.values = {_op: _op
+                        ,view: view};
+   return _elm.Header.values;
 };
 Elm.Html = Elm.Html || {};
 Elm.Html.make = function (_elm) {
@@ -6206,6 +6732,36 @@ Elm.Native.Debug.make = function(localRuntime) {
 		watch: F2(watch),
 		watchSummary:F3(watchSummary),
 	};
+};
+
+Elm.Native.Effects = {};
+Elm.Native.Effects.make = function(localRuntime) {
+
+	localRuntime.Native = localRuntime.Native || {};
+	localRuntime.Native.Effects = localRuntime.Native.Effects || {};
+	if (localRuntime.Native.Effects.values)
+	{
+		return localRuntime.Native.Effects.values;
+	}
+
+	var Task = Elm.Native.Task.make(localRuntime);
+	var Utils = Elm.Native.Utils.make(localRuntime);
+
+
+	function raf(timeToTask)
+	{
+		return Task.asyncFunction(function(callback) {
+			requestAnimationFrame(function(time) {
+				Task.perform(timeToTask(time));
+			});
+			callback(Task.succeed(Utils.Tuple0));
+		});
+	}
+
+	return localRuntime.Native.Effects.values = {
+		requestAnimationFrame: raf
+	};
+
 };
 
 
@@ -12940,6 +13496,109 @@ Elm.Native.Window.make = function(localRuntime) {
 	};
 };
 
+Elm.ParseUrlParams = Elm.ParseUrlParams || {};
+Elm.ParseUrlParams.make = function (_elm) {
+   "use strict";
+   _elm.ParseUrlParams = _elm.ParseUrlParams || {};
+   if (_elm.ParseUrlParams.values)
+   return _elm.ParseUrlParams.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   $moduleName = "ParseUrlParams",
+   $Basics = Elm.Basics.make(_elm),
+   $Dict = Elm.Dict.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $String = Elm.String.make(_elm);
+   var firstOccurrence = F2(function (c,
+   s) {
+      return function () {
+         var _v0 = A2($String.indexes,
+         $String.fromChar(c),
+         s);
+         switch (_v0.ctor)
+         {case "::":
+            return $Maybe.Just(_v0._0);
+            case "[]":
+            return $Maybe.Nothing;}
+         _U.badCase($moduleName,
+         "between lines 41 and 43");
+      }();
+   });
+   var splitAtFirst = F2(function (c,
+   s) {
+      return function () {
+         var _v3 = A2(firstOccurrence,
+         c,
+         s);
+         switch (_v3.ctor)
+         {case "Just":
+            return {ctor: "_Tuple2"
+                   ,_0: A2($String.left,_v3._0,s)
+                   ,_1: A2($String.dropLeft,
+                   _v3._0 + 1,
+                   s)};
+            case "Nothing":
+            return {ctor: "_Tuple2"
+                   ,_0: s
+                   ,_1: ""};}
+         _U.badCase($moduleName,
+         "between lines 35 and 37");
+      }();
+   });
+   var UrlParams = function (a) {
+      return {ctor: "UrlParams"
+             ,_0: a};
+   };
+   var parseParams = function (stringWithAmpersands) {
+      return function () {
+         var eachParam = A2($String.split,
+         "&",
+         stringWithAmpersands);
+         var eachPair = A2($List.map,
+         splitAtFirst(_U.chr("=")),
+         eachParam);
+         return UrlParams($Dict.fromList(eachPair));
+      }();
+   };
+   var Error = function (a) {
+      return {ctor: "Error",_0: a};
+   };
+   var parseSearchString = function (startsWithQuestionMarkThenParams) {
+      return function () {
+         var _v5 = $String.uncons(startsWithQuestionMarkThenParams);
+         switch (_v5.ctor)
+         {case "Just":
+            switch (_v5._0.ctor)
+              {case "_Tuple2":
+                 switch (_v5._0._0 + "")
+                   {case "?":
+                      return parseParams(_v5._0._1);}
+                   break;}
+              break;
+            case "Nothing":
+            return Error("No URL params");}
+         _U.badCase($moduleName,
+         "between lines 21 and 23");
+      }();
+   };
+   var parse = function (s) {
+      return function () {
+         var _v9 = parseSearchString(s);
+         switch (_v9.ctor)
+         {case "UrlParams":
+            return _v9._0;}
+         return $Dict.empty;
+      }();
+   };
+   _elm.ParseUrlParams.values = {_op: _op
+                                ,parse: parse};
+   return _elm.ParseUrlParams.values;
+};
 Elm.ReformattedFlickr = Elm.ReformattedFlickr || {};
 Elm.ReformattedFlickr.make = function (_elm) {
    "use strict";
@@ -13194,6 +13853,53 @@ Elm.ReformattedFlickr.make = function (_elm) {
                                    ,selectPhoto: selectPhoto
                                    ,pickSize: pickSize};
    return _elm.ReformattedFlickr.values;
+};
+Elm.RepoInput = Elm.RepoInput || {};
+Elm.RepoInput.make = function (_elm) {
+   "use strict";
+   _elm.RepoInput = _elm.RepoInput || {};
+   if (_elm.RepoInput.values)
+   return _elm.RepoInput.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   $moduleName = "RepoInput",
+   $Basics = Elm.Basics.make(_elm),
+   $Html = Elm.Html.make(_elm),
+   $Html$Attributes = Elm.Html.Attributes.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var styles = $Html$Attributes.style(_L.fromArray([{ctor: "_Tuple2"
+                                                     ,_0: "margin"
+                                                     ,_1: "10px"}]));
+   var view = function (formclass) {
+      return A2($Html.div,
+      _L.fromArray([styles]),
+      _L.fromArray([A2($Html.form,
+      _L.fromArray([$Html$Attributes.$class(formclass)]),
+      _L.fromArray([A2($Html.fieldset,
+      _L.fromArray([]),
+      _L.fromArray([A2($Html.legend,
+                   _L.fromArray([]),
+                   _L.fromArray([$Html.text("See events for a different repository:")]))
+                   ,A2($Html.input,
+                   _L.fromArray([$Html$Attributes.placeholder("owner")
+                                ,$Html$Attributes.name("owner")]),
+                   _L.fromArray([]))
+                   ,A2($Html.input,
+                   _L.fromArray([$Html$Attributes.placeholder("repository")
+                                ,$Html$Attributes.name("repo-name")]),
+                   _L.fromArray([]))
+                   ,A2($Html.button,
+                   _L.fromArray([$Html$Attributes.$class("pure-button pure-button-primary")]),
+                   _L.fromArray([$Html.text("Go")]))]))]))]));
+   };
+   _elm.RepoInput.values = {_op: _op
+                           ,view: view};
+   return _elm.RepoInput.values;
 };
 Elm.Result = Elm.Result || {};
 Elm.Result.make = function (_elm) {
@@ -13452,7 +14158,6 @@ Elm.SeeThePeople.make = function (_elm) {
    $moduleName = "SeeThePeople",
    $Basics = Elm.Basics.make(_elm),
    $GithubEvent = Elm.GithubEvent.make(_elm),
-   $GithubEventSignal = Elm.GithubEventSignal.make(_elm),
    $Html = Elm.Html.make(_elm),
    $Html$Attributes = Elm.Html.Attributes.make(_elm),
    $List = Elm.List.make(_elm),
@@ -13472,7 +14177,7 @@ Elm.SeeThePeople.make = function (_elm) {
             case "Varying":
             return _v0._0(t);}
          _U.badCase($moduleName,
-         "between lines 105 and 107");
+         "between lines 101 and 103");
       }();
    });
    var incrementBorder = F2(function (t,
@@ -13638,26 +14343,21 @@ Elm.SeeThePeople.make = function (_elm) {
       return function () {
          switch (a.ctor)
          {case "SingleEvent":
-            switch (a._0.ctor)
-              {case "NothingYet":
-                 return model;
-                 case "SoThisHappened":
-                 return A2($List.member,
-                   a._0._0.actor,
-                   A2($List.map,
-                   function (_) {
-                      return _.actor;
-                   },
-                   model.all)) ? _U.replace([["all"
-                                             ,A2(startAnimation,
-                                             a._0._0.actor,
-                                             model.all)]],
-                   model) : _U.replace([["all"
-                                        ,A2($List._op["::"],
-                                        newPerson(a._0._0.actor),
+            return A2($List.member,
+              a._0.actor,
+              A2($List.map,
+              function (_) {
+                 return _.actor;
+              },
+              model.all)) ? _U.replace([["all"
+                                        ,A2(startAnimation,
+                                        a._0.actor,
                                         model.all)]],
-                   model);}
-              break;
+              model) : _U.replace([["all"
+                                   ,A2($List._op["::"],
+                                   newPerson(a._0.actor),
+                                   model.all)]],
+              model);
             case "TimeKeepsTickingAway":
             return _U.replace([["all"
                                ,A2($List.map,
@@ -13669,7 +14369,7 @@ Elm.SeeThePeople.make = function (_elm) {
                                model.all)]],
               model);}
          _U.badCase($moduleName,
-         "between lines 82 and 88");
+         "between lines 79 and 84");
       }();
    });
    _elm.SeeThePeople.values = {_op: _op
@@ -13823,6 +14523,95 @@ Elm.Signal.make = function (_elm) {
                         ,Mailbox: Mailbox};
    return _elm.Signal.values;
 };
+Elm.StartApp = Elm.StartApp || {};
+Elm.StartApp.make = function (_elm) {
+   "use strict";
+   _elm.StartApp = _elm.StartApp || {};
+   if (_elm.StartApp.values)
+   return _elm.StartApp.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   $moduleName = "StartApp",
+   $Basics = Elm.Basics.make(_elm),
+   $Effects = Elm.Effects.make(_elm),
+   $Html = Elm.Html.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $Task = Elm.Task.make(_elm);
+   var start = function (config) {
+      return function () {
+         var update = F2(function (_v0,
+         _v1) {
+            return function () {
+               switch (_v1.ctor)
+               {case "_Tuple2":
+                  return function () {
+                       switch (_v0.ctor)
+                       {case "Just":
+                          return A2(config.update,
+                            _v0._0,
+                            _v1._0);}
+                       _U.badCase($moduleName,
+                       "on line 92, column 13 to 39");
+                    }();}
+               _U.badCase($moduleName,
+               "on line 92, column 13 to 39");
+            }();
+         });
+         var messages = $Signal.mailbox($Maybe.Nothing);
+         var address = A2($Signal.forwardTo,
+         messages.address,
+         $Maybe.Just);
+         var inputs = $Signal.mergeMany(A2($List._op["::"],
+         messages.signal,
+         A2($List.map,
+         $Signal.map($Maybe.Just),
+         config.inputs)));
+         var effectsAndModel = A3($Signal.foldp,
+         update,
+         config.init,
+         inputs);
+         var model = A2($Signal.map,
+         $Basics.fst,
+         effectsAndModel);
+         return {_: {}
+                ,html: A2($Signal.map,
+                config.view(address),
+                model)
+                ,model: model
+                ,tasks: A2($Signal.map,
+                function ($) {
+                   return $Effects.toTask(address)($Basics.snd($));
+                },
+                effectsAndModel)};
+      }();
+   };
+   var App = F3(function (a,b,c) {
+      return {_: {}
+             ,html: a
+             ,model: b
+             ,tasks: c};
+   });
+   var Config = F4(function (a,
+   b,
+   c,
+   d) {
+      return {_: {}
+             ,init: a
+             ,inputs: d
+             ,update: b
+             ,view: c};
+   });
+   _elm.StartApp.values = {_op: _op
+                          ,start: start
+                          ,Config: Config
+                          ,App: App};
+   return _elm.StartApp.values;
+};
 Elm.String = Elm.String || {};
 Elm.String.make = function (_elm) {
    "use strict";
@@ -13936,231 +14725,57 @@ Elm.Sydron.make = function (_elm) {
    _L = _N.List.make(_elm),
    $moduleName = "Sydron",
    $Basics = Elm.Basics.make(_elm),
-   $Dict = Elm.Dict.make(_elm),
-   $EventTicker = Elm.EventTicker.make(_elm),
-   $GithubEventSignal = Elm.GithubEventSignal.make(_elm),
-   $Html = Elm.Html.make(_elm),
-   $Html$Attributes = Elm.Html.Attributes.make(_elm),
-   $Http = Elm.Http.make(_elm),
+   $Effects = Elm.Effects.make(_elm),
+   $GithubEventLayer = Elm.GithubEventLayer.make(_elm),
+   $GithubRepository = Elm.GithubRepository.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
+   $ParseUrlParams = Elm.ParseUrlParams.make(_elm),
    $Result = Elm.Result.make(_elm),
-   $SeeThePeople = Elm.SeeThePeople.make(_elm),
    $Signal = Elm.Signal.make(_elm),
-   $String = Elm.String.make(_elm),
+   $StartApp = Elm.StartApp.make(_elm),
    $SydronAction = Elm.SydronAction.make(_elm),
    $Task = Elm.Task.make(_elm),
    $Time = Elm.Time.make(_elm);
+   var perEventMS = 3000;
+   var showNewEvent = A2($Signal.map,
+   function (t) {
+      return $GithubEventLayer.Heartbeat;
+   },
+   $Time.every(perEventMS));
    var timePasses = A2($Signal.map,
    $Time.inMilliseconds,
    $Time.fps(30));
-   var both = A2($Signal.merge,
-   A2($Signal.map,
+   var animationFrames = $Signal.map($GithubEventLayer.wrapAction)(A2($Signal.map,
    $SydronAction.TimeKeepsTickingAway,
-   timePasses),
-   A2($Signal.map,
-   $SydronAction.SingleEvent,
-   $GithubEventSignal.eventsOneByOne));
-   var makeTheseTwoThingsIntoATuple = function (inp) {
-      return function () {
-         switch (inp.ctor)
-         {case "::": switch (inp._1.ctor)
-              {case "::":
-                 switch (inp._1._1.ctor)
-                   {case "[]":
-                      return {ctor: "_Tuple2"
-                             ,_0: inp._0
-                             ,_1: inp._1._0};}
-                   break;}
-              break;}
-         _U.badCase($moduleName,
-         "between lines 147 and 148");
-      }();
-   };
-   var parseTheFucker = function (mappydoober) {
-      return A2($GithubEventSignal.GithubRepository,
-      A2($Maybe.withDefault,
-      "satellite-of-love",
-      A2($Dict.get,
-      "owner",
-      mappydoober)),
-      A2($Maybe.withDefault,
-      "Hungover",
-      A2($Dict.get,
-      "repo-name",
-      mappydoober)));
-   };
+   timePasses));
    var initialLocation = Elm.Native.Port.make(_elm).inbound("initialLocation",
    "String",
    function (v) {
       return typeof v === "string" || typeof v === "object" && v instanceof String ? v : _U.badPort("a string",
       v);
    });
-   var fuckingInputParameters = $String.isEmpty(initialLocation) ? $Dict.empty : function () {
-      var loseTheQuestionMark = A2($String.dropLeft,
-      1,
-      initialLocation);
-      var args = A2($String.split,
-      "&",
-      loseTheQuestionMark);
-      var listsOfTwo = A2($List.map,
-      $String.split("="),
-      args);
-      var pairs = A2($List.map,
-      makeTheseTwoThingsIntoATuple,
-      listsOfTwo);
-      var mappydoober = $Dict.fromList(pairs);
-      return mappydoober;
-   }();
-   var githubEventsPort = Elm.Native.Task.make(_elm).performSignal("githubEventsPort",
-   $GithubEventSignal.fetchOnce(parseTheFucker(fuckingInputParameters)));
-   var start = function (app) {
-      return function () {
-         var model = A3($Signal.foldp,
-         F2(function (a,m) {
-            return A2(app.update,a,m);
-         }),
-         app.model,
-         both);
-         return A2($Signal.map,
-         app.view,
-         model);
-      }();
-   };
-   var App = F3(function (a,b,c) {
-      return {_: {}
-             ,model: a
-             ,update: c
-             ,view: b};
-   });
-   var updateTicker = F2(function (action,
-   model) {
-      return function () {
-         switch (action.ctor)
-         {case "SingleEvent":
-            return _U.replace([["ticker"
-                               ,A2($EventTicker.update,
-                               action._0,
-                               model.ticker)]],
-              model);
-            case "TimeKeepsTickingAway":
-            return model;}
-         _U.badCase($moduleName,
-         "between lines 92 and 95");
-      }();
-   });
-   var updatePeople = F2(function (action,
-   model) {
-      return _U.replace([["people"
-                         ,A2($SeeThePeople.update,
-                         action,
-                         model.people)]],
-      model);
-   });
-   var update = F2(function (action,
-   m) {
-      return updateTicker(action)(updatePeople(action)(m));
-   });
-   var pageTitle = A2($Html.div,
-   _L.fromArray([$Html$Attributes.style(_L.fromArray([{ctor: "_Tuple2"
-                                                      ,_0: "height"
-                                                      ,_1: "100px"}
-                                                     ,{ctor: "_Tuple2"
-                                                      ,_0: "font-family"
-                                                      ,_1: "Helvetica"}
-                                                     ,{ctor: "_Tuple2"
-                                                      ,_0: "margin-top"
-                                                      ,_1: "20px"}
-                                                     ,{ctor: "_Tuple2"
-                                                      ,_0: "margin-left"
-                                                      ,_1: "20px"}]))]),
-   _L.fromArray([A2($Html.h1,
-                _L.fromArray([]),
-                _L.fromArray([$Html.text("Sydron")]))
-                ,$Html.text("A parade of Github Events for ")
-                ,A2($Html.a,
-                _L.fromArray([$Html$Attributes.href("http://github.com/satellite-of-love/Hungover")]),
-                _L.fromArray([$Html.text("Rachel\'s baby game repo")]))
-                ,$Html.text(". This is me playing with Elm; source code ")
-                ,A2($Html.a,
-                _L.fromArray([$Html$Attributes.href("http://github.com/jessitron/elm-sydron")]),
-                _L.fromArray([$Html.text("here")]))
-                ,$Html.text(".")]));
-   var inputParameter = function (key) {
-      return A2($Maybe.withDefault,
-      "",
-      A2($Dict.get,
-      key,
-      fuckingInputParameters));
-   };
-   var inputThinger = A2($Html.div,
-   _L.fromArray([]),
-   _L.fromArray([A2($Html.form,
-   _L.fromArray([]),
-   _L.fromArray([A2($Html.input,
-                _L.fromArray([$Html$Attributes.placeholder("owner")
-                             ,$Html$Attributes.name("owner")
-                             ,$Html$Attributes.value(inputParameter("owner"))]),
-                _L.fromArray([]))
-                ,A2($Html.input,
-                _L.fromArray([$Html$Attributes.placeholder("repository")
-                             ,$Html$Attributes.name("repo-name")
-                             ,$Html$Attributes.value(inputParameter("repo-name"))]),
-                _L.fromArray([]))
-                ,A2($Html.button,
-                _L.fromArray([$Html$Attributes.style(_L.fromArray([{ctor: "_Tuple2"
-                                                                   ,_0: "background"
-                                                                   ,_1: "url(\'img/elm-button.jpg\')"}
-                                                                  ,{ctor: "_Tuple2"
-                                                                   ,_0: "width"
-                                                                   ,_1: "137px"}
-                                                                  ,{ctor: "_Tuple2"
-                                                                   ,_0: "height"
-                                                                   ,_1: "100px"}]))]),
-                _L.fromArray([$Html.text("Go")]))]))]));
-   var view = function (m) {
-      return A2($Html.div,
-      _L.fromArray([]),
-      _L.fromArray([pageTitle
-                   ,inputThinger
-                   ,$EventTicker.view(m.ticker)
-                   ,$SeeThePeople.view(m.people)]));
-   };
-   var Model = F2(function (a,b) {
-      return {_: {}
-             ,people: b
-             ,ticker: a};
-   });
-   var init = A2(Model,
-   $EventTicker.init,
-   $SeeThePeople.init);
-   var main = function () {
-      var nothing = $GithubEventSignal.setRepo(A2($GithubEventSignal.GithubRepository,
-      initialLocation,
-      ""));
-      return start({_: {}
-                   ,model: init
-                   ,update: update
-                   ,view: view});
-   }();
+   var repositoryOfInterest = A3($GithubRepository.fromDict,
+   $ParseUrlParams.parse(initialLocation),
+   "satellite-of-love",
+   "Hungover");
+   var app = $StartApp.start(A4($StartApp.Config,
+   $GithubEventLayer.init(repositoryOfInterest),
+   $GithubEventLayer.update,
+   $GithubEventLayer.view,
+   _L.fromArray([animationFrames
+                ,showNewEvent])));
+   var main = app.html;
+   var tasks = Elm.Native.Task.make(_elm).performSignal("tasks",
+   app.tasks);
    _elm.Sydron.values = {_op: _op
-                        ,Model: Model
-                        ,init: init
-                        ,view: view
-                        ,inputThinger: inputThinger
-                        ,inputParameter: inputParameter
-                        ,pageTitle: pageTitle
-                        ,update: update
-                        ,updatePeople: updatePeople
-                        ,updateTicker: updateTicker
-                        ,App: App
-                        ,start: start
+                        ,app: app
                         ,main: main
-                        ,fuckingInputParameters: fuckingInputParameters
-                        ,parseTheFucker: parseTheFucker
-                        ,makeTheseTwoThingsIntoATuple: makeTheseTwoThingsIntoATuple
+                        ,repositoryOfInterest: repositoryOfInterest
                         ,timePasses: timePasses
-                        ,both: both};
+                        ,animationFrames: animationFrames
+                        ,perEventMS: perEventMS
+                        ,showNewEvent: showNewEvent};
    return _elm.Sydron.values;
 };
 Elm.SydronAction = Elm.SydronAction || {};
@@ -14175,7 +14790,7 @@ Elm.SydronAction.make = function (_elm) {
    _L = _N.List.make(_elm),
    $moduleName = "SydronAction",
    $Basics = Elm.Basics.make(_elm),
-   $GithubEventSignal = Elm.GithubEventSignal.make(_elm),
+   $GithubEvent = Elm.GithubEvent.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
@@ -14193,6 +14808,81 @@ Elm.SydronAction.make = function (_elm) {
                               ,SingleEvent: SingleEvent
                               ,TimeKeepsTickingAway: TimeKeepsTickingAway};
    return _elm.SydronAction.values;
+};
+Elm.SydronInt = Elm.SydronInt || {};
+Elm.SydronInt.make = function (_elm) {
+   "use strict";
+   _elm.SydronInt = _elm.SydronInt || {};
+   if (_elm.SydronInt.values)
+   return _elm.SydronInt.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   $moduleName = "SydronInt",
+   $Basics = Elm.Basics.make(_elm),
+   $EventTicker = Elm.EventTicker.make(_elm),
+   $GithubRepository = Elm.GithubRepository.make(_elm),
+   $Header = Elm.Header.make(_elm),
+   $Html = Elm.Html.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $RepoInput = Elm.RepoInput.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $SeeThePeople = Elm.SeeThePeople.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $SydronAction = Elm.SydronAction.make(_elm);
+   var updateTicker = F2(function (action,
+   model) {
+      return _U.replace([["ticker"
+                         ,A2($EventTicker.update,
+                         action,
+                         model.ticker)]],
+      model);
+   });
+   var updatePeople = F2(function (action,
+   model) {
+      return _U.replace([["people"
+                         ,A2($SeeThePeople.update,
+                         action,
+                         model.people)]],
+      model);
+   });
+   var update = F2(function (action,
+   m) {
+      return updateTicker(action)(updatePeople(action)(m));
+   });
+   var formclass = "pure-form";
+   var view = F2(function (_v0,m) {
+      return function () {
+         return A2($Html.div,
+         _L.fromArray([]),
+         _L.fromArray([$Header.view(m.repositoryOfInterest)
+                      ,$RepoInput.view(formclass)
+                      ,$EventTicker.view(m.ticker)
+                      ,$SeeThePeople.view(m.people)]));
+      }();
+   });
+   var Model = F3(function (a,
+   b,
+   c) {
+      return {_: {}
+             ,people: c
+             ,repositoryOfInterest: a
+             ,ticker: b};
+   });
+   var init = function (repositoryFromUrlParams) {
+      return A3(Model,
+      repositoryFromUrlParams,
+      $EventTicker.init,
+      $SeeThePeople.init);
+   };
+   _elm.SydronInt.values = {_op: _op
+                           ,update: update
+                           ,init: init
+                           ,view: view
+                           ,Model: Model};
+   return _elm.SydronInt.values;
 };
 Elm.Task = Elm.Task || {};
 Elm.Task.make = function (_elm) {

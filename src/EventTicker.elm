@@ -1,9 +1,9 @@
 module EventTicker(Model, init, view, update) where
 
 import GithubEvent exposing (Event)
-import GithubEventSignal exposing (SingleEvent(..))
 import Html exposing (Html)
 import Html.Attributes exposing (style)
+import SydronAction exposing (SydronAction(..))
 
 -- Model
 
@@ -46,10 +46,10 @@ itemStyle =
     ]
 
 -- Update
-type alias Action = GithubEventSignal.SingleEvent
+type alias Action = SydronAction
 
 update: Action -> Model -> Model
 update action model =
     case action of
-        NothingYet -> model
-        SoThisHappened event -> Model (List.take 10 (event :: model.recentEvents))
+        SingleEvent event -> Model (List.take 10 (event :: model.recentEvents))
+        _ -> model
