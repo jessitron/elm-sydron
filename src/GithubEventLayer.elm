@@ -2,7 +2,7 @@ module GithubEventLayer(init, update, view, Action(..), wrapAction) where
 
 import SydronInt as Inner
 import SydronAction as InnerActions
-import GithubEvent exposing (Event)
+import GithubEvent exposing (Event, BookmarkHeader, fetchPageOfEvents)
 import GithubRepository exposing (GithubRepository)
 import ErrorDisplay
 --
@@ -19,7 +19,7 @@ passSingleEvent e = InnerActions.SingleEvent e
 
 type Action = Passthrough InnerAction
              | Heartbeat
-             | SomeNewEvents (List Event)
+             | SomeNewEvents (List Event) BookmarkHeader
              | ErrorAlert Http.Error
 
 wrapAction: InnerAction -> Action
@@ -28,7 +28,7 @@ wrapAction ia = Passthrough ia
 --- MODEL
 
 type alias InnerModel = Inner.Model 
-type alias LastSeenHeader = String
+
 type alias Model =    
     { 
       inner: InnerModel,
@@ -36,7 +36,7 @@ type alias Model =
       seen: List Event, 
       unseen: List Event,
       lastError: Maybe Http.Error,
-      lastHeader: Maybe LastSeenHeader
+      lastHeader: Maybe BookmarkHeader
     }
 
 --innerInit: GithubRepository -> Inner.Model
@@ -68,7 +68,8 @@ updateModel: Action -> Model -> Model
 updateModel a m =
   case a of 
     Passthrough ia -> { m | inner <- innerUpdate ia m.inner }
-    SomeNewEvents moreEvents -> { m | unseen <- m.unseen ++ moreEvents }
+    SomeNewEvents moreEvents bh -> { m | unseen <- m.unseen ++ (List.reverse moreEvents),
+                                         lastHeader <- Just bh }
     Heartbeat -> 
       case m.unseen of
         [] -> m
@@ -83,33 +84,22 @@ andDoNothing m = (m, Effects.none)
 
 --- EFFECTS 
 
-fetchEvents: GithubRepository -> Maybe LastSeenHeader -> Effects Action
-fetchEvents repo Nothing = wrapErrors (fetchPageOfEvents repo)
+fetchEvents: GithubRepository -> Maybe BookmarkHeader -> Effects Action
+fetchEvents repo bh = wrapErrors (fetchPageOfEvents repo bh)
 
 --- guts
-fetchPageOfEvents : GithubRepository -> Task Http.Error (List Event)
-fetchPageOfEvents repo =
-    let
-      pageNo = 1
-      parameters = [("page", toString pageNo)]
-    in 
-      Http.get GithubEvent.listDecoder (github repo pageNo)
-
-realGithubUrl = "https://api.github.com/repos"
-
-github : GithubRepository -> Int -> String
-github repo pageNo = Http.url ( (Maybe.withDefault realGithubUrl repo.githubUrl) ++ "/" ++ repo.owner ++ "/" ++ repo.repo ++ "/events") <|
-        [("pageNo", (toString pageNo))]
 
 errorToAction: Http.Error -> Task Effects.Never Action
 errorToAction e = Task.succeed (ErrorAlert e)
 
-wrapErrors: Task Http.Error (List Event) -> Effects Action
+wrapErrors: Task Http.Error ((List Event), BookmarkHeader) -> Effects Action
 wrapErrors t =
   t 
-  |> Task.map SomeNewEvents
+  |> Task.map someNewEvents
   |> (\t -> Task.onError t errorToAction)
   |> Effects.task
+
+someNewEvents (ee, bh) = SomeNewEvents ee bh
 
 view: Signal.Address Action -> Model -> Html
 view addr m = Html.div [] 
