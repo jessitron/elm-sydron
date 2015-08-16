@@ -68,7 +68,7 @@ update a m =
     Nothing ->
     case a of 
       Passthrough ia -> { m | inner <- innerUpdate ia m.inner } `andDo` Nothing
-      SomeNewEvents moreEvents bh -> { m | unseen <- m.unseen ++ (List.reverse moreEvents),
+      SomeNewEvents moreEvents bh -> { m | unseen <- m.unseen ++ (List.reverse (filterKnown m moreEvents)),
                                            lastHeader <- Just bh } `andDo` Nothing
       Heartbeat -> 
         case m.unseen of
@@ -83,6 +83,15 @@ andDo m maybe =
   case maybe of
     Nothing -> (m, Effects.none)
     Just something -> (m, something)
+
+filterKnown: Model -> List Event -> List Event
+filterKnown m incomingEvents =
+  let
+    knownEvents = m.seen ++ m.unseen
+    isKnown event = (List.member event knownEvents)
+    unknown event = not (isKnown event)
+  in 
+    (List.filter unknown incomingEvents)
 
 
 --- EFFECTS 
