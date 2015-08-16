@@ -46,7 +46,7 @@ type alias BookmarkHeader = String
 fetchPageOfEvents : GithubRepository -> Maybe BookmarkHeader -> Task Http.Error ((List Event), BookmarkHeader)
 fetchPageOfEvents repo bh =
     let
-      headers = Maybe.map (\s -> [("ETag", s)]) bh |> Maybe.withDefault [] 
+      headers = Maybe.map (\s -> [("If-None-Match", s)]) bh |> Maybe.withDefault [] 
     in 
       GetWithHeaders.get listDecoder (github repo 1) headers
       |> Task.map extractHeader
