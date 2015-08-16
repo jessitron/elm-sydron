@@ -35,7 +35,7 @@ type alias Model =
       repository: GithubRepository,
       seen: List Event, 
       unseen: List Event,
-      lastError: Maybe Http.Error,
+      error: Maybe Http.Error,
       lastHeader: Maybe BookmarkHeader
     }
 
@@ -50,7 +50,7 @@ init repo =
         seen = [],
         unseen = [],
         lastHeader = Nothing,
-        lastError = Nothing
+        error = Nothing
       },
       fetchEvents repo Nothing
     )
@@ -63,17 +63,20 @@ innerUpdate = Inner.update
 
 update: Action -> Model -> (Model, Effects Action)
 update a m =
-  case a of 
-    Passthrough ia -> { m | inner <- innerUpdate ia m.inner } `andDo` Nothing
-    SomeNewEvents moreEvents bh -> { m | unseen <- m.unseen ++ (List.reverse moreEvents),
-                                         lastHeader <- Just bh } `andDo` Nothing
-    Heartbeat -> 
-      case m.unseen of
-        [] -> m `andDo` Nothing
-        head :: tail -> { m | inner <- innerUpdate (passSingleEvent head) m.inner,
-                              seen <- head :: m.seen, 
-                              unseen <- tail } `andDo` Nothing
-    ErrorAlert e -> { m | lastError <- Just e} `andDo` Nothing
+  case m.error of 
+    Just anything -> m `andDo` Nothing -- do nothing if we have ever failed
+    Nothing ->
+    case a of 
+      Passthrough ia -> { m | inner <- innerUpdate ia m.inner } `andDo` Nothing
+      SomeNewEvents moreEvents bh -> { m | unseen <- m.unseen ++ (List.reverse moreEvents),
+                                           lastHeader <- Just bh } `andDo` Nothing
+      Heartbeat -> 
+        case m.unseen of
+          [] -> m `andDo` Just (fetchEvents m.repository m.lastHeader)
+          head :: tail -> { m | inner <- innerUpdate (passSingleEvent head) m.inner,
+                                seen <- head :: m.seen, 
+                                unseen <- tail } `andDo` Nothing
+      ErrorAlert e -> { m | error <- Just e} `andDo` Nothing
 
 andDo: Model -> Maybe (Effects Action) -> (Model, Effects Action)
 andDo m maybe =
@@ -105,7 +108,7 @@ view: Signal.Address Action -> Model -> Html
 view addr m = Html.div [] 
                 [
                   Inner.view (Signal.forwardTo addr Passthrough ) m.inner,
-                  ErrorDisplay.view m.lastError
+                  ErrorDisplay.view m.error
                 ]
 
 
