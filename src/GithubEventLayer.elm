@@ -4,6 +4,7 @@ import SydronInt as Inner
 import SydronAction as InnerActions
 import GithubEvent exposing (Event)
 import GithubRepository exposing (GithubRepository)
+import ErrorDisplay
 --
 import Effects exposing (Effects)
 import Task exposing (Task)
@@ -34,6 +35,7 @@ type alias Model =
       repository: GithubRepository,
       seen: List Event, 
       unseen: List Event,
+      lastError: Maybe Http.Error,
       lastHeader: Maybe LastSeenHeader
     }
 
@@ -47,7 +49,8 @@ init repo =
         repository = repo,
         seen = [],
         unseen = [],
-        lastHeader = Nothing
+        lastHeader = Nothing,
+        lastError = Nothing
       },
       fetchEvents repo Nothing
     )
@@ -66,6 +69,7 @@ updateModel a m =
     Passthrough ia -> { m | inner <- innerUpdate ia m.inner }
     SomeNewEvents moreEvents -> { m | unseen <- m.unseen ++ moreEvents }
     Heartbeat -> moveOneOver m
+    ErrorAlert e -> { m | lastError <- Just e}
 
 andDoNothing: Model -> (Model, Effects Action)
 andDoNothing m = (m, Effects.none)
@@ -107,7 +111,11 @@ wrapErrors t =
   |> Effects.task
 
 view: Signal.Address Action -> Model -> Html
-view addr m = Inner.view (Signal.forwardTo addr Passthrough ) m.inner
+view addr m = Html.div [] 
+                [
+                  Inner.view (Signal.forwardTo addr Passthrough ) m.inner,
+                  ErrorDisplay.view m.lastError
+                ]
 
 
 
