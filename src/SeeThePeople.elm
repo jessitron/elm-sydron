@@ -76,7 +76,8 @@ pictureStyle relativeSize borderSize =
        ("margin-bottom", verticalMargin),
        ("width", pixels (relative imgPx relativeSize)),
        ("height", pixels imgPx),
-       ("border", (pixels borderPx) ++ " solid orange")
+       ("border", (pixels borderPx) ++ " solid orange"),
+       ("box-shadow", "10px 5px gold")
      ]
 
 pixels: Int -> String
