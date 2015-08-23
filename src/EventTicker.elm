@@ -29,8 +29,8 @@ eventListItem howToHighlight event  =
     Html.div [itemStyle (howToHighlight event)]
     [Html.text (event.eventType ++ " by " ++ event.actor.login ++ " at " ++ event.created_at)]
 
-view : Model -> Html
-view m =
+view : Signal.Address SydronAction -> Model -> Html
+view addr m =
   let
     howToHighlight event = 
       case m.highlightPerson of
