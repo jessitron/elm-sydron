@@ -23,12 +23,22 @@ type Iteratee a =
 
 fullSize = PresentAndFuture 1.0 Constant 
 
+type Highlight = 
+  NoHighlight
+
 type alias EachPerson = {
   actor: EventActor,
   size: PresentAndFuture Percentage,
-  border: PresentAndFuture Percentage
+  border: PresentAndFuture Percentage,
+  highlight: Highlight
 }
-newPerson actor = EachPerson actor growing shrinking
+newPerson actor = 
+  {
+    actor = actor,
+    size = growing,
+    border = shrinking,
+    highlight = NoHighlight
+  }
 
 type alias Model = 
     { 
