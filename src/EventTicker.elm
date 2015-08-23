@@ -15,6 +15,8 @@ init: Model
 init = Model []
 
 -- View
+
+-- TODO: make watch events show as (String.fromChar '\x2b50')
 eventListItem : Event -> Html
 eventListItem event =
     Html.div [itemStyle]
@@ -29,6 +31,8 @@ view m =
 divStyle = 
   style 
     [  
+      ("float", "left"),
+      ("width", "50%"),
       ("height", "100px"),
       ("box-sizing", "border-box"),
       ("border", "1px solid"),

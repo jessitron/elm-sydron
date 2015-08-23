@@ -3,6 +3,7 @@ module SydronInt(update, init, view, Model) where
 import GithubRepository exposing (GithubRepository)
 import SydronAction exposing (SydronAction(..))
 import Html exposing (Html)
+import Html.Attributes as Attr
 import Effects exposing (Effects)
 -- for actual use
 import EventTicker
@@ -35,10 +36,12 @@ view _ m =
         [ ]
         [ Header.view m.repositoryOfInterest,
           RepoInput.view formclass,
-          EventTicker.view m.ticker,
-          SeeThePeople.view m.people
+          Html.div [inline] [EventTicker.view m.ticker],
+          Html.div [inline] [SeeThePeople.view m.people]
         ]
 
+inline: Html.Attribute
+inline = Attr.style [("display", "inline")]
 
 -- UPDATE
 

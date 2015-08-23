@@ -41,7 +41,14 @@ draw p = Html.img [Attr.src p.actor.avatar_url , pictureStyle p.size.present p.b
 
 view: Model -> Html
 view model =
-  Html.div [] (List.map draw model.all)
+  Html.div 
+    [ divStyle ]
+    (List.map draw model.all)
+
+divStyle = 
+  Attr.style
+    [("float", "right"),
+     ("width", "50%")]
 
 marginPx = 20
 imgPx = 100
