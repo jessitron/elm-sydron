@@ -58,4 +58,9 @@ update: Action -> Model -> Model
 update action model =
     case action of
         SingleEvent event -> { model | recentEvents <- (List.take 10 (event :: model.recentEvents)) }
+        PersonOfInterest ea -> { model | highlightPerson <- Just ea }
         _ -> model
+
+
+
+
