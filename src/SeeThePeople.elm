@@ -38,7 +38,7 @@ newPerson actor =
     actor = actor,
     size = growing,
     border = shrinking,
-    highlight = NoHighlight
+    highlight = PersonOfInterestHighlight
   }
 
 type alias Model = 
@@ -53,8 +53,7 @@ draw addr p =
   Html.img 
     [
      Attr.src p.actor.avatar_url,
-     highlightStyle p.highlight,
-     pictureStyle p.size.present p.border.present,
+     personStyle p,
      Html.Events.onMouseOver addr (PersonOfInterest p.actor)
     ][]
 
@@ -73,21 +72,27 @@ marginPx = 20
 imgPx = 100
 maxBorderPx = 10
 
-highlightStyle: Highlight -> Html.Attribute
+personStyle: EachPerson -> Html.Attribute
+personStyle p = 
+  Attr.style (
+    (highlightStyle p.highlight)
+    ++ (pictureStyle p.size.present p.border.present)
+    )
+
+highlightStyle: Highlight -> List (String, String)
 highlightStyle h =
   case h of
-    NoHighlight -> Attr.style []
-    PersonOfInterestHighlight ->  Attr.style [("box-shadow", "10px 5px gold")]
+    NoHighlight -> []
+    PersonOfInterestHighlight -> [("box-shadow", "10px 5px gold")]
 
 
-pictureStyle : Float -> Float -> Html.Attribute
+pictureStyle : Float -> Float -> List (String, String)
 pictureStyle relativeSize borderSize =
   let 
     borderPx = relative maxBorderPx borderSize
     horizontalMargin = pixels ((relative marginPx relativeSize) - borderPx)
     verticalMargin = pixels (marginPx - borderPx)
   in
-    Attr.style
      [
        ("margin-left", horizontalMargin),
        ("margin-right", horizontalMargin),
