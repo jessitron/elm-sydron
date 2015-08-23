@@ -36,21 +36,24 @@ eventListItem howToHighlight addr event  =
 
 view : Signal.Address SydronAction -> Model -> Html
 view addr m =
-  let
-    howToHighlight event = 
-      case m.highlightPerson of
+  Html.div
+      [ divStyle ]
+      (List.map 
+        (eventListItem (eventHighlight m.highlightPerson) addr) 
+        m.recentEvents)
+
+eventHighlight: Maybe EventActor -> Event -> StylePortion
+eventHighlight whom event = 
+      case whom of
         Nothing -> []
         Just ea ->
           if ea == event.actor then
             highlightStyle
           else
            []
-  in
-    Html.div
-        [ divStyle ]
-        (List.map (eventListItem howToHighlight addr) m.recentEvents)
 
 highlightStyle = [("background-color", "gold")]
+
 
 divStyle = 
   style 
@@ -78,8 +81,14 @@ type alias Action = SydronAction
 update: Action -> Model -> Model
 update action model =
     case action of
-        SingleEvent event -> { model | recentEvents <- (List.take 10 (event :: model.recentEvents)) }
-        PersonOfInterest ea -> { model | highlightPerson <- Just ea }
+        SingleEvent event -> 
+          { model 
+            | recentEvents <- (List.take 10 (event :: model.recentEvents))
+          }
+        PersonOfInterest ea -> 
+          { model 
+            | highlightPerson <- Just ea 
+          }
         _ -> model
 
 
