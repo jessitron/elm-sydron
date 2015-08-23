@@ -1,6 +1,6 @@
 module EventTicker(Model, init, view, update) where
 
-import GithubEvent exposing (Event)
+import GithubEvent exposing (Event, EventActor)
 import Html exposing (Html)
 import Html.Attributes exposing (style)
 import SydronAction exposing (SydronAction(..))
@@ -9,11 +9,15 @@ import SydronAction exposing (SydronAction(..))
 
 type alias Model = 
   {
-    recentEvents : List Event
+    recentEvents : List Event,
+    highlightPerson : Maybe EventActor
   }
 init: Model 
-init = Model []
-
+init = 
+  {
+    recentEvents = [],
+    highlightPerson = Nothing
+  }
 -- View
 
 -- TODO: make watch events show as (String.fromChar '\x2b50')
@@ -53,5 +57,5 @@ type alias Action = SydronAction
 update: Action -> Model -> Model
 update action model =
     case action of
-        SingleEvent event -> Model (List.take 10 (event :: model.recentEvents))
+        SingleEvent event -> { model | recentEvents <- (List.take 10 (event :: model.recentEvents)) }
         _ -> model
