@@ -36,7 +36,7 @@ view addr m =
         [ ]
         [ Header.view m.repositoryOfInterest,
           RepoInput.view formclass,
-          Html.div [inline] [EventTicker.view m.ticker],
+          Html.div [inline] [EventTicker.view addr m.ticker],
           Html.div [inline] [SeeThePeople.view addr m.people]
         ]
 
