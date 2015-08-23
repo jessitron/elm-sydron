@@ -8,13 +8,13 @@ import SydronAction exposing (SydronAction(..))
 
 -- Model
 
-type alias Model = 
+type alias Model =
   {
     recentEvents : List Event,
     highlightPerson : Maybe EventActor
   }
-init: Model 
-init = 
+init: Model
+init =
   {
     recentEvents = [],
     highlightPerson = Nothing
@@ -27,7 +27,7 @@ type alias StylePortion = List (String, String)
 
 eventListItem : (Event -> StylePortion) -> Signal.Address SydronAction -> Event -> Html
 eventListItem howToHighlight addr event  =
-    Html.div 
+    Html.div
     [
       itemStyle (howToHighlight event),
       onMouseOver addr (PersonOfInterest event.actor)
@@ -38,12 +38,12 @@ view : Signal.Address SydronAction -> Model -> Html
 view addr m =
   Html.div
       [ divStyle ]
-      (List.map 
-        (eventListItem (eventHighlight m.highlightPerson) addr) 
+      (List.map
+        (eventListItem (eventHighlight m.highlightPerson) addr)
         m.recentEvents)
 
 eventHighlight: Maybe EventActor -> Event -> StylePortion
-eventHighlight whom event = 
+eventHighlight whom event =
       case whom of
         Nothing -> []
         Just ea ->
@@ -55,9 +55,9 @@ eventHighlight whom event =
 highlightStyle = [("background-color", "gold")]
 
 
-divStyle = 
-  style 
-    [  
+divStyle =
+  style
+    [
       ("float", "left"),
       ("width", "50%"),
       ("box-sizing", "border-box"),
@@ -66,9 +66,9 @@ divStyle =
       ("padding", "10px")
     ]
 itemStyle: StylePortion -> Html.Attribute
-itemStyle highlight = 
-  style 
-    ([ 
+itemStyle highlight =
+  style
+    ([
       ("color", "#515151"),
       ("font-family", "Helvetica"),
       ("font-size", "21px"),
@@ -81,16 +81,12 @@ type alias Action = SydronAction
 update: Action -> Model -> Model
 update action model =
     case action of
-        SingleEvent event -> 
-          { model 
+        SingleEvent event ->
+          { model
             | recentEvents <- event :: model.recentEvents
           }
-        PersonOfInterest ea -> 
-          { model 
-            | highlightPerson <- Just ea 
+        PersonOfInterest ea ->
+          { model
+            | highlightPerson <- Just ea
           }
         _ -> model
-
-
-
-

@@ -20,10 +20,10 @@ type alias Model =
      people: SeeThePeople.Model
   }
 init: GithubRepository -> Model
-init repositoryFromUrlParams = 
-  Model 
+init repositoryFromUrlParams =
+  Model
     repositoryFromUrlParams
-    EventTicker.init 
+    EventTicker.init
     SeeThePeople.init
 
 -- VIEW
@@ -47,22 +47,17 @@ inline = Attr.style [("display", "inline")]
 
 update: SydronAction -> Model -> Model
 update action m =
-    m 
+    m
       |> updatePeople action
       |> updateTicker action
+
 
 updatePeople : SydronAction -> Model -> Model
 updatePeople action model =
   { model | people <- SeeThePeople.update action model.people }
 -- is there an "updateIn" for records?
 
+
 updateTicker : SydronAction -> Model -> Model
 updateTicker action model =
   { model | ticker <- EventTicker.update action model.ticker }
-
-
-
-
-
-
-

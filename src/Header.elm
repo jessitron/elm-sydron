@@ -6,18 +6,18 @@ import Html.Attributes as Attr
 
 type alias Model = GithubRepository
 
-view model = 
-  Html.div 
-    [ Attr.style 
-      [ 
+view model =
+  Html.div
+    [ Attr.style
+      [
         ("height", "100px"),
         ("font-family", "Helvetica"),
-        ("margin-top", "20px"), 
+        ("margin-top", "20px"),
         ("margin-left", "20px")
       ]
     ]
-  [ 
-    Html.h1 [] 
+  [
+    Html.h1 []
       [Html.text "Sydron"],
     Html.text "A parade of Github Events for ",
     Html.a [Attr.href (repositoryLink model) ] [ Html.text (repositoryDescription model)],

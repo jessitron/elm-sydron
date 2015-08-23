@@ -9,8 +9,8 @@ import Dict exposing (Dict)
 
 type alias Headers = List (String, String)
 get: Json.Decoder value -> String -> Headers -> Task Error (value, Headers)
-get decoder url headers = 
-  let 
+get decoder url headers =
+  let
     request =
       {
           verb = "GET",

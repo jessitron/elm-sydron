@@ -4,7 +4,7 @@ import Html exposing (Html)
 import Html.Attributes as Attr
 
 view : String -> Html
-view formclass = 
+view formclass =
   Html.div [ styles ]
     [ Html.form [ Attr.class formclass] [
       Html.fieldset [] [

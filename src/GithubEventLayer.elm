@@ -27,13 +27,13 @@ wrapAction ia = Passthrough ia
 
 --- MODEL
 
-type alias InnerModel = Inner.Model 
+type alias InnerModel = Inner.Model
 
-type alias Model =    
-    { 
+type alias Model =
+    {
       inner: InnerModel,
       repository: GithubRepository,
-      seen: List Event, 
+      seen: List Event,
       unseen: List Event,
       error: Maybe Http.Error,
       lastHeader: Maybe BookmarkHeader
@@ -41,9 +41,9 @@ type alias Model =
 
 --innerInit: GithubRepository -> Inner.Model
 innerInit = Inner.init
- 
-init: GithubRepository -> (Model, Effects Action) 
-init repo = 
+
+init: GithubRepository -> (Model, Effects Action)
+init repo =
     (
       { inner = innerInit repo,
         repository = repo,
@@ -59,23 +59,23 @@ init repo =
 
 type alias InnerUpdate = InnerAction -> Inner.Model -> Inner.Model
 innerUpdate: InnerUpdate
-innerUpdate = Inner.update 
+innerUpdate = Inner.update
 
 update: Action -> Model -> (Model, Effects Action)
 update a m =
-    case a of 
+    case a of
       Passthrough ia -> { m | inner <- innerUpdate ia m.inner } `andDo` Nothing
       SomeNewEvents moreEvents bh -> { m | unseen <- m.unseen ++ (List.reverse (filterKnown m moreEvents)),
                                            lastHeader <- Just bh } `andDo` Nothing
-      Heartbeat -> 
+      Heartbeat ->
         case m.unseen of
-          [] -> 
-            case m.error of 
+          [] ->
+            case m.error of
               Just anything -> m `andDo` Nothing -- do nothing if we have ever failed
               Nothing ->
                 m `andDo` Just (fetchEvents m.repository m.lastHeader)
           head :: tail -> { m | inner <- innerUpdate (passSingleEvent head) m.inner,
-                                seen <- head :: m.seen, 
+                                seen <- head :: m.seen,
                                 unseen <- tail } `andDo` Nothing
       ErrorAlert e -> { m | error <- Just e} `andDo` Nothing
 
@@ -91,11 +91,11 @@ filterKnown m incomingEvents =
     knownEvents = m.seen ++ m.unseen
     isKnown event = (List.member event knownEvents)
     unknown event = not (isKnown event)
-  in 
+  in
     (List.filter unknown incomingEvents)
 
 
---- EFFECTS 
+--- EFFECTS
 
 fetchEvents: GithubRepository -> Maybe BookmarkHeader -> Effects Action
 fetchEvents repo bh = wrapErrors bh (fetchPageOfEvents repo bh)
@@ -113,31 +113,19 @@ notModifiedIsOk mbh e =
 
 wrapErrors: Maybe BookmarkHeader -> Task Http.Error ((List Event), BookmarkHeader) -> Effects Action
 wrapErrors mbh t =
-  t 
+  t
   |> (\t -> Task.onError t (notModifiedIsOk mbh))
   |> Task.map someNewEvents
   |> (\t -> Task.onError t errorToAction)
   |> Effects.task
 
+
 someNewEvents (ee, bh) = SomeNewEvents ee bh
 
+
 view: Signal.Address Action -> Model -> Html
-view addr m = Html.div [] 
+view addr m = Html.div []
                 [
                   Inner.view (Signal.forwardTo addr Passthrough ) m.inner,
                   ErrorDisplay.view m.error
                 ]
-
-
-
-
-
-
-
-
-
-
-
-
-
-

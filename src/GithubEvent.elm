@@ -10,13 +10,13 @@ import Dict
 
 -- JSON DECODERS
 
-type alias EventActor = 
-    { 
+type alias EventActor =
+    {
       login: String,
       avatar_url: String
     }
 
-type alias Event = 
+type alias Event =
   {
     eventType : String,
     actor : EventActor,
@@ -24,7 +24,7 @@ type alias Event =
   }
 
 githubEventActor : Json.Decoder EventActor
-githubEventActor = 
+githubEventActor =
     Json.object2
       EventActor
         ("login" := Json.string)
@@ -32,7 +32,7 @@ githubEventActor =
 
 listDecoder : Json.Decoder (List Event)
 listDecoder =
-    Json.list <| 
+    Json.list <|
         Json.object3
           Event
           ("type" := Json.string)
@@ -46,16 +46,16 @@ type alias BookmarkHeader = String
 fetchPageOfEvents : GithubRepository -> Maybe BookmarkHeader -> Task Http.Error ((List Event), BookmarkHeader)
 fetchPageOfEvents repo bh =
     let
-      headers = Maybe.map (\s -> [("If-None-Match", s)]) bh |> Maybe.withDefault [] 
-    in 
+      headers = Maybe.map (\s -> [("If-None-Match", s)]) bh |> Maybe.withDefault []
+    in
       GetWithHeaders.get listDecoder (github repo 1) headers
       |> Task.map extractHeader
 
 realGithubUrl = "https://api.github.com/repos"
 
 extractHeader: (value, GetWithHeaders.Headers) -> (value, BookmarkHeader)
-extractHeader (v, hh) = 
-  let 
+extractHeader (v, hh) =
+  let
     dict = (Dict.fromList hh)
     getOrEmpty key = (Dict.get key) >> Maybe.withDefault ""
   in
