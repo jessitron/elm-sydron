@@ -33,9 +33,7 @@ divStyle =
     [  
       ("float", "left"),
       ("width", "50%"),
-      ("height", "100px"),
       ("box-sizing", "border-box"),
-      ("border", "1px solid"),
       ("color", "#666666"),
       ("overflow", "scroll"),
       ("padding", "10px")
