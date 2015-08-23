@@ -38,7 +38,7 @@ newPerson actor =
     actor = actor,
     size = growing,
     border = shrinking,
-    highlight = PersonOfInterestHighlight
+    highlight = NoHighlight
   }
 
 type alias Model = 
