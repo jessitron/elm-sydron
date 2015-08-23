@@ -4,6 +4,7 @@ import SydronAction exposing (SydronAction(..))
 import GithubEvent exposing (EventActor, Event)
 import Html exposing (Html)
 import Html.Attributes as Attr
+import Html.Events
 import Time exposing (Time)
 
 type alias Percentage = Float
@@ -36,14 +37,20 @@ type alias Model =
 init = Model []
 ---- VIEW
 
-draw: EachPerson -> Html
-draw p = Html.img [Attr.src p.actor.avatar_url , pictureStyle p.size.present p.border.present ] []
+draw: Signal.Address SydronAction -> EachPerson -> Html
+draw addr p = 
+  Html.img 
+    [
+     Attr.src p.actor.avatar_url,
+     pictureStyle p.size.present p.border.present,
+     Html.Events.onMouseOver addr (PersonOfInterest p.actor)
+    ][]
 
-view: Model -> Html
-view model =
+view: Signal.Address SydronAction -> Model -> Html
+view addr model =
   Html.div 
     [ divStyle ]
-    (List.map draw model.all)
+    (List.map (draw addr) model.all)
 
 divStyle = 
   Attr.style

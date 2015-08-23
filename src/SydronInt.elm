@@ -31,13 +31,13 @@ init repositoryFromUrlParams =
 formclass = "pure-form" -- this is dependent on index.html including purecss
 
 view : Signal.Address SydronAction -> Model -> Html
-view _ m =
+view addr m =
     Html.div
         [ ]
         [ Header.view m.repositoryOfInterest,
           RepoInput.view formclass,
           Html.div [inline] [EventTicker.view m.ticker],
-          Html.div [inline] [SeeThePeople.view m.people]
+          Html.div [inline] [SeeThePeople.view addr m.people]
         ]
 
 inline: Html.Attribute
