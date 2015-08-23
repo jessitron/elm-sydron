@@ -25,6 +25,7 @@ fullSize = PresentAndFuture 1.0 Constant
 
 type Highlight = 
   NoHighlight
+  | PersonOfInterestHighlight
 
 type alias EachPerson = {
   actor: EventActor,
@@ -52,6 +53,7 @@ draw addr p =
   Html.img 
     [
      Attr.src p.actor.avatar_url,
+     highlightStyle p.highlight,
      pictureStyle p.size.present p.border.present,
      Html.Events.onMouseOver addr (PersonOfInterest p.actor)
     ][]
@@ -71,6 +73,13 @@ marginPx = 20
 imgPx = 100
 maxBorderPx = 10
 
+highlightStyle: Highlight -> Html.Attribute
+highlightStyle h =
+  case h of
+    NoHighlight -> Attr.style []
+    PersonOfInterestHighlight ->  Attr.style [("box-shadow", "10px 5px gold")]
+
+
 pictureStyle : Float -> Float -> Html.Attribute
 pictureStyle relativeSize borderSize =
   let 
@@ -86,8 +95,7 @@ pictureStyle relativeSize borderSize =
        ("margin-bottom", verticalMargin),
        ("width", pixels (relative imgPx relativeSize)),
        ("height", pixels imgPx),
-       ("border", (pixels borderPx) ++ " solid orange"),
-       ("box-shadow", "10px 5px gold")
+       ("border", (pixels borderPx) ++ " solid orange")
      ]
 
 pixels: Int -> String
