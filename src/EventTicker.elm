@@ -3,6 +3,7 @@ module EventTicker(Model, init, view, update) where
 import GithubEvent exposing (Event, EventActor)
 import Html exposing (Html)
 import Html.Attributes exposing (style)
+import Html.Events exposing (onMouseOver)
 import SydronAction exposing (SydronAction(..))
 
 -- Model
@@ -24,9 +25,13 @@ init =
 
 type alias StylePortion = List (String, String)
 
-eventListItem : (Event -> StylePortion) -> Event -> Html
-eventListItem howToHighlight event  =
-    Html.div [itemStyle (howToHighlight event)]
+eventListItem : (Event -> StylePortion) -> Signal.Address SydronAction -> Event -> Html
+eventListItem howToHighlight addr event  =
+    Html.div 
+    [
+      itemStyle (howToHighlight event),
+      onMouseOver addr (PersonOfInterest event.actor)
+    ]
     [Html.text (event.eventType ++ " by " ++ event.actor.login ++ " at " ++ event.created_at)]
 
 view : Signal.Address SydronAction -> Model -> Html
@@ -43,7 +48,7 @@ view addr m =
   in
     Html.div
         [ divStyle ]
-        (List.map (eventListItem howToHighlight) m.recentEvents)
+        (List.map (eventListItem howToHighlight addr) m.recentEvents)
 
 highlightStyle = [("background-color", "gold")]
 
