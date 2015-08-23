@@ -115,11 +115,31 @@ relative maxPx relativeSize =
 update: SydronAction -> Model -> Model
 update a model = 
     case a of 
-        TimeKeepsTickingAway t -> { model | all <- List.map (\m -> incrementSize t (incrementBorder t m)) model.all }
+        TimeKeepsTickingAway t -> 
+          { model 
+            | all <- List.map (\m -> incrementSize t (incrementBorder t m)) model.all 
+          }
         SingleEvent e -> 
             if List.member e.actor (List.map .actor model.all)
                 then { model | all <- startAnimation e.actor model.all }
                 else { model | all <- (newPerson e.actor) :: model.all }
+        PersonOfInterest p ->
+            highlightPerson p model
+
+-- highlight
+highlightPerson: EventActor -> Model -> Model
+highlightPerson ea model =
+  let
+    shouldHighlight person = (person.actor == ea)
+    correctHighlight person = 
+      if shouldHighlight person then
+        PersonOfInterestHighlight
+      else 
+        NoHighlight
+  in 
+    { model 
+     | all <- List.map (\p -> { p | highlight <- correctHighlight p}) model.all
+    }
 
 -- animate
 
