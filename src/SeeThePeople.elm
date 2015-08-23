@@ -4,6 +4,7 @@ import SydronAction exposing (SydronAction(..))
 import GithubEvent exposing (EventActor, Event)
 import Html exposing (Html)
 import Html.Attributes as Attr
+import Html.Events
 import Time exposing (Time)
 
 type alias Percentage = Float
@@ -22,12 +23,23 @@ type Iteratee a =
 
 fullSize = PresentAndFuture 1.0 Constant 
 
+type Highlight = 
+  NoHighlight
+  | PersonOfInterestHighlight
+
 type alias EachPerson = {
   actor: EventActor,
   size: PresentAndFuture Percentage,
-  border: PresentAndFuture Percentage
+  border: PresentAndFuture Percentage,
+  highlight: Highlight
 }
-newPerson actor = EachPerson actor growing shrinking
+newPerson actor = 
+  {
+    actor = actor,
+    size = growing,
+    border = shrinking,
+    highlight = NoHighlight
+  }
 
 type alias Model = 
     { 
@@ -36,25 +48,51 @@ type alias Model =
 init = Model []
 ---- VIEW
 
-draw: EachPerson -> Html
-draw p = Html.img [Attr.src p.actor.avatar_url , pictureStyle p.size.present p.border.present ] []
+draw: Signal.Address SydronAction -> EachPerson -> Html
+draw addr p = 
+  Html.img 
+    [
+     Attr.src p.actor.avatar_url,
+     personStyle p,
+     Html.Events.onMouseOver addr (PersonOfInterest p.actor)
+    ][]
 
-view: Model -> Html
-view model =
-  Html.div [] (List.map draw model.all)
+view: Signal.Address SydronAction -> Model -> Html
+view addr model =
+  Html.div 
+    [ divStyle ]
+    (List.map (draw addr) model.all)
+
+divStyle = 
+  Attr.style
+    [("float", "right"),
+     ("width", "50%")]
 
 marginPx = 20
 imgPx = 100
 maxBorderPx = 10
 
-pictureStyle : Float -> Float -> Html.Attribute
+personStyle: EachPerson -> Html.Attribute
+personStyle p = 
+  Attr.style (
+    (highlightStyle p.highlight)
+    ++ (pictureStyle p.size.present p.border.present)
+    )
+
+highlightStyle: Highlight -> List (String, String)
+highlightStyle h =
+  case h of
+    NoHighlight -> []
+    PersonOfInterestHighlight -> [("box-shadow", "10px 5px gold")]
+
+
+pictureStyle : Float -> Float -> List (String, String)
 pictureStyle relativeSize borderSize =
   let 
     borderPx = relative maxBorderPx borderSize
     horizontalMargin = pixels ((relative marginPx relativeSize) - borderPx)
     verticalMargin = pixels (marginPx - borderPx)
   in
-    Attr.style
      [
        ("margin-left", horizontalMargin),
        ("margin-right", horizontalMargin),
@@ -77,11 +115,31 @@ relative maxPx relativeSize =
 update: SydronAction -> Model -> Model
 update a model = 
     case a of 
-        TimeKeepsTickingAway t -> { model | all <- List.map (\m -> incrementSize t (incrementBorder t m)) model.all }
+        TimeKeepsTickingAway t -> 
+          { model 
+            | all <- List.map (\m -> incrementSize t (incrementBorder t m)) model.all 
+          }
         SingleEvent e -> 
             if List.member e.actor (List.map .actor model.all)
                 then { model | all <- startAnimation e.actor model.all }
                 else { model | all <- (newPerson e.actor) :: model.all }
+        PersonOfInterest p ->
+            highlightPerson p model
+
+-- highlight
+highlightPerson: EventActor -> Model -> Model
+highlightPerson ea model =
+  let
+    shouldHighlight person = (person.actor == ea)
+    correctHighlight person = 
+      if shouldHighlight person then
+        PersonOfInterestHighlight
+      else 
+        NoHighlight
+  in 
+    { model 
+     | all <- List.map (\p -> { p | highlight <- correctHighlight p}) model.all
+    }
 
 -- animate
 

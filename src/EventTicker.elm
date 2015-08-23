@@ -1,49 +1,79 @@
 module EventTicker(Model, init, view, update) where
 
-import GithubEvent exposing (Event)
+import GithubEvent exposing (Event, EventActor)
 import Html exposing (Html)
 import Html.Attributes exposing (style)
+import Html.Events exposing (onMouseOver)
 import SydronAction exposing (SydronAction(..))
 
 -- Model
 
 type alias Model = 
   {
-    recentEvents : List Event
+    recentEvents : List Event,
+    highlightPerson : Maybe EventActor
   }
 init: Model 
-init = Model []
-
+init = 
+  {
+    recentEvents = [],
+    highlightPerson = Nothing
+  }
 -- View
-eventListItem : Event -> Html
-eventListItem event =
-    Html.div [itemStyle]
+
+-- TODO: make watch events show as (String.fromChar '\x2b50')
+
+type alias StylePortion = List (String, String)
+
+eventListItem : (Event -> StylePortion) -> Signal.Address SydronAction -> Event -> Html
+eventListItem howToHighlight addr event  =
+    Html.div 
+    [
+      itemStyle (howToHighlight event),
+      onMouseOver addr (PersonOfInterest event.actor)
+    ]
     [Html.text (event.eventType ++ " by " ++ event.actor.login ++ " at " ++ event.created_at)]
 
-view : Model -> Html
-view m =
-    Html.div
-        [ divStyle ]
-        (List.map eventListItem m.recentEvents)
+view : Signal.Address SydronAction -> Model -> Html
+view addr m =
+  Html.div
+      [ divStyle ]
+      (List.map 
+        (eventListItem (eventHighlight m.highlightPerson) addr) 
+        m.recentEvents)
+
+eventHighlight: Maybe EventActor -> Event -> StylePortion
+eventHighlight whom event = 
+      case whom of
+        Nothing -> []
+        Just ea ->
+          if ea == event.actor then
+            highlightStyle
+          else
+           []
+
+highlightStyle = [("background-color", "gold")]
+
 
 divStyle = 
   style 
     [  
-      ("height", "100px"),
+      ("float", "left"),
+      ("width", "50%"),
       ("box-sizing", "border-box"),
-      ("border", "1px solid"),
       ("color", "#666666"),
       ("overflow", "scroll"),
       ("padding", "10px")
     ]
-itemStyle = 
+itemStyle: StylePortion -> Html.Attribute
+itemStyle highlight = 
   style 
-    [ 
+    ([ 
       ("color", "#515151"),
       ("font-family", "Helvetica"),
       ("font-size", "21px"),
       ("height", "24px")
-    ]
+    ] ++ highlight)
 
 -- Update
 type alias Action = SydronAction
@@ -51,5 +81,16 @@ type alias Action = SydronAction
 update: Action -> Model -> Model
 update action model =
     case action of
-        SingleEvent event -> Model (List.take 10 (event :: model.recentEvents))
+        SingleEvent event -> 
+          { model 
+            | recentEvents <- event :: model.recentEvents
+          }
+        PersonOfInterest ea -> 
+          { model 
+            | highlightPerson <- Just ea 
+          }
         _ -> model
+
+
+
+

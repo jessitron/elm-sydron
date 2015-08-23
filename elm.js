@@ -2076,32 +2076,54 @@ Elm.EventTicker.make = function (_elm) {
    $GithubEvent = Elm.GithubEvent.make(_elm),
    $Html = Elm.Html.make(_elm),
    $Html$Attributes = Elm.Html.Attributes.make(_elm),
+   $Html$Events = Elm.Html.Events.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm),
    $SydronAction = Elm.SydronAction.make(_elm);
-   var itemStyle = $Html$Attributes.style(_L.fromArray([{ctor: "_Tuple2"
-                                                        ,_0: "color"
-                                                        ,_1: "#515151"}
-                                                       ,{ctor: "_Tuple2"
-                                                        ,_0: "font-family"
-                                                        ,_1: "Helvetica"}
-                                                       ,{ctor: "_Tuple2"
-                                                        ,_0: "font-size"
-                                                        ,_1: "21px"}
-                                                       ,{ctor: "_Tuple2"
-                                                        ,_0: "height"
-                                                        ,_1: "24px"}]));
+   var update = F2(function (action,
+   model) {
+      return function () {
+         switch (action.ctor)
+         {case "PersonOfInterest":
+            return _U.replace([["highlightPerson"
+                               ,$Maybe.Just(action._0)]],
+              model);
+            case "SingleEvent":
+            return _U.replace([["recentEvents"
+                               ,A2($List._op["::"],
+                               action._0,
+                               model.recentEvents)]],
+              model);}
+         return model;
+      }();
+   });
+   var itemStyle = function (highlight) {
+      return $Html$Attributes.style(A2($Basics._op["++"],
+      _L.fromArray([{ctor: "_Tuple2"
+                    ,_0: "color"
+                    ,_1: "#515151"}
+                   ,{ctor: "_Tuple2"
+                    ,_0: "font-family"
+                    ,_1: "Helvetica"}
+                   ,{ctor: "_Tuple2"
+                    ,_0: "font-size"
+                    ,_1: "21px"}
+                   ,{ctor: "_Tuple2"
+                    ,_0: "height"
+                    ,_1: "24px"}]),
+      highlight));
+   };
    var divStyle = $Html$Attributes.style(_L.fromArray([{ctor: "_Tuple2"
-                                                       ,_0: "height"
-                                                       ,_1: "100px"}
+                                                       ,_0: "float"
+                                                       ,_1: "left"}
+                                                      ,{ctor: "_Tuple2"
+                                                       ,_0: "width"
+                                                       ,_1: "50%"}
                                                       ,{ctor: "_Tuple2"
                                                        ,_0: "box-sizing"
                                                        ,_1: "border-box"}
-                                                      ,{ctor: "_Tuple2"
-                                                       ,_0: "border"
-                                                       ,_1: "1px solid"}
                                                       ,{ctor: "_Tuple2"
                                                        ,_0: "color"
                                                        ,_1: "#666666"}
@@ -2111,9 +2133,30 @@ Elm.EventTicker.make = function (_elm) {
                                                       ,{ctor: "_Tuple2"
                                                        ,_0: "padding"
                                                        ,_1: "10px"}]));
-   var eventListItem = function (event) {
+   var highlightStyle = _L.fromArray([{ctor: "_Tuple2"
+                                      ,_0: "background-color"
+                                      ,_1: "gold"}]);
+   var eventHighlight = F2(function (whom,
+   event) {
+      return function () {
+         switch (whom.ctor)
+         {case "Just":
+            return _U.eq(whom._0,
+              event.actor) ? highlightStyle : _L.fromArray([]);
+            case "Nothing":
+            return _L.fromArray([]);}
+         _U.badCase($moduleName,
+         "between lines 47 and 53");
+      }();
+   });
+   var eventListItem = F3(function (howToHighlight,
+   addr,
+   event) {
       return A2($Html.div,
-      _L.fromArray([itemStyle]),
+      _L.fromArray([itemStyle(howToHighlight(event))
+                   ,A2($Html$Events.onMouseOver,
+                   addr,
+                   $SydronAction.PersonOfInterest(event.actor))]),
       _L.fromArray([$Html.text(A2($Basics._op["++"],
       event.eventType,
       A2($Basics._op["++"],
@@ -2123,31 +2166,24 @@ Elm.EventTicker.make = function (_elm) {
       A2($Basics._op["++"],
       " at ",
       event.created_at)))))]));
-   };
-   var view = function (m) {
+   });
+   var view = F2(function (addr,
+   m) {
       return A2($Html.div,
       _L.fromArray([divStyle]),
       A2($List.map,
-      eventListItem,
+      A2(eventListItem,
+      eventHighlight(m.highlightPerson),
+      addr),
       m.recentEvents));
-   };
-   var Model = function (a) {
+   });
+   var init = {_: {}
+              ,highlightPerson: $Maybe.Nothing
+              ,recentEvents: _L.fromArray([])};
+   var Model = F2(function (a,b) {
       return {_: {}
+             ,highlightPerson: b
              ,recentEvents: a};
-   };
-   var init = Model(_L.fromArray([]));
-   var update = F2(function (action,
-   model) {
-      return function () {
-         switch (action.ctor)
-         {case "SingleEvent":
-            return Model(A2($List.take,
-              10,
-              A2($List._op["::"],
-              action._0,
-              model.recentEvents)));}
-         return model;
-      }();
    });
    _elm.EventTicker.values = {_op: _op
                              ,init: init
@@ -2420,7 +2456,7 @@ Elm.GithubEventLayer.make = function (_elm) {
                    break;}
               return $Task.fail(_v0._1);}
          _U.badCase($moduleName,
-         "between lines 109 and 111");
+         "between lines 110 and 112");
       }();
    });
    var filterKnown = F2(function (m,
@@ -2455,7 +2491,7 @@ Elm.GithubEventLayer.make = function (_elm) {
                    ,_0: m
                    ,_1: $Effects.none};}
          _U.badCase($moduleName,
-         "between lines 83 and 85");
+         "between lines 84 and 86");
       }();
    });
    var innerUpdate = $SydronInt.update;
@@ -2495,7 +2531,7 @@ Elm.GithubEventLayer.make = function (_elm) {
               _v8._0,
               _v8._1);}
          _U.badCase($moduleName,
-         "on line 121, column 26 to 45");
+         "on line 122, column 26 to 45");
       }();
    };
    var wrapErrors = F2(function (mbh,
@@ -2555,67 +2591,66 @@ Elm.GithubEventLayer.make = function (_elm) {
    };
    var update = F2(function (a,m) {
       return function () {
-         var _v12 = m.error;
-         switch (_v12.ctor)
-         {case "Just": return A2(andDo,
-              m,
+         switch (a.ctor)
+         {case "ErrorAlert":
+            return A2(andDo,
+              _U.replace([["error"
+                          ,$Maybe.Just(a._0)]],
+              m),
               $Maybe.Nothing);
-            case "Nothing":
+            case "Heartbeat":
             return function () {
-                 switch (a.ctor)
-                 {case "ErrorAlert":
-                    return A2(andDo,
-                      _U.replace([["error"
-                                  ,$Maybe.Just(a._0)]],
+                 var _v17 = m.unseen;
+                 switch (_v17.ctor)
+                 {case "::": return A2(andDo,
+                      _U.replace([["inner"
+                                  ,A2(innerUpdate,
+                                  passSingleEvent(_v17._0),
+                                  m.inner)]
+                                 ,["seen"
+                                  ,A2($List._op["::"],
+                                  _v17._0,
+                                  m.seen)]
+                                 ,["unseen",_v17._1]],
                       m),
                       $Maybe.Nothing);
-                    case "Heartbeat":
-                    return function () {
-                         var _v19 = m.unseen;
-                         switch (_v19.ctor)
-                         {case "::": return A2(andDo,
-                              _U.replace([["inner"
-                                          ,A2(innerUpdate,
-                                          passSingleEvent(_v19._0),
-                                          m.inner)]
-                                         ,["seen"
-                                          ,A2($List._op["::"],
-                                          _v19._0,
-                                          m.seen)]
-                                         ,["unseen",_v19._1]],
-                              m),
+                    case "[]": return function () {
+                         var _v20 = m.error;
+                         switch (_v20.ctor)
+                         {case "Just": return A2(andDo,
+                              m,
                               $Maybe.Nothing);
-                            case "[]": return A2(andDo,
+                            case "Nothing": return A2(andDo,
                               m,
                               $Maybe.Just(A2(fetchEvents,
                               m.repository,
                               m.lastHeader)));}
                          _U.badCase($moduleName,
-                         "between lines 74 and 79");
-                      }();
-                    case "Passthrough":
-                    return A2(andDo,
-                      _U.replace([["inner"
-                                  ,A2(innerUpdate,a._0,m.inner)]],
-                      m),
-                      $Maybe.Nothing);
-                    case "SomeNewEvents":
-                    return A2(andDo,
-                      _U.replace([["unseen"
-                                  ,A2($Basics._op["++"],
-                                  m.unseen,
-                                  $List.reverse(A2(filterKnown,
-                                  m,
-                                  a._0)))]
-                                 ,["lastHeader"
-                                  ,$Maybe.Just(a._1)]],
-                      m),
-                      $Maybe.Nothing);}
+                         "between lines 73 and 77");
+                      }();}
                  _U.badCase($moduleName,
-                 "between lines 69 and 79");
-              }();}
+                 "between lines 71 and 80");
+              }();
+            case "Passthrough":
+            return A2(andDo,
+              _U.replace([["inner"
+                          ,A2(innerUpdate,a._0,m.inner)]],
+              m),
+              $Maybe.Nothing);
+            case "SomeNewEvents":
+            return A2(andDo,
+              _U.replace([["unseen"
+                          ,A2($Basics._op["++"],
+                          m.unseen,
+                          $List.reverse(A2(filterKnown,
+                          m,
+                          a._0)))]
+                         ,["lastHeader"
+                          ,$Maybe.Just(a._1)]],
+              m),
+              $Maybe.Nothing);}
          _U.badCase($moduleName,
-         "between lines 66 and 79");
+         "between lines 66 and 80");
       }();
    });
    _elm.GithubEventLayer.values = {_op: _op
@@ -14223,6 +14258,7 @@ Elm.SeeThePeople.make = function (_elm) {
    $GithubEvent = Elm.GithubEvent.make(_elm),
    $Html = Elm.Html.make(_elm),
    $Html$Attributes = Elm.Html.Attributes.make(_elm),
+   $Html$Events = Elm.Html.Events.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
@@ -14240,7 +14276,7 @@ Elm.SeeThePeople.make = function (_elm) {
             case "Varying":
             return _v0._0(t);}
          _U.badCase($moduleName,
-         "between lines 101 and 103");
+         "between lines 159 and 161");
       }();
    });
    var incrementBorder = F2(function (t,
@@ -14264,6 +14300,19 @@ Elm.SeeThePeople.make = function (_elm) {
       $Basics.toString(i),
       "px");
    };
+   var highlightStyle = function (h) {
+      return function () {
+         switch (h.ctor)
+         {case "NoHighlight":
+            return _L.fromArray([]);
+            case "PersonOfInterestHighlight":
+            return _L.fromArray([{ctor: "_Tuple2"
+                                 ,_0: "box-shadow"
+                                 ,_1: "10px 5px gold"}]);}
+         _U.badCase($moduleName,
+         "between lines 84 and 86");
+      }();
+   };
    var maxBorderPx = 10;
    var imgPx = 100;
    var marginPx = 20;
@@ -14277,57 +14326,100 @@ Elm.SeeThePeople.make = function (_elm) {
          marginPx,
          relativeSize) - borderPx);
          var verticalMargin = pixels(marginPx - borderPx);
-         return $Html$Attributes.style(_L.fromArray([{ctor: "_Tuple2"
-                                                     ,_0: "margin-left"
-                                                     ,_1: horizontalMargin}
-                                                    ,{ctor: "_Tuple2"
-                                                     ,_0: "margin-right"
-                                                     ,_1: horizontalMargin}
-                                                    ,{ctor: "_Tuple2"
-                                                     ,_0: "margin-top"
-                                                     ,_1: verticalMargin}
-                                                    ,{ctor: "_Tuple2"
-                                                     ,_0: "margin-bottom"
-                                                     ,_1: verticalMargin}
-                                                    ,{ctor: "_Tuple2"
-                                                     ,_0: "width"
-                                                     ,_1: pixels(A2(relative,
-                                                     imgPx,
-                                                     relativeSize))}
-                                                    ,{ctor: "_Tuple2"
-                                                     ,_0: "height"
-                                                     ,_1: pixels(imgPx)}
-                                                    ,{ctor: "_Tuple2"
-                                                     ,_0: "border"
-                                                     ,_1: A2($Basics._op["++"],
-                                                     pixels(borderPx),
-                                                     " solid orange")}]));
+         return _L.fromArray([{ctor: "_Tuple2"
+                              ,_0: "margin-left"
+                              ,_1: horizontalMargin}
+                             ,{ctor: "_Tuple2"
+                              ,_0: "margin-right"
+                              ,_1: horizontalMargin}
+                             ,{ctor: "_Tuple2"
+                              ,_0: "margin-top"
+                              ,_1: verticalMargin}
+                             ,{ctor: "_Tuple2"
+                              ,_0: "margin-bottom"
+                              ,_1: verticalMargin}
+                             ,{ctor: "_Tuple2"
+                              ,_0: "width"
+                              ,_1: pixels(A2(relative,
+                              imgPx,
+                              relativeSize))}
+                             ,{ctor: "_Tuple2"
+                              ,_0: "height"
+                              ,_1: pixels(imgPx)}
+                             ,{ctor: "_Tuple2"
+                              ,_0: "border"
+                              ,_1: A2($Basics._op["++"],
+                              pixels(borderPx),
+                              " solid orange")}]);
       }();
    });
-   var draw = function (p) {
+   var personStyle = function (p) {
+      return $Html$Attributes.style(A2($Basics._op["++"],
+      highlightStyle(p.highlight),
+      A2(pictureStyle,
+      p.size.present,
+      p.border.present)));
+   };
+   var divStyle = $Html$Attributes.style(_L.fromArray([{ctor: "_Tuple2"
+                                                       ,_0: "float"
+                                                       ,_1: "right"}
+                                                      ,{ctor: "_Tuple2"
+                                                       ,_0: "width"
+                                                       ,_1: "50%"}]));
+   var draw = F2(function (addr,
+   p) {
       return A2($Html.img,
       _L.fromArray([$Html$Attributes.src(p.actor.avatar_url)
-                   ,A2(pictureStyle,
-                   p.size.present,
-                   p.border.present)]),
+                   ,personStyle(p)
+                   ,A2($Html$Events.onMouseOver,
+                   addr,
+                   $SydronAction.PersonOfInterest(p.actor))]),
       _L.fromArray([]));
-   };
-   var view = function (model) {
+   });
+   var view = F2(function (addr,
+   model) {
       return A2($Html.div,
-      _L.fromArray([]),
-      A2($List.map,draw,model.all));
-   };
+      _L.fromArray([divStyle]),
+      A2($List.map,
+      draw(addr),
+      model.all));
+   });
    var Model = function (a) {
       return {_: {},all: a};
    };
    var init = Model(_L.fromArray([]));
-   var EachPerson = F3(function (a,
+   var EachPerson = F4(function (a,
    b,
-   c) {
+   c,
+   d) {
       return {_: {}
              ,actor: a
              ,border: c
+             ,highlight: d
              ,size: b};
+   });
+   var PersonOfInterestHighlight = {ctor: "PersonOfInterestHighlight"};
+   var NoHighlight = {ctor: "NoHighlight"};
+   var highlightPerson = F2(function (ea,
+   model) {
+      return function () {
+         var shouldHighlight = function (person) {
+            return _U.eq(person.actor,
+            ea);
+         };
+         var correctHighlight = function (person) {
+            return shouldHighlight(person) ? PersonOfInterestHighlight : NoHighlight;
+         };
+         return _U.replace([["all"
+                            ,A2($List.map,
+                            function (p) {
+                               return _U.replace([["highlight"
+                                                  ,correctHighlight(p)]],
+                               p);
+                            },
+                            model.all)]],
+         model);
+      }();
    });
    var Varying = function (a) {
       return {ctor: "Varying"
@@ -14388,10 +14480,11 @@ Elm.SeeThePeople.make = function (_elm) {
                    1.0))
                    ,present: 1.0};
    var newPerson = function (actor) {
-      return A3(EachPerson,
-      actor,
-      growing,
-      shrinking);
+      return {_: {}
+             ,actor: actor
+             ,border: shrinking
+             ,highlight: NoHighlight
+             ,size: growing};
    };
    var startAnimation = function (ea) {
       return $List.map(function (n) {
@@ -14405,7 +14498,11 @@ Elm.SeeThePeople.make = function (_elm) {
    model) {
       return function () {
          switch (a.ctor)
-         {case "SingleEvent":
+         {case "PersonOfInterest":
+            return A2(highlightPerson,
+              a._0,
+              model);
+            case "SingleEvent":
             return A2($List.member,
               a._0.actor,
               A2($List.map,
@@ -14432,7 +14529,7 @@ Elm.SeeThePeople.make = function (_elm) {
                                model.all)]],
               model);}
          _U.badCase($moduleName,
-         "between lines 79 and 84");
+         "between lines 117 and 127");
       }();
    });
    _elm.SeeThePeople.values = {_op: _op
@@ -14865,6 +14962,10 @@ Elm.SydronAction.make = function (_elm) {
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm),
    $Time = Elm.Time.make(_elm);
+   var PersonOfInterest = function (a) {
+      return {ctor: "PersonOfInterest"
+             ,_0: a};
+   };
    var TimeKeepsTickingAway = function (a) {
       return {ctor: "TimeKeepsTickingAway"
              ,_0: a};
@@ -14875,7 +14976,8 @@ Elm.SydronAction.make = function (_elm) {
    };
    _elm.SydronAction.values = {_op: _op
                               ,SingleEvent: SingleEvent
-                              ,TimeKeepsTickingAway: TimeKeepsTickingAway};
+                              ,TimeKeepsTickingAway: TimeKeepsTickingAway
+                              ,PersonOfInterest: PersonOfInterest};
    return _elm.SydronAction.values;
 };
 Elm.SydronInt = Elm.SydronInt || {};
@@ -14894,6 +14996,7 @@ Elm.SydronInt.make = function (_elm) {
    $GithubRepository = Elm.GithubRepository.make(_elm),
    $Header = Elm.Header.make(_elm),
    $Html = Elm.Html.make(_elm),
+   $Html$Attributes = Elm.Html.Attributes.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $RepoInput = Elm.RepoInput.make(_elm),
@@ -14921,16 +15024,26 @@ Elm.SydronInt.make = function (_elm) {
    m) {
       return updateTicker(action)(updatePeople(action)(m));
    });
+   var inline = $Html$Attributes.style(_L.fromArray([{ctor: "_Tuple2"
+                                                     ,_0: "display"
+                                                     ,_1: "inline"}]));
    var formclass = "pure-form";
-   var view = F2(function (_v0,m) {
-      return function () {
-         return A2($Html.div,
-         _L.fromArray([]),
-         _L.fromArray([$Header.view(m.repositoryOfInterest)
-                      ,$RepoInput.view(formclass)
-                      ,$EventTicker.view(m.ticker)
-                      ,$SeeThePeople.view(m.people)]));
-      }();
+   var view = F2(function (addr,
+   m) {
+      return A2($Html.div,
+      _L.fromArray([]),
+      _L.fromArray([$Header.view(m.repositoryOfInterest)
+                   ,$RepoInput.view(formclass)
+                   ,A2($Html.div,
+                   _L.fromArray([inline]),
+                   _L.fromArray([A2($EventTicker.view,
+                   addr,
+                   m.ticker)]))
+                   ,A2($Html.div,
+                   _L.fromArray([inline]),
+                   _L.fromArray([A2($SeeThePeople.view,
+                   addr,
+                   m.people)]))]));
    });
    var Model = F3(function (a,
    b,
