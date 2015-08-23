@@ -63,16 +63,17 @@ innerUpdate = Inner.update
 
 update: Action -> Model -> (Model, Effects Action)
 update a m =
-  case m.error of 
-    Just anything -> m `andDo` Nothing -- do nothing if we have ever failed
-    Nothing ->
     case a of 
       Passthrough ia -> { m | inner <- innerUpdate ia m.inner } `andDo` Nothing
       SomeNewEvents moreEvents bh -> { m | unseen <- m.unseen ++ (List.reverse (filterKnown m moreEvents)),
                                            lastHeader <- Just bh } `andDo` Nothing
       Heartbeat -> 
         case m.unseen of
-          [] -> m `andDo` Just (fetchEvents m.repository m.lastHeader)
+          [] -> 
+            case m.error of 
+              Just anything -> m `andDo` Nothing -- do nothing if we have ever failed
+              Nothing ->
+                m `andDo` Just (fetchEvents m.repository m.lastHeader)
           head :: tail -> { m | inner <- innerUpdate (passSingleEvent head) m.inner,
                                 seen <- head :: m.seen, 
                                 unseen <- tail } `andDo` Nothing
