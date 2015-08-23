@@ -84,8 +84,7 @@ itemStyle highlight =
     ([
       "color" => "#515151",
       "font-family" => "Helvetica",
-      "font-size" => "21px",
-      "height" => "24px"
+      "font-size" => "21px"
     ] ++ highlight)
 
 
@@ -95,13 +94,16 @@ type alias Action = SydronAction
 
 update: Action -> Model -> Model
 update action model =
-    case action of
-        SingleEvent event ->
-          { model
-            | recentEvents <- event :: model.recentEvents
-          }
-        PersonOfInterest ea ->
-          { model
-            | highlightPerson <- Just ea
-          }
-        _ -> model
+  case action of
+    SingleEvent event -> 
+      { model 
+        | recentEvents <- event :: model.recentEvents
+      }
+    PersonOfInterest ea -> 
+      { model 
+        | highlightPerson <- Just ea 
+      }
+    _ -> model
+
+
+
