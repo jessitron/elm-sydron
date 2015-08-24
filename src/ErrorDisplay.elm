@@ -1,19 +1,19 @@
 module ErrorDisplay(view) where
 
 import Http
-import Html exposing (Html, Attribute)
-import Html.Attributes as Attr
+import Html exposing (..)
+import Html.Attributes exposing (..)
 
 
 view: Maybe Http.Error -> Html
 view me =
  case me of
-  Just e -> Html.h2 [errorStyle] [Html.text (toString e)]
-  Nothing -> Html.div [][]
+  Just e -> h2 [errorStyle] [text (toString e)]
+  Nothing -> div [][]
 
 
 errorStyle: Attribute
-errorStyle = Attr.style [("color" => "red")]
+errorStyle = style [("color" => "red")]
 
 
 (=>) = (,)

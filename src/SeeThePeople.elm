@@ -2,9 +2,9 @@ module SeeThePeople(Model, init, view, update) where
 
 import SydronAction exposing (SydronAction(..))
 import GithubEvent exposing (EventActor, Event)
-import Html exposing (Html)
-import Html.Attributes as Attr
-import Html.Events
+import Html exposing (..)
+import Html.Attributes exposing (..)
+import Html.Events exposing (onMouseOver)
 import Time exposing (Time)
 
 type alias Percentage = Float
@@ -60,23 +60,23 @@ init = Model []
 
 draw: Signal.Address SydronAction -> EachPerson -> Html
 draw addr p =
-  Html.img
+  img
     [
-     Attr.src p.actor.avatar_url,
+     src p.actor.avatar_url,
      personStyle p,
-     Html.Events.onMouseOver addr (PersonOfInterest p.actor)
+     onMouseOver addr (PersonOfInterest p.actor)
     ][]
 
 
 view: Signal.Address SydronAction -> Model -> Html
 view addr model =
-  Html.div
+  div
     [ divStyle ]
     (List.map (draw addr) model.all)
 
 
 divStyle =
-  Attr.style
+  style
     ["float" => "right",
      "width" => "50%"]
 
@@ -90,9 +90,9 @@ imgPx = 100
 maxBorderPx = 10
 
 
-personStyle: EachPerson -> Html.Attribute
+personStyle: EachPerson -> Attribute
 personStyle p =
-  Attr.style (
+  style (
     (highlightStyle p.highlight)
     ++ (pictureStyle p.size.present p.border.present)
     )

@@ -1,24 +1,24 @@
 module RepoInput(view) where
 
-import Html exposing (Html)
-import Html.Attributes as Attr
+import Html exposing (..)
+import Html.Attributes exposing (..)
 
 
 view : String -> Html
 view formclass =
-  Html.div [ styles ]
-    [ Html.form [ Attr.class formclass] [
-      Html.fieldset [] [
-         Html.legend [] [Html.text "See events for a different repository:"],
-         Html.input [ Attr.placeholder "owner", Attr.name "owner"] [],
-         Html.input [ Attr.placeholder "repository", Attr.name "repo-name"] [],
-         Html.button [ Attr.class "pure-button pure-button-primary"] [Html.text "Go"]
+  div [ styles ]
+    [ Html.form [ class formclass] [
+      fieldset [] [
+         legend [] [text "See events for a different repository:"],
+         input [ placeholder "owner", name "owner"] [],
+         input [ placeholder "repository", name "repo-name"] [],
+         button [ class "pure-button pure-button-primary"] [text "Go"]
        ]
     ]]
 
 
-styles : Html.Attribute
-styles = Attr.style [
+styles : Attribute
+styles = style [
           "margin" => "10px"
           ]
 

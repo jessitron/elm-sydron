@@ -9,7 +9,7 @@ import ErrorDisplay
 import Effects exposing (Effects)
 import Task exposing (Task)
 import Http
-import Html exposing (Html)
+import Html exposing (..)
 
 
 --- ACTIONS
@@ -158,7 +158,7 @@ someNewEvents (ee, bh) = SomeNewEvents ee bh
 
 
 view: Signal.Address Action -> Model -> Html
-view addr m = Html.div []
+view addr m = div []
                 [
                   Inner.view (Signal.forwardTo addr Passthrough ) m.inner,
                   ErrorDisplay.view m.error

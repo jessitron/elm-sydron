@@ -2,8 +2,8 @@ module SydronInt(update, init, view, Model) where
 
 import GithubRepository exposing (GithubRepository)
 import SydronAction exposing (SydronAction(..))
-import Html exposing (Html)
-import Html.Attributes as Attr
+import Html exposing (..)
+import Html.Attributes exposing (..)
 import Effects exposing (Effects)
 -- for actual use
 import EventTicker
@@ -37,17 +37,17 @@ formclass = "pure-form" -- this is dependent on index.html including purecss
 
 view : Signal.Address SydronAction -> Model -> Html
 view addr m =
-    Html.div
+    div
         [ ]
         [ Header.view m.repositoryOfInterest,
           RepoInput.view formclass,
-          Html.div [inline] [EventTicker.view addr m.ticker],
-          Html.div [inline] [SeeThePeople.view addr m.people]
+          div [inline] [EventTicker.view addr m.ticker],
+          div [inline] [SeeThePeople.view addr m.people]
         ]
 
 
-inline: Html.Attribute
-inline = Attr.style ["display" => "inline"]
+inline: Attribute
+inline = style ["display" => "inline"]
 
 
 -- UPDATE
