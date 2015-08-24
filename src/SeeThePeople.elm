@@ -16,6 +16,7 @@ type alias PresentAndFuture a =
       future: Iteratee a
     }
 
+
 type Iteratee a =
     Constant
     | Varying (Time -> PresentAndFuture a)
@@ -23,9 +24,11 @@ type Iteratee a =
 
 fullSize = PresentAndFuture 1.0 Constant
 
+
 type Highlight =
   NoHighlight
   | PersonOfInterestHighlight
+
 
 type alias EachPerson = {
   actor: EventActor,
@@ -33,6 +36,8 @@ type alias EachPerson = {
   border: PresentAndFuture Percentage,
   highlight: Highlight
 }
+
+
 newPerson actor =
   {
     actor = actor,
@@ -41,11 +46,16 @@ newPerson actor =
     highlight = NoHighlight
   }
 
+
 type alias Model =
     {
       all: List EachPerson
     }
+
+
 init = Model []
+
+
 ---- VIEW
 
 draw: Signal.Address SydronAction -> EachPerson -> Html
@@ -57,20 +67,28 @@ draw addr p =
      Html.Events.onMouseOver addr (PersonOfInterest p.actor)
     ][]
 
+
 view: Signal.Address SydronAction -> Model -> Html
 view addr model =
   Html.div
     [ divStyle ]
     (List.map (draw addr) model.all)
 
+
 divStyle =
   Attr.style
     [("float", "right"),
      ("width", "50%")]
 
+
 marginPx = 20
+
+
 imgPx = 100
+
+
 maxBorderPx = 10
+
 
 personStyle: EachPerson -> Html.Attribute
 personStyle p =
@@ -78,6 +96,7 @@ personStyle p =
     (highlightStyle p.highlight)
     ++ (pictureStyle p.size.present p.border.present)
     )
+
 
 highlightStyle: Highlight -> List (String, String)
 highlightStyle h =
@@ -103,8 +122,10 @@ pictureStyle relativeSize borderSize =
        ("border", (pixels borderPx) ++ " solid orange")
      ]
 
+
 pixels: Int -> String
 pixels i = (toString i) ++ "px"
+
 
 relative: Int -> Float -> Int
 relative maxPx relativeSize =
@@ -141,6 +162,7 @@ highlightPerson ea model =
      | all <- List.map (\p -> { p | highlight <- correctHighlight p}) model.all
     }
 
+
 -- animate
 
 startAnimation : EventActor -> List EachPerson -> List EachPerson
@@ -151,8 +173,11 @@ startAnimation ea =
 incrementSize : Time -> EachPerson -> EachPerson
 incrementSize t m =
   { m | size <- iterateeate t m.size }
+
+
 incrementBorder t m =
   { m | border <- iterateeate t m.border }
+
 
 iterateeate : Time -> PresentAndFuture a -> PresentAndFuture a
 iterateeate t paf =
@@ -160,7 +185,9 @@ iterateeate t paf =
     Constant  -> paf
     Varying f -> f t
 
+
 entrySlowness = Time.second
+
 
 growing: PresentAndFuture Percentage
 growing =
@@ -168,6 +195,7 @@ growing =
     present = 0.0,
     future = Varying (growFromOver entrySlowness 0.0)
   }
+
 
 growFromOver : Time -> Percentage -> Time -> PresentAndFuture Percentage
 growFromOver totalTime presentValue dt =
@@ -180,7 +208,9 @@ growFromOver totalTime presentValue dt =
     then PresentAndFuture max Constant
     else PresentAndFuture presentValue (Varying nextFunction)
 
+
 borderErodes = 3 * Time.second
+
 
 shrinking: PresentAndFuture Percentage
 shrinking =
@@ -188,6 +218,7 @@ shrinking =
     present = 1.0,
     future = Varying (shrinkOver borderErodes 1.0)
   }
+
 
 shrinkOver : Time -> Percentage -> Time -> PresentAndFuture Percentage
 shrinkOver totalTime presentValue dt =

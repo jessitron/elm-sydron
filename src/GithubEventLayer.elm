@@ -11,23 +11,30 @@ import Task exposing (Task)
 import Http
 import Html exposing (Html)
 
+
 --- ACTIONS
 
 type alias InnerAction = InnerActions.SydronAction
+
+
 passSingleEvent: Event -> InnerAction
 passSingleEvent e = InnerActions.SingleEvent e
+
 
 type Action = Passthrough InnerAction
              | Heartbeat
              | SomeNewEvents (List Event) BookmarkHeader
              | ErrorAlert Http.Error
 
+
 wrapAction: InnerAction -> Action
 wrapAction ia = Passthrough ia
+
 
 --- MODEL
 
 type alias InnerModel = Inner.Model
+
 
 type alias Model =
     {
@@ -39,8 +46,10 @@ type alias Model =
       lastHeader: Maybe BookmarkHeader
     }
 
+
 --innerInit: GithubRepository -> Inner.Model
 innerInit = Inner.init
+
 
 init: GithubRepository -> (Model, Effects Action)
 init repo =
@@ -58,8 +67,11 @@ init repo =
 --- UPDATE
 
 type alias InnerUpdate = InnerAction -> Inner.Model -> Inner.Model
+
+
 innerUpdate: InnerUpdate
 innerUpdate = Inner.update
+
 
 update: Action -> Model -> (Model, Effects Action)
 update a m =
@@ -79,11 +91,13 @@ update a m =
                                 unseen <- tail } `andDo` Nothing
       ErrorAlert e -> { m | error <- Just e} `andDo` Nothing
 
+
 andDo: Model -> Maybe (Effects Action) -> (Model, Effects Action)
 andDo m maybe =
   case maybe of
     Nothing -> (m, Effects.none)
     Just something -> (m, something)
+
 
 filterKnown: Model -> List Event -> List Event
 filterKnown m incomingEvents =
@@ -97,19 +111,23 @@ filterKnown m incomingEvents =
 
 --- EFFECTS
 
+
 fetchEvents: GithubRepository -> Maybe BookmarkHeader -> Effects Action
 fetchEvents repo bh = wrapErrors bh (fetchPageOfEvents repo bh)
 
 --- guts
 
+
 errorToAction: Http.Error -> Task Effects.Never Action
 errorToAction e = Task.succeed (ErrorAlert e)
+
 
 notModifiedIsOk: Maybe BookmarkHeader -> Http.Error -> Task Http.Error ((List Event), BookmarkHeader)
 notModifiedIsOk mbh e =
   case (mbh, e) of
     (Just bh, Http.BadResponse 304 _) -> Task.succeed ([], bh)
     (_, e) -> Task.fail e
+
 
 wrapErrors: Maybe BookmarkHeader -> Task Http.Error ((List Event), BookmarkHeader) -> Effects Action
 wrapErrors mbh t =

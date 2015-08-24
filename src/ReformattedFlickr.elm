@@ -12,6 +12,7 @@ import Window
 
 -- VIEW
 
+
 view : Int -> String -> String -> Html
 view height string imgUrl =
     Html.div

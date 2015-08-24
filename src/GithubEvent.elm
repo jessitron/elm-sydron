@@ -10,11 +10,13 @@ import Dict
 
 -- JSON DECODERS
 
+
 type alias EventActor =
     {
       login: String,
       avatar_url: String
     }
+
 
 type alias Event =
   {
@@ -23,12 +25,14 @@ type alias Event =
     created_at: String
   }
 
+
 githubEventActor : Json.Decoder EventActor
 githubEventActor =
     Json.object2
       EventActor
         ("login" := Json.string)
         ("avatar_url" := Json.string)
+
 
 listDecoder : Json.Decoder (List Event)
 listDecoder =
@@ -39,9 +43,11 @@ listDecoder =
           ("actor" := githubEventActor)
           ("created_at" := Json.string)
 
+
 --- HOW TO FETCH
 
 type alias BookmarkHeader = String
+
 
 fetchPageOfEvents : GithubRepository -> Maybe BookmarkHeader -> Task Http.Error ((List Event), BookmarkHeader)
 fetchPageOfEvents repo bh =
@@ -51,7 +57,9 @@ fetchPageOfEvents repo bh =
       GetWithHeaders.get listDecoder (github repo 1) headers
       |> Task.map extractHeader
 
+
 realGithubUrl = "https://api.github.com/repos"
+
 
 extractHeader: (value, GetWithHeaders.Headers) -> (value, BookmarkHeader)
 extractHeader (v, hh) =
@@ -60,6 +68,7 @@ extractHeader (v, hh) =
     getOrEmpty key = (Dict.get key) >> Maybe.withDefault ""
   in
     (v, getOrEmpty "ETag" dict)
+
 
 github : GithubRepository -> Int -> String
 github repo pageNo = Http.url ( (Maybe.withDefault realGithubUrl repo.githubUrl) ++ "/" ++ repo.owner ++ "/" ++ repo.repo ++ "/events") <|

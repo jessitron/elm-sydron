@@ -4,7 +4,9 @@ import GithubRepository exposing (GithubRepository)
 import Html
 import Html.Attributes as Attr
 
+
 type alias Model = GithubRepository
+
 
 view model =
   Html.div
@@ -29,6 +31,7 @@ view model =
     Html.text " and displays them one at a time. Then it polls github for new events for the repository, displaying them as they come in.",
     Html.text " Events are displayed at most one per three seconds."
   ]
+
 
 repositoryLink repo = "http://github.com/" ++ repo.owner ++ "/" ++ repo.repo
 repositoryDescription repo = repo.owner ++ "'s " ++ repo.repo ++ " repository"

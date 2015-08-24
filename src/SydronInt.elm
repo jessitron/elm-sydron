@@ -19,6 +19,8 @@ type alias Model =
      ticker: EventTicker.Model,
      people: SeeThePeople.Model
   }
+
+
 init: GithubRepository -> Model
 init repositoryFromUrlParams =
   Model
@@ -26,9 +28,12 @@ init repositoryFromUrlParams =
     EventTicker.init
     SeeThePeople.init
 
+
 -- VIEW
 
+
 formclass = "pure-form" -- this is dependent on index.html including purecss
+
 
 view : Signal.Address SydronAction -> Model -> Html
 view addr m =
@@ -40,8 +45,10 @@ view addr m =
           Html.div [inline] [SeeThePeople.view addr m.people]
         ]
 
+
 inline: Html.Attribute
 inline = Attr.style [("display", "inline")]
+
 
 -- UPDATE
 

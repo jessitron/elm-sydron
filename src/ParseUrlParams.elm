@@ -3,6 +3,7 @@ module ParseUrlParams(parse, integerParam) where
 import String
 import Dict exposing (Dict)
 
+
 type Model =
     Error String
   | UrlParams (Dict String String)
@@ -15,6 +16,7 @@ parse s =
     UrlParams d -> d
     _ -> Dict.empty
 
+
 integerParam: String -> Int -> Dict String String -> Int
 integerParam key default dict =
   case (Dict.get key dict) of
@@ -24,17 +26,20 @@ integerParam key default dict =
         Err _ -> default
         Ok i -> i
 
+
 toMaybeInt: String -> Maybe Int
 toMaybeInt s =
   case (String.toInt s) of
     Ok i -> Just i
     Err _ -> Nothing
 
+
 parseSearchString : String -> Model
 parseSearchString startsWithQuestionMarkThenParams =
   case (String.uncons startsWithQuestionMarkThenParams) of
     Nothing -> Error "No URL params"
     Just ('?', rest) -> parseParams rest
+
 
 parseParams : String -> Model
 parseParams stringWithAmpersands =
@@ -44,11 +49,13 @@ parseParams stringWithAmpersands =
   in
     UrlParams (Dict.fromList eachPair)
 
+
 splitAtFirst : Char -> String -> (String, String)
 splitAtFirst c s =
   case (firstOccurrence c s) of
     Nothing -> (s, "")
     Just i  -> ((String.left i s), (String.dropLeft (i + 1) s))
+
 
 firstOccurrence : Char -> String -> Maybe Int
 firstOccurrence c s =
