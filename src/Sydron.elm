@@ -60,9 +60,11 @@ animationFrames =
         |> Signal.map GithubEventLayer.wrapAction
 
 
-perEventMS = Time.second * (toFloat (ParseUrlParams.integerParam "frequency" 3 urlParameters))
-
-
 showNewEvent: Signal GithubEventLayer.Action
-showNewEvent = Signal.map (\t -> GithubEventLayer.Heartbeat) (Time.every perEventMS)
-
+showNewEvent =
+    urlParameters
+        |> ParseUrlParams.integerParam "frequency" 3
+        |> toFloat
+        |> (*) Time.second
+        |> Time.every
+        |> Signal.map (always GithubEventLayer.Heartbeat)
