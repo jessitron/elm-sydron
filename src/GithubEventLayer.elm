@@ -118,11 +118,12 @@ foo => bar
 filterKnown: Model -> List Event -> List Event
 filterKnown m incomingEvents =
   let
-    knownEvents = m.seen ++ m.unseen
-    isKnown event = (List.member event knownEvents)
-    unknown event = not (isKnown event)
+    isKnown event =
+      m.seen ++ m.unseen
+        |> List.member event
   in
-    (List.filter unknown incomingEvents)
+    incomingEvents
+      |> List.filter (not << isKnown)
 
 
 --- EFFECTS

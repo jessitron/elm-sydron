@@ -49,20 +49,22 @@ repositoryOfInterest =
     "satellite-of-love" "Hungover"
 
 
-timePasses : Signal Time
-timePasses =  (Signal.map Time.inMilliseconds (Time.fps 30))
-
-
 animationFrames : Signal GithubEventLayer.Action
 animationFrames =
-    timePasses
-        |> Signal.map TimeKeepsTickingAway
-        |> Signal.map GithubEventLayer.wrapAction
+    Time.fps 30
+        |> Signal.map (Time.inMilliseconds >> wrapTickAction)
 
 
-perEventMS = Time.second * (toFloat (ParseUrlParams.integerParam "frequency" 3 urlParameters))
+wrapTickAction : Time -> GithubEventLayer.Action
+wrapTickAction ms =
+    GithubEventLayer.wrapAction (TimeKeepsTickingAway ms)
 
 
 showNewEvent: Signal GithubEventLayer.Action
-showNewEvent = Signal.map (\t -> GithubEventLayer.Heartbeat) (Time.every perEventMS)
-
+showNewEvent =
+    urlParameters
+        |> ParseUrlParams.integerParam "frequency" 3
+        |> toFloat
+        |> (*) Time.second
+        |> Time.every
+        |> Signal.map (always GithubEventLayer.Heartbeat)
