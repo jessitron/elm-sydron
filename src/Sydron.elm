@@ -54,8 +54,10 @@ timePasses =  (Signal.map Time.inMilliseconds (Time.fps 30))
 
 
 animationFrames : Signal GithubEventLayer.Action
-animationFrames = Signal.map TimeKeepsTickingAway timePasses
-                  |> Signal.map GithubEventLayer.wrapAction
+animationFrames =
+    timePasses
+        |> Signal.map TimeKeepsTickingAway
+        |> Signal.map GithubEventLayer.wrapAction
 
 
 perEventMS = Time.second * (toFloat (ParseUrlParams.integerParam "frequency" 3 urlParameters))

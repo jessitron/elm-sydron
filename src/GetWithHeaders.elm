@@ -51,5 +51,9 @@ handleResponseWithHeaders handle response =
 
     True ->
         case response.value of
-          Text str -> handle str |> Task.map (\v -> (v, (Dict.toList response.headers)))
+          Text str ->
+            str
+              |> handle
+              |> Task.map (\v -> (v, (Dict.toList response.headers)))
+
           _ -> fail (UnexpectedPayload "Response body is a blob, expecting a string.")
