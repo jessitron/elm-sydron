@@ -74,6 +74,9 @@ viewEventType eventType =
         "PullRequestEvent" ->
           "created a pull request."
 
+        "WatchEvent" ->
+          "watched the repo."
+
         unrecognizedEvent ->
           "did a " ++ unrecognizedEvent ++ "."
   ]
