@@ -12,7 +12,6 @@ view model =
   div
     [ style
       [
-        "height" => "100px",
         "font-family" => "Helvetica",
         "margin-top" => "20px",
         "margin-left" => "20px"
