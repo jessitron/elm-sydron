@@ -1,6 +1,21 @@
 # Sydron: github events visualized
 Hey, it's a start. Mostly I'm playing around with Elm.
 
+## React Rally
+
+This project was created for my talk at React Rally 2015.
+Here are some resources for people who want more information after that
+talk:
+
+[Slides](https://speakerdeck.com/jessitron/functional-principles-in-react-and-elm)
+
+### Elm
+
+ - [Elm](http://elm-lang.org)
+ - [Integrating Elm with React](http://noredinktech.tumblr.com/post/126978281075/walkthrough-introducing-elm-to-a-js-web-app) post by @rtfeldman
+ - [Evan on user focused design in Elm](https://www.youtube.com/watch?v=oYk8CKH7OhE) video from Curry On 2015
+ - [Functional Reactive Programming in Elm](https://www.youtube.com/watch?v=F-nTU3Wy26I) video from Philly ETE 2014
+
 ## See it in action
 
 Visit [Sydron](http://jessitron.github.io/elm-sydron), and type your
