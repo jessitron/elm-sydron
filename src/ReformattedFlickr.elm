@@ -1,7 +1,7 @@
 module ReformattedFlickr where
 
-import Html exposing (Html)
-import Html.Attributes as Attr
+import Html exposing (..)
+import Html.Attributes exposing (..)
 import Html.Events as Event
 import Http
 import Json.Decode as Json exposing ((:=))
@@ -15,14 +15,14 @@ import Window
 
 view : Int -> String -> String -> Html
 view height string imgUrl =
-    Html.div
-        [ Attr.style (imgStyle height imgUrl) ]
+    div
+        [ style (imgStyle height imgUrl) ]
         [
-            Html.input
+            input
                 [
-                    Attr.placeholder "Flickr Query",
-                    Attr.value string,
-                    Attr.style queryInputStyle,
+                    placeholder "Flickr Query",
+                    value string,
+                    style queryInputStyle,
                     Event.on "input" Event.targetValue (Signal.message query.address)
                 ]
                 []
