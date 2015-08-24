@@ -36,8 +36,8 @@ formclass = "pure-form" -- this is dependent on index.html including purecss
 
 view : Signal.Address SydronAction -> Model -> Html
 view addr m =
-    div
-        [ ]
+    main'
+        [style ["width" => "960px", "margin" => "0 auto"]]
         [ Header.view m.repo,
           RepoInput.view formclass,
           span [] [EventTicker.view addr m.ticker],
