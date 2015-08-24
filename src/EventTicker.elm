@@ -105,7 +105,7 @@ divStyle =
   style
     [
       "float" => "left",
-      "width" => "50%",
+      "width" => "70%",
       "box-sizing" => "border-box",
       "color" => "#666666",
       "overflow" => "scroll",
