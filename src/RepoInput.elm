@@ -19,5 +19,7 @@ view formclass =
 
 styles : Html.Attribute
 styles = Attr.style [
-          ("margin", "10px")
+          "margin" => "10px"
           ]
+
+(=>) = (,)

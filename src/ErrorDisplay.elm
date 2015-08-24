@@ -13,4 +13,7 @@ view me =
 
 
 errorStyle: Attribute
-errorStyle = Attr.style [("color", "red")]
+errorStyle = Attr.style [("color" => "red")]
+
+
+(=>) = (,)

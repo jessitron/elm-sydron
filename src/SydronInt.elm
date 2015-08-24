@@ -47,7 +47,7 @@ view addr m =
 
 
 inline: Html.Attribute
-inline = Attr.style [("display", "inline")]
+inline = Attr.style ["display" => "inline"]
 
 
 -- UPDATE
@@ -68,3 +68,6 @@ updatePeople action model =
 updateTicker : SydronAction -> Model -> Model
 updateTicker action model =
   { model | ticker <- EventTicker.update action model.ticker }
+
+
+(=>) = (,)

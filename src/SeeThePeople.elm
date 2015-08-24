@@ -77,8 +77,8 @@ view addr model =
 
 divStyle =
   Attr.style
-    [("float", "right"),
-     ("width", "50%")]
+    ["float" => "right",
+     "width" => "50%"]
 
 
 marginPx = 20
@@ -230,3 +230,6 @@ shrinkOver totalTime presentValue dt =
     if (nextPresent <= min)
     then PresentAndFuture min Constant
     else PresentAndFuture presentValue (Varying nextFunction)
+
+
+(=>) = (,)

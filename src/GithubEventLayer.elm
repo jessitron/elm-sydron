@@ -75,28 +75,44 @@ innerUpdate = Inner.update
 
 update: Action -> Model -> (Model, Effects Action)
 update a m =
-    case a of
-      Passthrough ia -> { m | inner <- innerUpdate ia m.inner } `andDo` Nothing
-      SomeNewEvents moreEvents bh -> { m | unseen <- m.unseen ++ (List.reverse (filterKnown m moreEvents)),
-                                           lastHeader <- Just bh } `andDo` Nothing
-      Heartbeat ->
-        case m.unseen of
-          [] ->
-            case m.error of
-              Just anything -> m `andDo` Nothing -- do nothing if we have ever failed
-              Nothing ->
-                m `andDo` Just (fetchEvents m.repository m.lastHeader)
-          head :: tail -> { m | inner <- innerUpdate (passSingleEvent head) m.inner,
-                                seen <- head :: m.seen,
-                                unseen <- tail } `andDo` Nothing
-      ErrorAlert e -> { m | error <- Just e} `andDo` Nothing
+  case a of
+    Passthrough ia ->
+      { m | inner <- innerUpdate ia m.inner } => Effects.none
+
+    SomeNewEvents moreEvents bh ->
+      { m |
+        unseen <- m.unseen ++ (List.reverse (filterKnown m moreEvents)),
+        lastHeader <- Just bh
+      } => Effects.none
+
+    Heartbeat ->
+      case m.unseen of
+        [] ->
+          case m.error of
+            Just anything ->
+              m => Effects.none -- do nothing if we have ever failed
+
+            Nothing ->
+              m => fetchEvents m.repository m.lastHeader
+
+        head :: tail ->
+          { m |
+            inner <- innerUpdate (passSingleEvent head) m.inner,
+            seen <- head :: m.seen,
+            unseen <- tail
+          } => Effects.none
+
+    ErrorAlert e ->
+      { m | error <- Just e} => Effects.none
 
 
-andDo: Model -> Maybe (Effects Action) -> (Model, Effects Action)
-andDo m maybe =
-  case maybe of
-    Nothing -> (m, Effects.none)
-    Just something -> (m, something)
+{- Micro-DSL for creating tuples. Now these are equivalent:
+
+foo => bar
+(foo, bar)
+
+-}
+(=>) = (,)
 
 
 filterKnown: Model -> List Event -> List Event
