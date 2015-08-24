@@ -49,13 +49,10 @@ repositoryOfInterest =
     "satellite-of-love" "Hungover"
 
 
-timePasses : Signal Time
-timePasses =  (Signal.map Time.inMilliseconds (Time.fps 30))
-
-
 animationFrames : Signal GithubEventLayer.Action
 animationFrames =
-    timePasses
+    Time.fps 30
+        |> Signal.map Time.inMilliseconds
         |> Signal.map TimeKeepsTickingAway
         |> Signal.map GithubEventLayer.wrapAction
 
