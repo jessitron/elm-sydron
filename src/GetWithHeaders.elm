@@ -7,10 +7,13 @@ import Task exposing (Task, andThen, mapError, succeed, fail)
 import Json.Decode as Json
 import Dict exposing (Dict)
 
+
 type alias Headers = List (String, String)
+
+
 get: Json.Decoder value -> String -> Headers -> Task Error (value, Headers)
-get decoder url headers = 
-  let 
+get decoder url headers =
+  let
     request =
       {
           verb = "GET",
@@ -32,11 +35,13 @@ fromJsonWithHeaders decoder response =
       mapError promoteError response
         `andThen` handleResponseWithHeaders decode
 
+
 promoteError : RawError -> Error
 promoteError rawError =
   case rawError of
     RawTimeout -> Timeout
     RawNetworkError -> NetworkError
+
 
 handleResponseWithHeaders : (String -> Task Error a) -> Response -> Task Error (a, Headers)
 handleResponseWithHeaders handle response =

@@ -10,22 +10,25 @@ import Time exposing (Time)
 type alias Percentage = Float
 
 
-type alias PresentAndFuture a = 
+type alias PresentAndFuture a =
     {
       present: a,
       future: Iteratee a
     }
 
-type Iteratee a = 
+
+type Iteratee a =
     Constant
     | Varying (Time -> PresentAndFuture a)
 
 
-fullSize = PresentAndFuture 1.0 Constant 
+fullSize = PresentAndFuture 1.0 Constant
 
-type Highlight = 
+
+type Highlight =
   NoHighlight
   | PersonOfInterestHighlight
+
 
 type alias EachPerson = {
   actor: EventActor,
@@ -33,7 +36,9 @@ type alias EachPerson = {
   border: PresentAndFuture Percentage,
   highlight: Highlight
 }
-newPerson actor = 
+
+
+newPerson actor =
   {
     actor = actor,
     size = growing,
@@ -41,43 +46,57 @@ newPerson actor =
     highlight = NoHighlight
   }
 
-type alias Model = 
-    { 
-      all: List EachPerson 
+
+type alias Model =
+    {
+      all: List EachPerson
     }
+
+
 init = Model []
+
+
 ---- VIEW
 
 draw: Signal.Address SydronAction -> EachPerson -> Html
-draw addr p = 
-  Html.img 
+draw addr p =
+  Html.img
     [
      Attr.src p.actor.avatar_url,
      personStyle p,
      Html.Events.onMouseOver addr (PersonOfInterest p.actor)
     ][]
 
+
 view: Signal.Address SydronAction -> Model -> Html
 view addr model =
-  Html.div 
+  Html.div
     [ divStyle ]
     (List.map (draw addr) model.all)
 
-divStyle = 
+
+divStyle =
   Attr.style
     [("float", "right"),
      ("width", "50%")]
 
+
 marginPx = 20
+
+
 imgPx = 100
+
+
 maxBorderPx = 10
 
+
 personStyle: EachPerson -> Html.Attribute
-personStyle p = 
+personStyle p =
   Attr.style (
     (highlightStyle p.highlight)
     ++ (pictureStyle p.size.present p.border.present)
     )
+
 
 highlightStyle: Highlight -> List (String, String)
 highlightStyle h =
@@ -88,7 +107,7 @@ highlightStyle h =
 
 pictureStyle : Float -> Float -> List (String, String)
 pictureStyle relativeSize borderSize =
-  let 
+  let
     borderPx = relative maxBorderPx borderSize
     horizontalMargin = pixels ((relative marginPx relativeSize) - borderPx)
     verticalMargin = pixels (marginPx - borderPx)
@@ -103,23 +122,25 @@ pictureStyle relativeSize borderSize =
        ("border", (pixels borderPx) ++ " solid orange")
      ]
 
+
 pixels: Int -> String
 pixels i = (toString i) ++ "px"
 
+
 relative: Int -> Float -> Int
-relative maxPx relativeSize = 
- round ((toFloat maxPx) * relativeSize) 
+relative maxPx relativeSize =
+ round ((toFloat maxPx) * relativeSize)
 
 ---- UPDATE
 
 update: SydronAction -> Model -> Model
-update a model = 
-    case a of 
-        TimeKeepsTickingAway t -> 
-          { model 
-            | all <- List.map (\m -> incrementSize t (incrementBorder t m)) model.all 
+update a model =
+    case a of
+        TimeKeepsTickingAway t ->
+          { model
+            | all <- List.map (\m -> incrementSize t (incrementBorder t m)) model.all
           }
-        SingleEvent e -> 
+        SingleEvent e ->
             if List.member e.actor (List.map .actor model.all)
                 then { model | all <- startAnimation e.actor model.all }
                 else { model | all <- (newPerson e.actor) :: model.all }
@@ -131,28 +152,32 @@ highlightPerson: EventActor -> Model -> Model
 highlightPerson ea model =
   let
     shouldHighlight person = (person.actor == ea)
-    correctHighlight person = 
+    correctHighlight person =
       if shouldHighlight person then
         PersonOfInterestHighlight
-      else 
+      else
         NoHighlight
-  in 
-    { model 
+  in
+    { model
      | all <- List.map (\p -> { p | highlight <- correctHighlight p}) model.all
     }
+
 
 -- animate
 
 startAnimation : EventActor -> List EachPerson -> List EachPerson
-startAnimation ea = 
+startAnimation ea =
   List.map (\n -> if (n.actor /= ea) then n else { n | border <- shrinking })
 
 
 incrementSize : Time -> EachPerson -> EachPerson
 incrementSize t m =
   { m | size <- iterateeate t m.size }
+
+
 incrementBorder t m =
   { m | border <- iterateeate t m.border }
+
 
 iterateeate : Time -> PresentAndFuture a -> PresentAndFuture a
 iterateeate t paf =
@@ -160,17 +185,20 @@ iterateeate t paf =
     Constant  -> paf
     Varying f -> f t
 
+
 entrySlowness = Time.second
 
+
 growing: PresentAndFuture Percentage
-growing = 
+growing =
   {
     present = 0.0,
     future = Varying (growFromOver entrySlowness 0.0)
   }
 
+
 growFromOver : Time -> Percentage -> Time -> PresentAndFuture Percentage
-growFromOver totalTime presentValue dt = 
+growFromOver totalTime presentValue dt =
   let
     max = 1.0
     nextPresent = (dt / totalTime) * max + presentValue
@@ -180,17 +208,20 @@ growFromOver totalTime presentValue dt =
     then PresentAndFuture max Constant
     else PresentAndFuture presentValue (Varying nextFunction)
 
+
 borderErodes = 3 * Time.second
 
+
 shrinking: PresentAndFuture Percentage
-shrinking = 
+shrinking =
   {
     present = 1.0,
     future = Varying (shrinkOver borderErodes 1.0)
   }
 
+
 shrinkOver : Time -> Percentage -> Time -> PresentAndFuture Percentage
-shrinkOver totalTime presentValue dt = 
+shrinkOver totalTime presentValue dt =
   let
     min = 0.0
     nextPresent = presentValue - (dt / totalTime) * 1.0
@@ -199,7 +230,3 @@ shrinkOver totalTime presentValue dt =
     if (nextPresent <= min)
     then PresentAndFuture min Constant
     else PresentAndFuture presentValue (Varying nextFunction)
-
-
-
-

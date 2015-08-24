@@ -3,8 +3,9 @@ module RepoInput(view) where
 import Html exposing (Html)
 import Html.Attributes as Attr
 
+
 view : String -> Html
-view formclass = 
+view formclass =
   Html.div [ styles ]
     [ Html.form [ Attr.class formclass] [
       Html.fieldset [] [
@@ -14,6 +15,7 @@ view formclass =
          Html.button [ Attr.class "pure-button pure-button-primary"] [Html.text "Go"]
        ]
     ]]
+
 
 styles : Html.Attribute
 styles = Attr.style [
