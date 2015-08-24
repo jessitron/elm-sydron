@@ -52,9 +52,12 @@ repositoryOfInterest =
 animationFrames : Signal GithubEventLayer.Action
 animationFrames =
     Time.fps 30
-        |> Signal.map Time.inMilliseconds
-        |> Signal.map TimeKeepsTickingAway
-        |> Signal.map GithubEventLayer.wrapAction
+        |> Signal.map (Time.inMilliseconds >> wrapTickAction)
+
+
+wrapTickAction : Time -> GithubEventLayer.Action
+wrapTickAction ms =
+    GithubEventLayer.wrapAction (TimeKeepsTickingAway ms)
 
 
 showNewEvent: Signal GithubEventLayer.Action
