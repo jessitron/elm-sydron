@@ -2039,9 +2039,15 @@ Elm.ErrorDisplay.make = function (_elm) {
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm);
-   var errorStyle = $Html$Attributes.style(_L.fromArray([{ctor: "_Tuple2"
-                                                         ,_0: "color"
-                                                         ,_1: "red"}]));
+   _op["=>"] = F2(function (v0,
+   v1) {
+      return {ctor: "_Tuple2"
+             ,_0: v0
+             ,_1: v1};
+   });
+   var errorStyle = $Html$Attributes.style(_L.fromArray([A2(_op["=>"],
+   "color",
+   "red")]));
    var view = function (me) {
       return function () {
          switch (me.ctor)
@@ -2054,7 +2060,7 @@ Elm.ErrorDisplay.make = function (_elm) {
               _L.fromArray([]),
               _L.fromArray([]));}
          _U.badCase($moduleName,
-         "between lines 9 and 11");
+         "between lines 10 and 12");
       }();
    };
    _elm.ErrorDisplay.values = {_op: _op
@@ -2099,43 +2105,46 @@ Elm.EventTicker.make = function (_elm) {
          return model;
       }();
    });
+   _op["=>"] = F2(function (v0,
+   v1) {
+      return {ctor: "_Tuple2"
+             ,_0: v0
+             ,_1: v1};
+   });
    var itemStyle = function (highlight) {
       return $Html$Attributes.style(A2($Basics._op["++"],
-      _L.fromArray([{ctor: "_Tuple2"
-                    ,_0: "color"
-                    ,_1: "#515151"}
-                   ,{ctor: "_Tuple2"
-                    ,_0: "font-family"
-                    ,_1: "Helvetica"}
-                   ,{ctor: "_Tuple2"
-                    ,_0: "font-size"
-                    ,_1: "21px"}
-                   ,{ctor: "_Tuple2"
-                    ,_0: "height"
-                    ,_1: "24px"}]),
+      _L.fromArray([A2(_op["=>"],
+                   "color",
+                   "#515151")
+                   ,A2(_op["=>"],
+                   "font-family",
+                   "Helvetica")
+                   ,A2(_op["=>"],
+                   "font-size",
+                   "21px")]),
       highlight));
    };
-   var divStyle = $Html$Attributes.style(_L.fromArray([{ctor: "_Tuple2"
-                                                       ,_0: "float"
-                                                       ,_1: "left"}
-                                                      ,{ctor: "_Tuple2"
-                                                       ,_0: "width"
-                                                       ,_1: "50%"}
-                                                      ,{ctor: "_Tuple2"
-                                                       ,_0: "box-sizing"
-                                                       ,_1: "border-box"}
-                                                      ,{ctor: "_Tuple2"
-                                                       ,_0: "color"
-                                                       ,_1: "#666666"}
-                                                      ,{ctor: "_Tuple2"
-                                                       ,_0: "overflow"
-                                                       ,_1: "scroll"}
-                                                      ,{ctor: "_Tuple2"
-                                                       ,_0: "padding"
-                                                       ,_1: "10px"}]));
-   var highlightStyle = _L.fromArray([{ctor: "_Tuple2"
-                                      ,_0: "background-color"
-                                      ,_1: "gold"}]);
+   var divStyle = $Html$Attributes.style(_L.fromArray([A2(_op["=>"],
+                                                      "float",
+                                                      "left")
+                                                      ,A2(_op["=>"],
+                                                      "width",
+                                                      "50%")
+                                                      ,A2(_op["=>"],
+                                                      "box-sizing",
+                                                      "border-box")
+                                                      ,A2(_op["=>"],
+                                                      "color",
+                                                      "#666666")
+                                                      ,A2(_op["=>"],
+                                                      "overflow",
+                                                      "scroll")
+                                                      ,A2(_op["=>"],
+                                                      "padding",
+                                                      "10px")]));
+   var highlightStyle = _L.fromArray([A2(_op["=>"],
+   "background-color",
+   "gold")]);
    var eventHighlight = F2(function (whom,
    event) {
       return function () {
@@ -2146,7 +2155,7 @@ Elm.EventTicker.make = function (_elm) {
             case "Nothing":
             return _L.fromArray([]);}
          _U.badCase($moduleName,
-         "between lines 47 and 53");
+         "between lines 54 and 60");
       }();
    });
    var eventListItem = F3(function (howToHighlight,
@@ -2235,7 +2244,7 @@ Elm.GetWithHeaders.make = function (_elm) {
                  return $Task.fail($Http.UnexpectedPayload("Response body is a blob, expecting a string."));
               }();}
          _U.badCase($moduleName,
-         "between lines 43 and 50");
+         "between lines 48 and 59");
       }();
    });
    var promoteError = function (rawError) {
@@ -2246,7 +2255,7 @@ Elm.GetWithHeaders.make = function (_elm) {
             case "RawTimeout":
             return $Http.Timeout;}
          _U.badCase($moduleName,
-         "between lines 37 and 39");
+         "between lines 41 and 43");
       }();
    };
    var fromJsonWithHeaders = F2(function (decoder,
@@ -2263,7 +2272,7 @@ Elm.GetWithHeaders.make = function (_elm) {
                   case "Ok":
                   return $Task.succeed(_v4._0);}
                _U.badCase($moduleName,
-               "between lines 28 and 31");
+               "between lines 31 and 34");
             }();
          };
          return A2($Task.andThen,
@@ -2333,7 +2342,7 @@ Elm.GithubEvent.make = function (_elm) {
                         dict)};
               }();}
          _U.badCase($moduleName,
-         "between lines 58 and 62");
+         "between lines 66 and 70");
       }();
    };
    var realGithubUrl = "https://api.github.com/repos";
@@ -2390,19 +2399,15 @@ Elm.GithubEvent.make = function (_elm) {
    $Json$Decode.string)));
    var fetchPageOfEvents = F2(function (repo,
    bh) {
-      return function () {
-         var headers = $Maybe.withDefault(_L.fromArray([]))(A2($Maybe.map,
-         function (s) {
-            return _L.fromArray([{ctor: "_Tuple2"
-                                 ,_0: "If-None-Match"
-                                 ,_1: s}]);
-         },
-         bh));
-         return $Task.map(extractHeader)(A3($GetWithHeaders.get,
-         listDecoder,
-         A2(github,repo,1),
-         headers));
-      }();
+      return $Task.map(extractHeader)(A2($GetWithHeaders.get,
+      listDecoder,
+      A2(github,
+      repo,
+      1))($Maybe.withDefault(_L.fromArray([]))($Maybe.map(function (s) {
+         return _L.fromArray([{ctor: "_Tuple2"
+                              ,_0: "If-None-Match"
+                              ,_1: s}]);
+      })(bh))));
    });
    _elm.GithubEvent.values = {_op: _op
                              ,fetchPageOfEvents: fetchPageOfEvents
@@ -2456,43 +2461,27 @@ Elm.GithubEventLayer.make = function (_elm) {
                    break;}
               return $Task.fail(_v0._1);}
          _U.badCase($moduleName,
-         "between lines 110 and 112");
+         "between lines 144 and 146");
       }();
    });
    var filterKnown = F2(function (m,
    incomingEvents) {
       return function () {
-         var knownEvents = A2($Basics._op["++"],
-         m.seen,
-         m.unseen);
          var isKnown = function (event) {
-            return A2($List.member,
-            event,
-            knownEvents);
+            return $List.member(event)(A2($Basics._op["++"],
+            m.seen,
+            m.unseen));
          };
-         var unknown = function (event) {
-            return $Basics.not(isKnown(event));
-         };
-         return A2($List.filter,
-         unknown,
-         incomingEvents);
+         return $List.filter(function ($) {
+            return $Basics.not(isKnown($));
+         })(incomingEvents);
       }();
    });
-   var andDo = F2(function (m,
-   maybe) {
-      return function () {
-         switch (maybe.ctor)
-         {case "Just":
-            return {ctor: "_Tuple2"
-                   ,_0: m
-                   ,_1: maybe._0};
-            case "Nothing":
-            return {ctor: "_Tuple2"
-                   ,_0: m
-                   ,_1: $Effects.none};}
-         _U.badCase($moduleName,
-         "between lines 84 and 86");
-      }();
+   _op["=>"] = F2(function (v0,
+   v1) {
+      return {ctor: "_Tuple2"
+             ,_0: v0
+             ,_1: v1};
    });
    var innerUpdate = $SydronInt.update;
    var innerInit = $SydronInt.init;
@@ -2523,15 +2512,15 @@ Elm.GithubEventLayer.make = function (_elm) {
              ,_0: a
              ,_1: b};
    });
-   var someNewEvents = function (_v8) {
+   var someNewEvents = function (_v6) {
       return function () {
-         switch (_v8.ctor)
+         switch (_v6.ctor)
          {case "_Tuple2":
             return A2(SomeNewEvents,
-              _v8._0,
-              _v8._1);}
+              _v6._0,
+              _v6._1);}
          _U.badCase($moduleName,
-         "on line 122, column 26 to 45");
+         "on line 158, column 26 to 45");
       }();
    };
    var wrapErrors = F2(function (mbh,
@@ -2593,52 +2582,54 @@ Elm.GithubEventLayer.make = function (_elm) {
       return function () {
          switch (a.ctor)
          {case "ErrorAlert":
-            return A2(andDo,
+            return A2(_op["=>"],
               _U.replace([["error"
                           ,$Maybe.Just(a._0)]],
               m),
-              $Maybe.Nothing);
+              $Effects.none);
             case "Heartbeat":
             return function () {
-                 var _v17 = m.unseen;
-                 switch (_v17.ctor)
-                 {case "::": return A2(andDo,
+                 var _v15 = m.unseen;
+                 switch (_v15.ctor)
+                 {case "::": return A2(_op["=>"],
                       _U.replace([["inner"
                                   ,A2(innerUpdate,
-                                  passSingleEvent(_v17._0),
+                                  passSingleEvent(_v15._0),
                                   m.inner)]
                                  ,["seen"
                                   ,A2($List._op["::"],
-                                  _v17._0,
+                                  _v15._0,
                                   m.seen)]
-                                 ,["unseen",_v17._1]],
+                                 ,["unseen",_v15._1]],
                       m),
-                      $Maybe.Nothing);
+                      $Effects.none);
                     case "[]": return function () {
-                         var _v20 = m.error;
-                         switch (_v20.ctor)
-                         {case "Just": return A2(andDo,
+                         var _v18 = m.error;
+                         switch (_v18.ctor)
+                         {case "Just":
+                            return A2(_op["=>"],
                               m,
-                              $Maybe.Nothing);
-                            case "Nothing": return A2(andDo,
+                              $Effects.none);
+                            case "Nothing":
+                            return A2(_op["=>"],
                               m,
-                              $Maybe.Just(A2(fetchEvents,
+                              A2(fetchEvents,
                               m.repository,
-                              m.lastHeader)));}
+                              m.lastHeader));}
                          _U.badCase($moduleName,
-                         "between lines 73 and 77");
+                         "between lines 91 and 98");
                       }();}
                  _U.badCase($moduleName,
-                 "between lines 71 and 80");
+                 "between lines 89 and 105");
               }();
             case "Passthrough":
-            return A2(andDo,
+            return A2(_op["=>"],
               _U.replace([["inner"
                           ,A2(innerUpdate,a._0,m.inner)]],
               m),
-              $Maybe.Nothing);
+              $Effects.none);
             case "SomeNewEvents":
-            return A2(andDo,
+            return A2(_op["=>"],
               _U.replace([["unseen"
                           ,A2($Basics._op["++"],
                           m.unseen,
@@ -2648,9 +2639,9 @@ Elm.GithubEventLayer.make = function (_elm) {
                          ,["lastHeader"
                           ,$Maybe.Just(a._1)]],
               m),
-              $Maybe.Nothing);}
+              $Effects.none);}
          _U.badCase($moduleName,
-         "between lines 66 and 80");
+         "between lines 78 and 114");
       }();
    });
    _elm.GithubEventLayer.values = {_op: _op
@@ -3619,6 +3610,12 @@ Elm.Header.make = function (_elm) {
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm);
+   _op["=>"] = F2(function (v0,
+   v1) {
+      return {ctor: "_Tuple2"
+             ,_0: v0
+             ,_1: v1};
+   });
    var repositoryDescription = function (repo) {
       return A2($Basics._op["++"],
       repo.owner,
@@ -3639,36 +3636,27 @@ Elm.Header.make = function (_elm) {
    };
    var view = function (model) {
       return A2($Html.div,
-      _L.fromArray([$Html$Attributes.style(_L.fromArray([{ctor: "_Tuple2"
-                                                         ,_0: "height"
-                                                         ,_1: "100px"}
-                                                        ,{ctor: "_Tuple2"
-                                                         ,_0: "font-family"
-                                                         ,_1: "Helvetica"}
-                                                        ,{ctor: "_Tuple2"
-                                                         ,_0: "margin-top"
-                                                         ,_1: "20px"}
-                                                        ,{ctor: "_Tuple2"
-                                                         ,_0: "margin-left"
-                                                         ,_1: "20px"}]))]),
+      _L.fromArray([$Html$Attributes.style(_L.fromArray([A2(_op["=>"],
+                                                        "height",
+                                                        "100px")
+                                                        ,A2(_op["=>"],
+                                                        "font-family",
+                                                        "Helvetica")
+                                                        ,A2(_op["=>"],
+                                                        "margin-top",
+                                                        "20px")
+                                                        ,A2(_op["=>"],
+                                                        "margin-left",
+                                                        "20px")]))]),
       _L.fromArray([A2($Html.h1,
                    _L.fromArray([]),
                    _L.fromArray([$Html.text("Sydron")]))
-                   ,$Html.text("A parade of Github Events for ")
-                   ,A2($Html.a,
-                   _L.fromArray([$Html$Attributes.href(repositoryLink(model))]),
-                   _L.fromArray([$Html.text(repositoryDescription(model))]))
-                   ,$Html.text(". This is me playing with Elm; source code ")
-                   ,A2($Html.a,
-                   _L.fromArray([$Html$Attributes.href("http://github.com/jessitron/elm-sydron")]),
-                   _L.fromArray([$Html.text("here")]))
-                   ,$Html.text(".")
-                   ,A2($Html.br,
+                   ,A2($Html.h2,
                    _L.fromArray([]),
-                   _L.fromArray([]))
-                   ,$Html.text("This retrieves one page of past events (within the past 90 days; github doesn\'t keep them forever)")
-                   ,$Html.text(" and displays them one at a time. Then it polls github for new events for the repository, displaying them as they come in.")
-                   ,$Html.text(" Events are displayed at most one per three seconds.")]));
+                   _L.fromArray([$Html.text("A parade of Github Events for ")
+                                ,A2($Html.a,
+                                _L.fromArray([$Html$Attributes.href(repositoryLink(model))]),
+                                _L.fromArray([$Html.text(repositoryLink(model))]))]))]));
    };
    _elm.Header.values = {_op: _op
                         ,view: view};
@@ -13489,75 +13477,6 @@ Elm.Native.VirtualDom.make = function(elm)
 
 },{}]},{},[23]);
 
-Elm.Native = Elm.Native || {};
-Elm.Native.Window = {};
-Elm.Native.Window.make = function(localRuntime) {
-
-	localRuntime.Native = localRuntime.Native || {};
-	localRuntime.Native.Window = localRuntime.Native.Window || {};
-	if (localRuntime.Native.Window.values)
-	{
-		return localRuntime.Native.Window.values;
-	}
-
-	var NS = Elm.Native.Signal.make(localRuntime);
-	var Tuple2 = Elm.Native.Utils.make(localRuntime).Tuple2;
-
-
-	function getWidth()
-	{
-		return localRuntime.node.clientWidth;
-	}
-
-
-	function getHeight()
-	{
-		if (localRuntime.isFullscreen())
-		{
-			return window.innerHeight;
-		}
-		return localRuntime.node.clientHeight;
-	}
-
-
-	var dimensions = NS.input('Window.dimensions', Tuple2(getWidth(), getHeight()));
-
-
-	function resizeIfNeeded()
-	{
-		// Do not trigger event if the dimensions have not changed.
-		// This should be most of the time.
-		var w = getWidth();
-		var h = getHeight();
-		if (dimensions.value._0 === w && dimensions.value._1 === h)
-		{
-			return;
-		}
-
-		setTimeout(function () {
-			// Check again to see if the dimensions have changed.
-			// It is conceivable that the dimensions have changed
-			// again while some other event was being processed.
-			var w = getWidth();
-			var h = getHeight();
-			if (dimensions.value._0 === w && dimensions.value._1 === h)
-			{
-				return;
-			}
-			localRuntime.notify(dimensions.id, Tuple2(w,h));
-		}, 0);
-	}
-
-
-	localRuntime.addListener([dimensions.id], window, 'resize', resizeIfNeeded);
-
-
-	return localRuntime.Native.Window.values = {
-		dimensions: dimensions,
-		resizeIfNeeded: resizeIfNeeded
-	};
-};
-
 Elm.ParseUrlParams = Elm.ParseUrlParams || {};
 Elm.ParseUrlParams.make = function (_elm) {
    "use strict";
@@ -13588,7 +13507,7 @@ Elm.ParseUrlParams.make = function (_elm) {
             case "[]":
             return $Maybe.Nothing;}
          _U.badCase($moduleName,
-         "between lines 55 and 57");
+         "between lines 62 and 64");
       }();
    });
    var splitAtFirst = F2(function (c,
@@ -13609,7 +13528,7 @@ Elm.ParseUrlParams.make = function (_elm) {
                    ,_0: s
                    ,_1: ""};}
          _U.badCase($moduleName,
-         "between lines 49 and 51");
+         "between lines 55 and 57");
       }();
    });
    var toMaybeInt = function (s) {
@@ -13621,7 +13540,7 @@ Elm.ParseUrlParams.make = function (_elm) {
             case "Ok":
             return $Maybe.Just(_v5._0);}
          _U.badCase($moduleName,
-         "between lines 29 and 31");
+         "between lines 32 and 34");
       }();
    };
    var integerParam = F3(function (key,
@@ -13639,12 +13558,12 @@ Elm.ParseUrlParams.make = function (_elm) {
                  {case "Err": return $default;
                     case "Ok": return _v10._0;}
                  _U.badCase($moduleName,
-                 "between lines 23 and 25");
+                 "between lines 25 and 27");
               }();
             case "Nothing":
             return $default;}
          _U.badCase($moduleName,
-         "between lines 20 and 25");
+         "between lines 22 and 27");
       }();
    });
    var UrlParams = function (a) {
@@ -13680,7 +13599,7 @@ Elm.ParseUrlParams.make = function (_elm) {
             case "Nothing":
             return Error("No URL params");}
          _U.badCase($moduleName,
-         "between lines 35 and 37");
+         "between lines 39 and 41");
       }();
    };
    var parse = function (s) {
@@ -13696,261 +13615,6 @@ Elm.ParseUrlParams.make = function (_elm) {
                                 ,parse: parse
                                 ,integerParam: integerParam};
    return _elm.ParseUrlParams.values;
-};
-Elm.ReformattedFlickr = Elm.ReformattedFlickr || {};
-Elm.ReformattedFlickr.make = function (_elm) {
-   "use strict";
-   _elm.ReformattedFlickr = _elm.ReformattedFlickr || {};
-   if (_elm.ReformattedFlickr.values)
-   return _elm.ReformattedFlickr.values;
-   var _op = {},
-   _N = Elm.Native,
-   _U = _N.Utils.make(_elm),
-   _L = _N.List.make(_elm),
-   $moduleName = "ReformattedFlickr",
-   $Basics = Elm.Basics.make(_elm),
-   $Html = Elm.Html.make(_elm),
-   $Html$Attributes = Elm.Html.Attributes.make(_elm),
-   $Html$Events = Elm.Html.Events.make(_elm),
-   $Http = Elm.Http.make(_elm),
-   $Json$Decode = Elm.Json.Decode.make(_elm),
-   $List = Elm.List.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm),
-   $String = Elm.String.make(_elm),
-   $Task = Elm.Task.make(_elm),
-   $Window = Elm.Window.make(_elm);
-   var pickSize = F2(function (_v0,
-   sizes) {
-      return function () {
-         switch (_v0.ctor)
-         {case "_Tuple2":
-            return function () {
-                 var sizeRating = function (size) {
-                    return function () {
-                       var penalty = _U.cmp(size.width,
-                       _v0._0) > 0 || _U.cmp(size.height,
-                       _v0._1) > 0 ? 400 : 0;
-                       return $Basics.abs(_v0._0 - size.width) + $Basics.abs(_v0._1 - size.height) + penalty;
-                    }();
-                 };
-                 return function () {
-                    var _v4 = A2($List.sortBy,
-                    sizeRating,
-                    sizes);
-                    switch (_v4.ctor)
-                    {case "::":
-                       return $Task.succeed(_v4._0.source);
-                       case "[]":
-                       return $Task.fail($Http.UnexpectedPayload("expecting 1 or more image sizes to choose from"));}
-                    _U.badCase($moduleName,
-                    "between lines 183 and 188");
-                 }();
-              }();}
-         _U.badCase($moduleName,
-         "between lines 172 and 188");
-      }();
-   });
-   var selectPhoto = function (photos) {
-      return function () {
-         switch (photos.ctor)
-         {case "::":
-            return $Task.succeed(photos._0);
-            case "[]":
-            return $Task.fail($Http.UnexpectedPayload("expecting 1 or more photos from Flickr"));}
-         _U.badCase($moduleName,
-         "between lines 162 and 167");
-      }();
-   };
-   var flickr = F2(function (method,
-   args) {
-      return $Http.url("https://api.flickr.com/services/rest/")(A2($Basics._op["++"],
-      _L.fromArray([{ctor: "_Tuple2"
-                    ,_0: "format"
-                    ,_1: "json"}
-                   ,{ctor: "_Tuple2"
-                    ,_0: "nojsoncallback"
-                    ,_1: "1"}
-                   ,{ctor: "_Tuple2"
-                    ,_0: "api_key"
-                    ,_1: "9be5b08cd8168fa82d136aa55f1fdb3c"}
-                   ,{ctor: "_Tuple2"
-                    ,_0: "method"
-                    ,_1: A2($Basics._op["++"],
-                    "flickr.photos.",
-                    method)}]),
-      args));
-   });
-   var intOrStringInt = $Json$Decode.oneOf(_L.fromArray([$Json$Decode.$int
-                                                        ,A2($Json$Decode.customDecoder,
-                                                        $Json$Decode.string,
-                                                        $String.toInt)]));
-   var Size = F3(function (a,b,c) {
-      return {_: {}
-             ,height: c
-             ,source: a
-             ,width: b};
-   });
-   var sizeList = $Json$Decode.at(_L.fromArray(["sizes"
-                                               ,"size"]))($Json$Decode.list(A4($Json$Decode.object3,
-   Size,
-   A2($Json$Decode._op[":="],
-   "source",
-   $Json$Decode.string),
-   A2($Json$Decode._op[":="],
-   "width",
-   intOrStringInt),
-   A2($Json$Decode._op[":="],
-   "height",
-   intOrStringInt))));
-   var Photo = F2(function (a,b) {
-      return {_: {}
-             ,id: a
-             ,title: b};
-   });
-   var photoList = $Json$Decode.at(_L.fromArray(["photos"
-                                                ,"photo"]))($Json$Decode.list(A3($Json$Decode.object2,
-   Photo,
-   A2($Json$Decode._op[":="],
-   "id",
-   $Json$Decode.string),
-   A2($Json$Decode._op[":="],
-   "title",
-   $Json$Decode.string))));
-   var getImage = F2(function (dimensions,
-   tag) {
-      return function () {
-         var searchArgs = _L.fromArray([{ctor: "_Tuple2"
-                                        ,_0: "sort"
-                                        ,_1: "random"}
-                                       ,{ctor: "_Tuple2"
-                                        ,_0: "per_page"
-                                        ,_1: "10"}
-                                       ,{ctor: "_Tuple2"
-                                        ,_0: "tags"
-                                        ,_1: tag}]);
-         return A2($Task.andThen,
-         A2($Task.andThen,
-         A2($Http.get,
-         photoList,
-         A2(flickr,"search",searchArgs)),
-         selectPhoto),
-         function (photo) {
-            return A2($Task.andThen,
-            A2($Http.get,
-            sizeList,
-            A2(flickr,
-            "getSizes",
-            _L.fromArray([{ctor: "_Tuple2"
-                          ,_0: "photo_id"
-                          ,_1: photo.id}]))),
-            pickSize(dimensions));
-         });
-      }();
-   });
-   var query = $Signal.mailbox("");
-   var sample = F3(function (func,
-   sampled,
-   events) {
-      return A2($Signal.sampleOn,
-      events,
-      A3($Signal.map2,
-      func,
-      sampled,
-      events));
-   });
-   var results = $Signal.mailbox("waiting.gif");
-   var requestImgs = Elm.Native.Task.make(_elm).performSignal("requestImgs",
-   $Signal.map(function (task) {
-      return A2($Task.andThen,
-      task,
-      $Signal.send(results.address));
-   })(A2(sample,
-   getImage,
-   $Window.dimensions)(query.signal)));
-   var imgStyle = F2(function (height,
-   src) {
-      return _L.fromArray([{ctor: "_Tuple2"
-                           ,_0: "background-image"
-                           ,_1: A2($Basics._op["++"],
-                           "url(\'",
-                           A2($Basics._op["++"],
-                           src,
-                           "\')"))}
-                          ,{ctor: "_Tuple2"
-                           ,_0: "background-repeat"
-                           ,_1: "no-repeat"}
-                          ,{ctor: "_Tuple2"
-                           ,_0: "background-attachment"
-                           ,_1: "fixed"}
-                          ,{ctor: "_Tuple2"
-                           ,_0: "background-position"
-                           ,_1: "center"}
-                          ,{ctor: "_Tuple2"
-                           ,_0: "width"
-                           ,_1: "100%"}
-                          ,{ctor: "_Tuple2"
-                           ,_0: "height"
-                           ,_1: A2($Basics._op["++"],
-                           $Basics.toString(height),
-                           "px")}]);
-   });
-   var queryInputStyle = _L.fromArray([{ctor: "_Tuple2"
-                                       ,_0: "width"
-                                       ,_1: "100%"}
-                                      ,{ctor: "_Tuple2"
-                                       ,_0: "height"
-                                       ,_1: "40px"}
-                                      ,{ctor: "_Tuple2"
-                                       ,_0: "padding"
-                                       ,_1: "10px 0"}
-                                      ,{ctor: "_Tuple2"
-                                       ,_0: "font-size"
-                                       ,_1: "2em"}
-                                      ,{ctor: "_Tuple2"
-                                       ,_0: "text-align"
-                                       ,_1: "center"}]);
-   var view = F3(function (height,
-   string,
-   imgUrl) {
-      return A2($Html.div,
-      _L.fromArray([$Html$Attributes.style(A2(imgStyle,
-      height,
-      imgUrl))]),
-      _L.fromArray([A2($Html.input,
-      _L.fromArray([$Html$Attributes.placeholder("Flickr Query")
-                   ,$Html$Attributes.value(string)
-                   ,$Html$Attributes.style(queryInputStyle)
-                   ,A3($Html$Events.on,
-                   "input",
-                   $Html$Events.targetValue,
-                   $Signal.message(query.address))]),
-      _L.fromArray([]))]));
-   });
-   var main = A4($Signal.map3,
-   view,
-   $Window.height,
-   query.signal,
-   results.signal);
-   _elm.ReformattedFlickr.values = {_op: _op
-                                   ,view: view
-                                   ,queryInputStyle: queryInputStyle
-                                   ,imgStyle: imgStyle
-                                   ,main: main
-                                   ,results: results
-                                   ,sample: sample
-                                   ,query: query
-                                   ,getImage: getImage
-                                   ,Photo: Photo
-                                   ,Size: Size
-                                   ,photoList: photoList
-                                   ,sizeList: sizeList
-                                   ,intOrStringInt: intOrStringInt
-                                   ,flickr: flickr
-                                   ,selectPhoto: selectPhoto
-                                   ,pickSize: pickSize};
-   return _elm.ReformattedFlickr.values;
 };
 Elm.RepoInput = Elm.RepoInput || {};
 Elm.RepoInput.make = function (_elm) {
@@ -13970,9 +13634,15 @@ Elm.RepoInput.make = function (_elm) {
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm);
-   var styles = $Html$Attributes.style(_L.fromArray([{ctor: "_Tuple2"
-                                                     ,_0: "margin"
-                                                     ,_1: "10px"}]));
+   _op["=>"] = F2(function (v0,
+   v1) {
+      return {ctor: "_Tuple2"
+             ,_0: v0
+             ,_1: v1};
+   });
+   var styles = $Html$Attributes.style(_L.fromArray([A2(_op["=>"],
+   "margin",
+   "10px")]));
    var view = function (formclass) {
       return A2($Html.div,
       _L.fromArray([styles]),
@@ -14265,6 +13935,12 @@ Elm.SeeThePeople.make = function (_elm) {
    $Signal = Elm.Signal.make(_elm),
    $SydronAction = Elm.SydronAction.make(_elm),
    $Time = Elm.Time.make(_elm);
+   _op["=>"] = F2(function (v0,
+   v1) {
+      return {ctor: "_Tuple2"
+             ,_0: v0
+             ,_1: v1};
+   });
    var borderErodes = 3 * $Time.second;
    var entrySlowness = $Time.second;
    var iterateeate = F2(function (t,
@@ -14276,7 +13952,7 @@ Elm.SeeThePeople.make = function (_elm) {
             case "Varying":
             return _v0._0(t);}
          _U.badCase($moduleName,
-         "between lines 159 and 161");
+         "between lines 184 and 186");
       }();
    });
    var incrementBorder = F2(function (t,
@@ -14310,7 +13986,7 @@ Elm.SeeThePeople.make = function (_elm) {
                                  ,_0: "box-shadow"
                                  ,_1: "10px 5px gold"}]);}
          _U.badCase($moduleName,
-         "between lines 84 and 86");
+         "between lines 103 and 105");
       }();
    };
    var maxBorderPx = 10;
@@ -14360,12 +14036,12 @@ Elm.SeeThePeople.make = function (_elm) {
       p.size.present,
       p.border.present)));
    };
-   var divStyle = $Html$Attributes.style(_L.fromArray([{ctor: "_Tuple2"
-                                                       ,_0: "float"
-                                                       ,_1: "right"}
-                                                      ,{ctor: "_Tuple2"
-                                                       ,_0: "width"
-                                                       ,_1: "50%"}]));
+   var divStyle = $Html$Attributes.style(_L.fromArray([A2(_op["=>"],
+                                                      "float",
+                                                      "right")
+                                                      ,A2(_op["=>"],
+                                                      "width",
+                                                      "50%")]));
    var draw = F2(function (addr,
    p) {
       return A2($Html.img,
@@ -14529,7 +14205,7 @@ Elm.SeeThePeople.make = function (_elm) {
                                model.all)]],
               model);}
          _U.badCase($moduleName,
-         "between lines 117 and 127");
+         "between lines 138 and 148");
       }();
    });
    _elm.SeeThePeople.values = {_op: _op
@@ -14898,12 +14574,12 @@ Elm.Sydron.make = function (_elm) {
    $SydronAction = Elm.SydronAction.make(_elm),
    $Task = Elm.Task.make(_elm),
    $Time = Elm.Time.make(_elm);
-   var timePasses = A2($Signal.map,
-   $Time.inMilliseconds,
-   $Time.fps(30));
-   var animationFrames = $Signal.map($GithubEventLayer.wrapAction)(A2($Signal.map,
-   $SydronAction.TimeKeepsTickingAway,
-   timePasses));
+   var wrapTickAction = function (ms) {
+      return $GithubEventLayer.wrapAction($SydronAction.TimeKeepsTickingAway(ms));
+   };
+   var animationFrames = $Signal.map(function ($) {
+      return wrapTickAction($Time.inMilliseconds($));
+   })($Time.fps(30));
    var initialLocation = Elm.Native.Port.make(_elm).inbound("initialLocation",
    "String",
    function (v) {
@@ -14915,15 +14591,12 @@ Elm.Sydron.make = function (_elm) {
    urlParameters,
    "satellite-of-love",
    "Hungover");
-   var perEventMS = $Time.second * $Basics.toFloat(A3($ParseUrlParams.integerParam,
+   var showNewEvent = $Signal.map($Basics.always($GithubEventLayer.Heartbeat))($Time.every(F2(function (x,
+   y) {
+      return x * y;
+   })($Time.second)($Basics.toFloat(A2($ParseUrlParams.integerParam,
    "frequency",
-   3,
-   urlParameters));
-   var showNewEvent = A2($Signal.map,
-   function (t) {
-      return $GithubEventLayer.Heartbeat;
-   },
-   $Time.every(perEventMS));
+   3)(urlParameters)))));
    var app = $StartApp.start(A4($StartApp.Config,
    $GithubEventLayer.init(repositoryOfInterest),
    $GithubEventLayer.update,
@@ -14938,9 +14611,8 @@ Elm.Sydron.make = function (_elm) {
                         ,main: main
                         ,urlParameters: urlParameters
                         ,repositoryOfInterest: repositoryOfInterest
-                        ,timePasses: timePasses
                         ,animationFrames: animationFrames
-                        ,perEventMS: perEventMS
+                        ,wrapTickAction: wrapTickAction
                         ,showNewEvent: showNewEvent};
    return _elm.Sydron.values;
 };
@@ -15004,6 +14676,12 @@ Elm.SydronInt.make = function (_elm) {
    $SeeThePeople = Elm.SeeThePeople.make(_elm),
    $Signal = Elm.Signal.make(_elm),
    $SydronAction = Elm.SydronAction.make(_elm);
+   _op["=>"] = F2(function (v0,
+   v1) {
+      return {ctor: "_Tuple2"
+             ,_0: v0
+             ,_1: v1};
+   });
    var updateTicker = F2(function (action,
    model) {
       return _U.replace([["ticker"
@@ -15024,15 +14702,15 @@ Elm.SydronInt.make = function (_elm) {
    m) {
       return updateTicker(action)(updatePeople(action)(m));
    });
-   var inline = $Html$Attributes.style(_L.fromArray([{ctor: "_Tuple2"
-                                                     ,_0: "display"
-                                                     ,_1: "inline"}]));
+   var inline = $Html$Attributes.style(_L.fromArray([A2(_op["=>"],
+   "display",
+   "inline")]));
    var formclass = "pure-form";
    var view = F2(function (addr,
    m) {
       return A2($Html.div,
       _L.fromArray([]),
-      _L.fromArray([$Header.view(m.repositoryOfInterest)
+      _L.fromArray([$Header.view(m.repo)
                    ,$RepoInput.view(formclass)
                    ,A2($Html.div,
                    _L.fromArray([inline]),
@@ -15050,7 +14728,7 @@ Elm.SydronInt.make = function (_elm) {
    c) {
       return {_: {}
              ,people: c
-             ,repositoryOfInterest: a
+             ,repo: a
              ,ticker: b};
    });
    var init = function (repositoryFromUrlParams) {
@@ -15585,31 +15263,4 @@ Elm.VirtualDom.make = function (_elm) {
                             ,lazy3: lazy3
                             ,Options: Options};
    return _elm.VirtualDom.values;
-};
-Elm.Window = Elm.Window || {};
-Elm.Window.make = function (_elm) {
-   "use strict";
-   _elm.Window = _elm.Window || {};
-   if (_elm.Window.values)
-   return _elm.Window.values;
-   var _op = {},
-   _N = Elm.Native,
-   _U = _N.Utils.make(_elm),
-   _L = _N.List.make(_elm),
-   $moduleName = "Window",
-   $Basics = Elm.Basics.make(_elm),
-   $Native$Window = Elm.Native.Window.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
-   var dimensions = $Native$Window.dimensions;
-   var width = A2($Signal.map,
-   $Basics.fst,
-   dimensions);
-   var height = A2($Signal.map,
-   $Basics.snd,
-   dimensions);
-   _elm.Window.values = {_op: _op
-                        ,dimensions: dimensions
-                        ,width: width
-                        ,height: height};
-   return _elm.Window.values;
 };

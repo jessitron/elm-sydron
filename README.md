@@ -12,7 +12,7 @@ events.
 To run this, install [Elm](http://elm-lang.org), then
 
     elm-package install
-    elm-make *.elm
+    elm-make src/Sydron.elm
     open index.html
 
 ## What does it do

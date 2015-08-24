@@ -9,41 +9,50 @@ import ErrorDisplay
 import Effects exposing (Effects)
 import Task exposing (Task)
 import Http
-import Html exposing (Html)
+import Html exposing (..)
+
 
 --- ACTIONS
 
 type alias InnerAction = InnerActions.SydronAction
+
+
 passSingleEvent: Event -> InnerAction
 passSingleEvent e = InnerActions.SingleEvent e
+
 
 type Action = Passthrough InnerAction
              | Heartbeat
              | SomeNewEvents (List Event) BookmarkHeader
              | ErrorAlert Http.Error
 
+
 wrapAction: InnerAction -> Action
 wrapAction ia = Passthrough ia
 
+
 --- MODEL
 
-type alias InnerModel = Inner.Model 
+type alias InnerModel = Inner.Model
 
-type alias Model =    
-    { 
+
+type alias Model =
+    {
       inner: InnerModel,
       repository: GithubRepository,
-      seen: List Event, 
+      seen: List Event,
       unseen: List Event,
       error: Maybe Http.Error,
       lastHeader: Maybe BookmarkHeader
     }
 
+
 --innerInit: GithubRepository -> Inner.Model
 innerInit = Inner.init
- 
-init: GithubRepository -> (Model, Effects Action) 
-init repo = 
+
+
+init: GithubRepository -> (Model, Effects Action)
+init repo =
     (
       { inner = innerInit repo,
         repository = repo,
@@ -58,52 +67,77 @@ init repo =
 --- UPDATE
 
 type alias InnerUpdate = InnerAction -> Inner.Model -> Inner.Model
+
+
 innerUpdate: InnerUpdate
-innerUpdate = Inner.update 
+innerUpdate = Inner.update
+
 
 update: Action -> Model -> (Model, Effects Action)
 update a m =
-    case a of 
-      Passthrough ia -> { m | inner <- innerUpdate ia m.inner } `andDo` Nothing
-      SomeNewEvents moreEvents bh -> { m | unseen <- m.unseen ++ (List.reverse (filterKnown m moreEvents)),
-                                           lastHeader <- Just bh } `andDo` Nothing
-      Heartbeat -> 
-        case m.unseen of
-          [] -> 
-            case m.error of 
-              Just anything -> m `andDo` Nothing -- do nothing if we have ever failed
-              Nothing ->
-                m `andDo` Just (fetchEvents m.repository m.lastHeader)
-          head :: tail -> { m | inner <- innerUpdate (passSingleEvent head) m.inner,
-                                seen <- head :: m.seen, 
-                                unseen <- tail } `andDo` Nothing
-      ErrorAlert e -> { m | error <- Just e} `andDo` Nothing
+  case a of
+    Passthrough ia ->
+      { m | inner <- innerUpdate ia m.inner } => Effects.none
 
-andDo: Model -> Maybe (Effects Action) -> (Model, Effects Action)
-andDo m maybe =
-  case maybe of
-    Nothing -> (m, Effects.none)
-    Just something -> (m, something)
+    SomeNewEvents moreEvents bh ->
+      { m |
+        unseen <- m.unseen ++ (List.reverse (filterKnown m moreEvents)),
+        lastHeader <- Just bh
+      } => Effects.none
+
+    Heartbeat ->
+      case m.unseen of
+        [] ->
+          case m.error of
+            Just anything ->
+              m => Effects.none -- do nothing if we have ever failed
+
+            Nothing ->
+              m => fetchEvents m.repository m.lastHeader
+
+        head :: tail ->
+          { m |
+            inner <- innerUpdate (passSingleEvent head) m.inner,
+            seen <- head :: m.seen,
+            unseen <- tail
+          } => Effects.none
+
+    ErrorAlert e ->
+      { m | error <- Just e} => Effects.none
+
+
+{- Micro-DSL for creating tuples. Now these are equivalent:
+
+foo => bar
+(foo, bar)
+
+-}
+(=>) = (,)
+
 
 filterKnown: Model -> List Event -> List Event
 filterKnown m incomingEvents =
   let
-    knownEvents = m.seen ++ m.unseen
-    isKnown event = (List.member event knownEvents)
-    unknown event = not (isKnown event)
-  in 
-    (List.filter unknown incomingEvents)
+    isKnown event =
+      m.seen ++ m.unseen
+        |> List.member event
+  in
+    incomingEvents
+      |> List.filter (not << isKnown)
 
 
---- EFFECTS 
+--- EFFECTS
+
 
 fetchEvents: GithubRepository -> Maybe BookmarkHeader -> Effects Action
 fetchEvents repo bh = wrapErrors bh (fetchPageOfEvents repo bh)
 
 --- guts
 
+
 errorToAction: Http.Error -> Task Effects.Never Action
 errorToAction e = Task.succeed (ErrorAlert e)
+
 
 notModifiedIsOk: Maybe BookmarkHeader -> Http.Error -> Task Http.Error ((List Event), BookmarkHeader)
 notModifiedIsOk mbh e =
@@ -111,33 +145,22 @@ notModifiedIsOk mbh e =
     (Just bh, Http.BadResponse 304 _) -> Task.succeed ([], bh)
     (_, e) -> Task.fail e
 
+
 wrapErrors: Maybe BookmarkHeader -> Task Http.Error ((List Event), BookmarkHeader) -> Effects Action
 wrapErrors mbh t =
-  t 
-  |> (\t -> Task.onError t (notModifiedIsOk mbh))
-  |> Task.map someNewEvents
-  |> (\t -> Task.onError t errorToAction)
-  |> Effects.task
+  t
+    |> (\t -> Task.onError t (notModifiedIsOk mbh))
+    |> Task.map someNewEvents
+    |> (\t -> Task.onError t errorToAction)
+    |> Effects.task
+
 
 someNewEvents (ee, bh) = SomeNewEvents ee bh
 
+
 view: Signal.Address Action -> Model -> Html
-view addr m = Html.div [] 
+view addr m = div []
                 [
                   Inner.view (Signal.forwardTo addr Passthrough ) m.inner,
                   ErrorDisplay.view m.error
                 ]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
