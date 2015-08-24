@@ -39,7 +39,7 @@ view addr m =
     main'
         [style ["width" => "960px", "margin" => "0 auto"]]
         [ Header.view m.repo,
-          RepoInput.view formclass m.repositoryOfInterest.owner m.repositoryOfInterest.repo,
+          RepoInput.view formclass m.repo.owner m.repo.repo,
           span [] [EventTicker.view addr m.ticker],
           span [] [SeeThePeople.view addr m.people]
         ]
