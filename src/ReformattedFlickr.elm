@@ -32,23 +32,23 @@ view height string imgUrl =
 queryInputStyle : List (String, String)
 queryInputStyle =
     [
-        ("width",      "100%"),
-        ("height",     "40px"),
-        ("padding",    "10px 0"),
-        ("font-size",  "2em"),
-        ("text-align", "center")
+        "width" =>      "100%",
+        "height" =>     "40px",
+        "padding" =>    "10px 0",
+        "font-size" =>  "2em",
+        "text-align" => "center"
     ]
 
 
 imgStyle : Int -> String -> List (String, String)
 imgStyle height src =
     [
-        ("background-image",      "url('" ++ src ++ "')"),
-        ("background-repeat",     "no-repeat"),
-        ("background-attachment", "fixed"),
-        ("background-position",   "center"),
-        ("width",                 "100%"),
-        ("height",                (toString height) ++ "px")
+        "background-image" =>      "url('" ++ src ++ "')",
+        "background-repeat" =>     "no-repeat",
+        "background-attachment" => "fixed",
+        "background-position" =>   "center",
+        "width" =>                 "100%",
+        "height" =>                (toString height) ++ "px"
     ]
 
 
@@ -149,10 +149,10 @@ flickr : String -> List (String, String) -> String
 flickr method args =
     Http.url "https://api.flickr.com/services/rest/" <|
         [
-            ("format",         "json"),
-            ("nojsoncallback", "1"),
-            ("api_key",        "9be5b08cd8168fa82d136aa55f1fdb3c"),
-            ("method",         "flickr.photos." ++ method)
+            "format" =>         "json",
+            "nojsoncallback" => "1",
+            "api_key" =>        "9be5b08cd8168fa82d136aa55f1fdb3c",
+            "method" =>         "flickr.photos." ++ method
         ] ++ args
 
 

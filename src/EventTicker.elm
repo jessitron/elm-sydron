@@ -60,29 +60,32 @@ eventHighlight whom event =
            []
 
 
-highlightStyle = [("background-color", "gold")]
+highlightStyle = ["background-color" => "gold"]
 
 
 divStyle =
   style
     [
-      ("float", "left"),
-      ("width", "50%"),
-      ("box-sizing", "border-box"),
-      ("color", "#666666"),
-      ("overflow", "scroll"),
-      ("padding", "10px")
+      "float" => "left",
+      "width" => "50%",
+      "box-sizing" => "border-box",
+      "color" => "#666666",
+      "overflow" => "scroll",
+      "padding" => "10px"
     ]
+
+
+(=>) = (,)
 
 
 itemStyle: StylePortion -> Html.Attribute
 itemStyle highlight =
   style
     ([
-      ("color", "#515151"),
-      ("font-family", "Helvetica"),
-      ("font-size", "21px"),
-      ("height", "24px")
+      "color" => "#515151",
+      "font-family" => "Helvetica",
+      "font-size" => "21px",
+      "height" => "24px"
     ] ++ highlight)
 
 

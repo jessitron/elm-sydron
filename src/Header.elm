@@ -12,10 +12,10 @@ view model =
   Html.div
     [ Attr.style
       [
-        ("height", "100px"),
-        ("font-family", "Helvetica"),
-        ("margin-top", "20px"),
-        ("margin-left", "20px")
+        "height" => "100px",
+        "font-family" => "Helvetica",
+        "margin-top" => "20px",
+        "margin-left" => "20px"
       ]
     ]
   [
@@ -35,3 +35,5 @@ view model =
 
 repositoryLink repo = "http://github.com/" ++ repo.owner ++ "/" ++ repo.repo
 repositoryDescription repo = repo.owner ++ "'s " ++ repo.repo ++ " repository"
+
+(=>) = (,)
