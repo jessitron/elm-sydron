@@ -32,7 +32,4 @@ view model =
   ]
 
 
-repositoryLink repo = "http://github.com/" ++ repo.owner ++ "/" ++ repo.repo
-repositoryDescription repo = repo.owner ++ "'s " ++ repo.repo ++ " repository"
-
 (=>) = (,)
