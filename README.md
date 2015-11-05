@@ -8,7 +8,7 @@ Here are some resources for people who want more information after that
 talk:
 
 [Slides](https://speakerdeck.com/jessitron/functional-principles-in-react-and-elm)
-[Video]()
+[Video](https://www.youtube.com/watch?v=1uRC3hmKQnM)
 [Slides from Rails Remote Conf]
 
 ### Resources
