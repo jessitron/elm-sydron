@@ -1,13 +1,21 @@
 # Sydron: github events visualized
 Hey, it's a start. Mostly I'm playing around with Elm.
 
-## React Rally
+## The Front end of the Future
 
-This project was created for my talk at React Rally 2015.
+This project was created for my talk at React Rally 2015, also delivered at Rails Remote Conf 2015.
 Here are some resources for people who want more information after that
 talk:
 
 [Slides](https://speakerdeck.com/jessitron/functional-principles-in-react-and-elm)
+[Video]()
+[Slides from Rails Remote Conf]
+
+### Resources
+
+[Functional programming in Ruby](https://github.com/jessitron/fp4rd)
+[Contracts as Types, in Clojure](https://www.youtube.com/watch?v=01McM4tPb_Y)
+[GraphQL by Lee Byron](https://www.youtube.com/watch?v=cr4QB3j8qFc)
 
 ### Elm
 
