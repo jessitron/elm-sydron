@@ -37,8 +37,49 @@ eventListItem howToHighlight addr event  =
       itemStyle (howToHighlight event),
       onMouseOver addr (PersonOfInterest event.actor)
     ]
-    [text (event.eventType ++ " by " ++ event.actor.login ++ " at " ++ event.created_at)]
+    [
+      viewUser event.actor,
+      span [] [viewEventType event.eventType],
+      span [timestampStyle] [text event.created_at]
+    ]
 
+
+timestampStyle =
+  -- TODO format the date and bump font-size back up
+  style ["opacity" => "0.7", "font-size" => "10px", "margin-left" => "10px"]
+
+
+viewUser user =
+  a [ style ["font-family" => "monospace"],
+      href ("https://github.com/" ++ user.login)
+    ]
+    [
+      img [ src user.avatar_url, style [ "position" => "relative", "top" => "6px"], width 24 ] [],
+      span [ style ["margin" => "0 10px"] ] [text user.login]
+    ]
+
+
+-- TODO: Full list of EventTypes is here: https://developer.github.com/v3/activity/events/types/
+viewEventType eventType =
+  span []
+  [
+    text <|
+      case eventType of
+        "PushEvent" ->
+          "pushed code."
+
+        "IssuesEvent" ->
+          "created an issue."
+
+        "PullRequestEvent" ->
+          "created a pull request."
+
+        "WatchEvent" ->
+          "watched the repo."
+
+        unrecognizedEvent ->
+          "did a " ++ unrecognizedEvent ++ "."
+  ]
 
 view : Signal.Address SydronAction -> Model -> Html
 view addr m =
@@ -67,7 +108,7 @@ divStyle =
   style
     [
       "float" => "left",
-      "width" => "50%",
+      "width" => "70%",
       "box-sizing" => "border-box",
       "color" => "#666666",
       "overflow" => "scroll",
@@ -83,6 +124,7 @@ itemStyle highlight =
   style
     ([
       "color" => "#515151",
+      "padding" => "5px 0",
       "font-family" => "Helvetica",
       "font-size" => "21px"
     ] ++ highlight)

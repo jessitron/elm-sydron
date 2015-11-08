@@ -78,7 +78,7 @@ view addr model =
 divStyle =
   style
     ["float" => "right",
-     "width" => "50%"]
+     "width" => "30%"]
 
 
 marginPx = 20
